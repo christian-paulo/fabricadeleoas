@@ -1,0 +1,1 @@
+DELETE FROM workouts WHERE profile_id = 'a4dbdfad-58b2-4206-8724-6f1253a90ff8' AND id != '5dd42d9a-4bf1-4efe-bc3b-48eeb944306e';
