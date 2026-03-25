@@ -14,10 +14,7 @@ const Dashboard = () => {
   const [totalDays, setTotalDays] = useState(0);
   const [loadingWorkout, setLoadingWorkout] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) navigate("/auth");
-    if (!loading && user && !profile?.onboarding_completed) navigate("/onboarding");
-  }, [user, profile, loading]);
+  // Auth/subscription/onboarding checks handled by ProtectedRoute
 
   useEffect(() => {
     if (!user) return;
