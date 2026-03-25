@@ -113,7 +113,7 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdo Suprema</h2>
+      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdo de Leoa</h2>
       <div className="space-y-3 mb-4">
         {[
           { title: "Kit Corpinho de Verão Suprema", desc: "Treinos intensos para resultados rápidos" },
