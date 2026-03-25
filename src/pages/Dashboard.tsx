@@ -109,7 +109,7 @@ const Dashboard = () => {
         <Button onClick={handleStartWorkout} disabled={loadingWorkout}
           className="w-full gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl animate-pulse-gold">
           {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={20} /> : <Play size={20} className="mr-2" />}
-          {loadingWorkout ? "Gerando Treino..." : "▶ Iniciar Caçada"}
+          {loadingWorkout ? "Gerando Treino..." : "Iniciar Caçada"}
         </Button>
       </div>
 
