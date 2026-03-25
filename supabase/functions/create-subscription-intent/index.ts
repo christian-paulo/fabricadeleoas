@@ -7,6 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const hasPaidAccess = (subscription: Stripe.Subscription) => {
+  return subscription.status === "active" || (subscription.status === "trialing" && !!subscription.default_payment_method);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -16,17 +20,21 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("User not authenticated");
+
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
+    const { data, error } = await supabaseClient.auth.getUser(token);
+    if (error) throw error;
+
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
 
-    // Find or create customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string;
+
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     } else {
@@ -37,33 +45,47 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Check if already has active subscription
-    const existingSubs = await stripe.subscriptions.list({
+    const existingSubscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      status: "all",
+      limit: 10,
+      expand: ["data.pending_setup_intent"],
     });
-    if (existingSubs.data.length > 0) {
+
+    const paidSubscription = existingSubscriptions.data.find(hasPaidAccess);
+    if (paidSubscription) {
       return new Response(JSON.stringify({ already_subscribed: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Also check trialing
-    const trialingSubs = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "trialing",
-      limit: 1,
+    const reusablePendingSubscription = existingSubscriptions.data.find((subscription) => {
+      const pendingSetupIntent =
+        subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== "string"
+          ? subscription.pending_setup_intent
+          : null;
+
+      return ["trialing", "incomplete", "past_due", "unpaid"].includes(subscription.status)
+        && !subscription.default_payment_method
+        && !!pendingSetupIntent?.client_secret;
     });
-    if (trialingSubs.data.length > 0) {
-      return new Response(JSON.stringify({ already_subscribed: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+
+    if (reusablePendingSubscription) {
+      const pendingSetupIntent = reusablePendingSubscription.pending_setup_intent as Stripe.SetupIntent;
+
+      return new Response(
+        JSON.stringify({
+          subscription_id: reusablePendingSubscription.id,
+          client_secret: pendingSetupIntent.client_secret,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
     }
 
-    // Create subscription with trial and incomplete payment behavior
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: "price_1TEx9fI4dFrhArZvg5kThQaN" }],
@@ -72,21 +94,33 @@ serve(async (req) => {
       payment_settings: {
         save_default_payment_method: "on_subscription",
       },
+      trial_settings: {
+        end_behavior: {
+          missing_payment_method: "cancel",
+        },
+      },
       expand: ["pending_setup_intent"],
     });
 
-    const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent;
+    const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null;
+    if (!setupIntent?.client_secret) {
+      throw new Error("Não foi possível iniciar a coleta do cartão");
+    }
 
-    return new Response(JSON.stringify({
-      subscription_id: subscription.id,
-      client_secret: setupIntent.client_secret,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({
+        subscription_id: subscription.id,
+        client_secret: setupIntent.client_secret,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : String(error);
+
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

@@ -17,19 +17,19 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, subscription } = useAuth();
 
   useEffect(() => {
-    if (user && profile) {
-      if (profile.is_subscriber && profile.onboarding_completed) {
-        navigate("/dashboard");
-      } else if (profile.is_subscriber || profile.stripe_subscription_id) {
-        navigate("/onboarding");
-      } else {
-        navigate("/checkout");
-      }
+    if (!user || !profile || subscription === null) return;
+
+    if (subscription.subscribed && profile.onboarding_completed) {
+      navigate("/dashboard");
+    } else if (subscription.subscribed) {
+      navigate("/onboarding");
+    } else {
+      navigate("/checkout");
     }
-  }, [user, profile]);
+  }, [user, profile, subscription, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

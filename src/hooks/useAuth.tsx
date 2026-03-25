@@ -17,7 +17,7 @@ type AuthContextType = {
   isAdmin: boolean;
   profile: any | null;
   signOut: () => Promise<void>;
-  checkSubscription: () => Promise<void>;
+  checkSubscription: () => Promise<SubscriptionStatus | null>;
   refreshProfile: () => Promise<void>;
 };
 
@@ -37,16 +37,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data) setProfile(data);
   };
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (): Promise<SubscriptionStatus | null> => {
     try {
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) {
         console.error("Check subscription error:", error);
-        return;
+        setSubscription(null);
+        return null;
       }
-      if (data) setSubscription(data as SubscriptionStatus);
+
+      if (data) {
+        const nextSubscription = data as SubscriptionStatus;
+        setSubscription(nextSubscription);
+        return nextSubscription;
+      }
+
+      setSubscription(null);
+      return null;
     } catch (e) {
       console.error("Subscription check failed:", e);
+      setSubscription(null);
+      return null;
     }
   };
 
