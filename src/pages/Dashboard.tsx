@@ -14,11 +14,8 @@ const Dashboard = () => {
   const [totalDays, setTotalDays] = useState(0);
   const [loadingWorkout, setLoadingWorkout] = useState(false);
 
-  // Auth/subscription/onboarding checks handled by ProtectedRoute
-
   useEffect(() => {
     if (!user) return;
-    // Fetch workout stats
     const fetchStats = async () => {
       const now = new Date();
       const weekStart = new Date(now);
@@ -50,18 +47,17 @@ const Dashboard = () => {
     }
   };
 
-  // Paywall check
   if (!loading && subscription && !subscription.subscribed) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
-        <h1 className="text-2xl font-heading text-primary mb-4">Acesso Bloqueado 🔒</h1>
-        <p className="text-sm text-muted-foreground text-center mb-6">
+        <h1 className="text-3xl font-heading text-primary mb-4">Acesso Bloqueado 🔒</h1>
+        <p className="text-base text-muted-foreground text-center mb-6">
           Seu período de teste expirou. Assine para continuar treinando!
         </p>
         <Button onClick={async () => {
           const { data } = await supabase.functions.invoke("create-checkout");
           if (data?.url) window.location.href = data.url;
-        }} className="gold-gradient text-primary-foreground font-heading h-12 rounded-xl px-8">
+        }} className="gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl px-8">
           Assinar R$ 49,90/mês
         </Button>
       </div>
@@ -73,61 +69,64 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <h1 className="text-2xl text-foreground mb-6">
-        Olá, Leoa <span className="text-primary">{name}</span>! 🦁
+      <h1 className="text-3xl text-foreground mb-1">
+        Olá, <span className="text-primary">{name}</span>! 👋
       </h1>
+      <p className="text-base text-muted-foreground mb-6">Vamos treinar hoje?</p>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="neu-card p-4 flex flex-col items-center">
-          <div className="relative w-16 h-16 mb-2">
+        <div className="neu-card p-5 flex flex-col items-center">
+          <div className="relative w-20 h-20 mb-3">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--primary))" strokeWidth="3"
+              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--primary))" strokeWidth="3.5"
                 strokeDasharray={`${(weekFrequency / weekTarget) * 94} 94`} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-sm font-heading text-primary">
+            <span className="absolute inset-0 flex items-center justify-center text-lg font-heading text-primary">
               {weekFrequency}/{weekTarget}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">Frequência Semanal</span>
+          <span className="text-sm text-muted-foreground font-medium">Frequência Semanal</span>
         </div>
-        <div className="neu-card p-4 flex flex-col items-center">
-          <div className="relative w-16 h-16 mb-2">
+        <div className="neu-card p-5 flex flex-col items-center">
+          <div className="relative w-20 h-20 mb-3">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--accent))" strokeWidth="3"
+              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--accent))" strokeWidth="3.5"
                 strokeDasharray={`${(totalDays / 30) * 94} 94`} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-sm font-heading text-accent">
+            <span className="absolute inset-0 flex items-center justify-center text-lg font-heading text-accent">
               {totalDays}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">Dias de Caçada</span>
+          <span className="text-sm text-muted-foreground font-medium">Dias de Caçada</span>
         </div>
       </div>
 
-      <div className="neu-card p-5 mb-6 gold-glow">
-        <h2 className="text-lg text-primary mb-1">Treino do Dia</h2>
-        <p className="text-sm text-muted-foreground mb-4">Gerado pela IA Guia das Leoas</p>
+      <div className="neu-card p-6 mb-6 gold-glow">
+        <h2 className="text-xl text-primary mb-1 uppercase">Treino do Dia</h2>
+        <p className="text-sm text-muted-foreground mb-5">Gerado pela IA Guia das Leoas</p>
         <Button onClick={handleStartWorkout} disabled={loadingWorkout}
-          className="w-full gold-gradient text-primary-foreground font-heading text-sm h-12 rounded-xl animate-pulse-gold">
-          {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={18} /> : <Play size={18} className="mr-2" />}
-          {loadingWorkout ? "Gerando Treino..." : "Iniciar Caçada"}
+          className="w-full gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl animate-pulse-gold">
+          {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={20} /> : <Play size={20} className="mr-2" />}
+          {loadingWorkout ? "Gerando Treino..." : "▶ Iniciar Caçada"}
         </Button>
       </div>
 
-      <h2 className="text-lg text-primary mb-3">E-books da Alcateia 📚</h2>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdo Suprema</h2>
+      <div className="space-y-3 mb-4">
         {[
-          { title: "Ciclo dos Carboidratos", desc: "Guia alimentar" },
-          { title: "Comportamentos", desc: "Mindset da Leoa" },
+          { title: "Kit Corpinho de Verão Suprema", desc: "Treinos intensos para resultados rápidos" },
+          { title: "Drink Anti Pochete Suprema", desc: "Receita exclusiva para queima de gordura" },
         ].map((ebook) => (
-          <div key={ebook.title} className="neu-card p-4">
-            <h3 className="text-xs font-heading text-foreground mb-1">{ebook.title}</h3>
-            <p className="text-[10px] text-muted-foreground mb-3">{ebook.desc}</p>
-            <button className="flex items-center gap-1 text-primary text-xs font-medium">
-              <Download size={14} /> Baixar
-            </button>
+          <div key={ebook.title} className="neu-card p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0">
+              <Download size={20} className="text-primary-foreground" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-heading text-foreground uppercase mb-0.5">{ebook.title}</h3>
+              <p className="text-xs text-muted-foreground">{ebook.desc}</p>
+            </div>
           </div>
         ))}
       </div>

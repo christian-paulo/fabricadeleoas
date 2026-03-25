@@ -87,40 +87,40 @@ const Treinos = () => {
 
   return (
     <AppLayout>
-      <h1 className="text-2xl text-foreground mb-1">Treino do Dia</h1>
-      <p className="text-xs text-muted-foreground mb-1">{phaseLabel}</p>
-      <p className="text-sm text-muted-foreground mb-6">
+      <h1 className="text-3xl text-foreground mb-1 uppercase">Treino do Dia</h1>
+      <p className="text-sm text-primary font-heading mb-1">{phaseLabel}</p>
+      <p className="text-base text-muted-foreground mb-6">
         {workoutJson?.title || "Carregando..."} {workoutJson?.total_series ? `• ${workoutJson.total_series} séries` : ""}
       </p>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="animate-spin text-primary" size={32} />
-          <span className="ml-3 text-muted-foreground text-sm">Gerando seu treino com IA...</span>
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="animate-spin text-primary mb-3" size={40} />
+          <span className="text-muted-foreground text-base">Gerando seu treino com IA...</span>
         </div>
       ) : triSets.length === 0 ? (
         <div className="neu-card p-6 text-center">
-          <p className="text-muted-foreground text-sm">Nenhum treino disponível. Cadastre exercícios no painel admin.</p>
+          <p className="text-muted-foreground text-base">Nenhum treino disponível. Cadastre exercícios no painel admin.</p>
         </div>
       ) : (
         <>
           {triSets.map((ts: any, idx: number) => (
             <div key={idx} className="mb-6">
-              <h3 className="text-xs font-heading text-primary mb-3 uppercase tracking-wider">{ts.label}</h3>
+              <h3 className="text-sm font-heading text-primary mb-3 uppercase tracking-widest">{ts.label}</h3>
               <div className="space-y-3">
                 {ts.exercises?.map((ex: any, i: number) => (
-                  <div key={i} className="neu-card p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-heading text-primary">
+                  <div key={i} className="neu-card p-5 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-sm font-heading text-primary-foreground font-bold">
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-foreground font-medium">{ex.name}</p>
-                      <p className="text-xs text-muted-foreground">{ex.reps}</p>
+                      <p className="text-base text-foreground font-bold uppercase">{ex.name}</p>
+                      <p className="text-sm text-muted-foreground">{ex.reps}</p>
                     </div>
                     {ex.video_url && (
                       <button onClick={() => setVideoModal({ name: ex.name, url: ex.video_url })}
-                        className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-primary">
-                        <Play size={14} />
+                        className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-primary-foreground">
+                        <Play size={16} />
                       </button>
                     )}
                   </div>
@@ -131,18 +131,18 @@ const Treinos = () => {
 
           {!completed ? (
             <Button onClick={() => setShowFeedback(true)}
-              className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl mb-4">
-              <CheckCircle2 size={18} className="mr-2" /> Concluir Caçada
+              className="w-full gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl mb-4">
+              <CheckCircle2 size={20} className="mr-2" /> Concluir Caçada
             </Button>
           ) : (
-            <div className="neu-card p-4 text-center mb-4">
-              <CheckCircle2 className="mx-auto text-primary mb-2" size={32} />
-              <p className="text-sm text-foreground">Caçada concluída! 🎉</p>
-              <p className="text-xs text-muted-foreground mb-3">
+            <div className="neu-card p-5 text-center mb-4">
+              <CheckCircle2 className="mx-auto text-primary mb-3" size={40} />
+              <p className="text-base text-foreground font-bold">Caçada concluída! 🎉</p>
+              <p className="text-sm text-muted-foreground mb-4">
                 Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
               </p>
               <Button onClick={generateNextWorkout}
-                className="gold-gradient text-primary-foreground font-heading h-10 rounded-xl px-6">
+                className="gold-gradient text-primary-foreground font-heading text-base h-12 rounded-xl px-8">
                 Gerar Próximo Treino
               </Button>
             </div>
@@ -154,7 +154,7 @@ const Treinos = () => {
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
         <DialogContent className="bg-card border-border max-w-sm mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-primary text-center">Como foi o esforço de hoje?</DialogTitle>
+            <DialogTitle className="text-primary text-center text-xl">Como foi o esforço de hoje?</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-4">
             {[
@@ -163,9 +163,9 @@ const Treinos = () => {
               { value: "dificil" as FeedbackType, label: "🔥 Muito Difícil", desc: "Quase não consegui" },
             ].map((opt) => (
               <button key={opt.value} onClick={() => submitFeedback(opt.value)}
-                className="neu-card p-4 text-left hover:ring-1 hover:ring-primary transition-all">
-                <p className="text-sm font-medium text-foreground">{opt.label}</p>
-                <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                className="neu-card p-5 text-left hover:ring-2 hover:ring-primary transition-all">
+                <p className="text-base font-bold text-foreground">{opt.label}</p>
+                <p className="text-sm text-muted-foreground">{opt.desc}</p>
               </button>
             ))}
           </div>
@@ -176,7 +176,7 @@ const Treinos = () => {
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
         <DialogContent className="bg-card border-border max-w-md mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-primary">{videoModal?.name}</DialogTitle>
+            <DialogTitle className="text-primary text-lg">{videoModal?.name}</DialogTitle>
           </DialogHeader>
           {videoModal?.url && (
             <div className="aspect-video">
