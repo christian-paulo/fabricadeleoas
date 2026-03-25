@@ -14,16 +14,223 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      exercises: {
+        Row: {
+          created_at: string | null
+          equipment: string | null
+          id: string
+          internal_level: string | null
+          muscle_group: string | null
+          name: string
+          target_aesthetic_tag: string | null
+          therapeutic_focus: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          equipment?: string | null
+          id?: string
+          internal_level?: string | null
+          muscle_group?: string | null
+          name: string
+          target_aesthetic_tag?: string | null
+          therapeutic_focus?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          equipment?: string | null
+          id?: string
+          internal_level?: string | null
+          muscle_group?: string | null
+          name?: string
+          target_aesthetic_tag?: string | null
+          therapeutic_focus?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      measurements: {
+        Row: {
+          arm: number | null
+          created_at: string | null
+          date: string
+          hip: number | null
+          id: string
+          profile_id: string
+          thigh: number | null
+          waist: number | null
+          weight: number | null
+        }
+        Insert: {
+          arm?: number | null
+          created_at?: string | null
+          date?: string
+          hip?: number | null
+          id?: string
+          profile_id: string
+          thigh?: number | null
+          waist?: number | null
+          weight?: number | null
+        }
+        Update: {
+          arm?: number | null
+          created_at?: string | null
+          date?: string
+          hip?: number | null
+          id?: string
+          profile_id?: string
+          thigh?: number | null
+          waist?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "measurements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          goal: string | null
+          has_pain: boolean | null
+          id: string
+          is_subscriber: boolean | null
+          medication_feeling: string | null
+          onboarding_completed: boolean | null
+          pain_location: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          target_area: string | null
+          training_experience: string | null
+          trial_start_date: string | null
+          updated_at: string | null
+          uses_medication: boolean | null
+          workout_days: number | null
+          workout_duration: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          goal?: string | null
+          has_pain?: boolean | null
+          id: string
+          is_subscriber?: boolean | null
+          medication_feeling?: string | null
+          onboarding_completed?: boolean | null
+          pain_location?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          target_area?: string | null
+          training_experience?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          uses_medication?: boolean | null
+          workout_days?: number | null
+          workout_duration?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          goal?: string | null
+          has_pain?: boolean | null
+          id?: string
+          is_subscriber?: boolean | null
+          medication_feeling?: string | null
+          onboarding_completed?: boolean | null
+          pain_location?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          target_area?: string | null
+          training_experience?: string | null
+          trial_start_date?: string | null
+          updated_at?: string | null
+          uses_medication?: boolean | null
+          workout_days?: number | null
+          workout_duration?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          date: string
+          feedback_effort: string | null
+          id: string
+          profile_id: string
+          workout_json: Json | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          date?: string
+          feedback_effort?: string | null
+          id?: string
+          profile_id: string
+          workout_json?: Json | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          date?: string
+          feedback_effort?: string | null
+          id?: string
+          profile_id?: string
+          workout_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +357,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
