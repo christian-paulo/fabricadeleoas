@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string | null
           equipment: string | null
+          exercise_type: string | null
           id: string
           internal_level: string | null
           muscle_group: string | null
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           equipment?: string | null
+          exercise_type?: string | null
           id?: string
           internal_level?: string | null
           muscle_group?: string | null
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           equipment?: string | null
+          exercise_type?: string | null
           id?: string
           internal_level?: string | null
           muscle_group?: string | null
