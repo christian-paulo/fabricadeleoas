@@ -42,11 +42,18 @@ const CheckoutForm = () => {
 
       if (error) {
         toast.error(error.message || "Erro ao processar pagamento");
-      } else {
-        await checkSubscription();
-        toast.success("Assinatura ativada! Agora vamos montar seu treino! 🦁");
-        navigate("/onboarding");
+        return;
       }
+
+      const nextSubscription = await checkSubscription();
+
+      if (nextSubscription?.subscribed) {
+        toast.success("Cartão confirmado! Agora vamos montar seu treino! 🦁");
+        navigate("/onboarding");
+        return;
+      }
+
+      toast.error("Cadastre um cartão válido para liberar o onboarding.");
     } catch (err: any) {
       toast.error(err.message || "Erro inesperado");
     } finally {
@@ -87,7 +94,7 @@ const CheckoutForm = () => {
 };
 
 const Checkout = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +105,7 @@ const Checkout = () => {
       navigate("/auth");
       return;
     }
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -128,7 +135,7 @@ const Checkout = () => {
     };
 
     createIntent();
-  }, [user]);
+  }, [user, navigate]);
 
   if (loading) {
     return (
@@ -154,7 +161,6 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Order Summary */}
         <div className="neu-card p-6 md:p-8 order-2 md:order-1 h-fit">
           <div className="mb-6">
             <h1 className="font-heading text-2xl text-primary mb-1">Fábrica de Leoas</h1>
@@ -197,7 +203,6 @@ const Checkout = () => {
           </p>
         </div>
 
-        {/* Payment Form */}
         <div className="neu-card p-6 md:p-8 order-1 md:order-2">
           <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
 
