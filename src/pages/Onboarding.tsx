@@ -39,7 +39,7 @@ const Onboarding = () => {
     setSaving(true);
     try {
       const { error } = await supabase.from("profiles").update({
-        full_name: data.fullName || profile?.full_name,
+        full_name: profile?.full_name,
         goal: data.goal,
         target_area: data.targetArea.join(", "),
         training_experience: data.trainingExperience,
