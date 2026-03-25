@@ -8,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 type QuizData = {
-  fullName: string;
   goal: string;
   targetArea: string[];
   trainingExperience: string;
@@ -21,7 +20,7 @@ type QuizData = {
 };
 
 const initialData: QuizData = {
-  fullName: "", goal: "", targetArea: [], trainingExperience: "",
+  goal: "", targetArea: [], trainingExperience: "",
   workoutDays: 3, workoutDuration: "", hasPain: null, painLocation: [],
   usesMedication: null, medicationFeeling: "",
 };
@@ -103,7 +102,7 @@ const Onboarding = () => {
 };
 
 function getStepCount(data: QuizData): number {
-  let count = 6;
+  let count = 5;
   if (data.goal !== "Melhorar Dores") count++;
   if (data.hasPain) count++;
   count++;
@@ -113,12 +112,11 @@ function getStepCount(data: QuizData): number {
 
 function validateStep(step: number, data: QuizData): boolean {
   switch (step) {
-    case 0: return data.fullName.trim().length > 0;
-    case 1: return data.goal !== "";
-    case 2: return data.targetArea.length > 0;
-    case 3: return data.trainingExperience !== "";
-    case 4: return data.workoutDays >= 2 && data.workoutDays <= 5;
-    case 5: return data.workoutDuration !== "";
+    case 0: return data.goal !== "";
+    case 1: return data.targetArea.length > 0;
+    case 2: return data.trainingExperience !== "";
+    case 3: return data.workoutDays >= 2 && data.workoutDays <= 5;
+    case 4: return data.workoutDuration !== "";
     default: return true;
   }
 }
@@ -130,15 +128,6 @@ function renderStep(step: number, data: QuizData, setData: (d: QuizData) => void
 
 function buildSteps(data: QuizData, setData: (d: QuizData) => void) {
   const steps: JSX.Element[] = [];
-
-  steps.push(
-    <div key="name">
-      <h2 className="text-2xl text-foreground mb-2">Qual seu nome, Leoa? 🦁</h2>
-      <p className="text-sm text-muted-foreground mb-6">Como devemos te chamar?</p>
-      <Input value={data.fullName} onChange={(e) => setData({ ...data, fullName: e.target.value })}
-        placeholder="Seu nome" className="bg-input border-border text-foreground h-12 text-lg" autoFocus />
-    </div>
-  );
 
   const goals = ["Emagrecimento", "Ganho de Massa", "Saúde", "Melhorar Dores"];
   steps.push(
