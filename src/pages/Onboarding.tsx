@@ -31,7 +31,7 @@ const Onboarding = () => {
   const [data, setData] = useState<QuizData>(initialData);
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   const totalSteps = getStepCount(data);
 
