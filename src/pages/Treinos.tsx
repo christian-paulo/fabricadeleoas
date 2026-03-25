@@ -29,20 +29,29 @@ const Treinos = () => {
   const fetchCurrentWorkout = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-workout", {
+      const { data: rawData, error } = await supabase.functions.invoke("generate-workout", {
         body: {},
       });
       if (error) {
+        console.error("generate-workout error:", error);
         toast.error("Erro ao carregar treino");
-      } else if (data?.workout) {
-        setWorkout(data.workout);
-        setCompleted(data.workout.completed || false);
-        setFeedback(data.workout.feedback_effort as FeedbackType);
-        setPhase(data.phase || "initial");
-        setWorkoutNumber(data.workoutNumber || 1);
-        setCompletedCount(data.completedCount || 0);
+      } else {
+        const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+        console.log("generate-workout response:", data);
+        if (data?.workout) {
+          setWorkout(data.workout);
+          setCompleted(data.workout.completed || false);
+          setFeedback(data.workout.feedback_effort as FeedbackType);
+          setPhase(data.phase || "initial");
+          setWorkoutNumber(data.workoutNumber || 1);
+          setCompletedCount(data.completedCount || 0);
+        } else {
+          console.error("No workout in response:", data);
+          toast.error("Treino não encontrado");
+        }
       }
-    } catch {
+    } catch (err) {
+      console.error("generate-workout catch:", err);
       toast.error("Erro ao carregar treino");
     }
     setLoading(false);
