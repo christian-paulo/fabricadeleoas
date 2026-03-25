@@ -56,14 +56,8 @@ const Onboarding = () => {
       if (error) throw error;
       await refreshProfile();
 
-      // Redirect to Stripe checkout
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke("create-checkout");
-      if (checkoutError) throw checkoutError;
-      if (checkoutData?.url) {
-        window.location.href = checkoutData.url;
-      } else {
-        navigate("/dashboard");
-      }
+      // Redirect to embedded checkout
+      navigate("/checkout");
     } catch (err: any) {
       toast.error(err.message || "Erro ao salvar perfil");
       setSaving(false);
