@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,26 +13,46 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      if (profile?.onboarding_completed) {
+        navigate("/dashboard");
+      } else {
+        navigate("/onboarding");
+      }
+    }
+  }, [user, profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Integrate with Supabase Auth
-    setTimeout(() => {
+
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Bem-vinda de volta, Leoa! 🦁");
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        toast.success("Conta criada! Verifique seu e-mail para confirmar.");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erro na autenticação");
+    } finally {
       setLoading(false);
-      navigate("/onboarding");
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
-      {/* Logo */}
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-heading text-primary mb-2">Fábrica de Leoas</h1>
         <p className="text-sm text-muted-foreground">Consultoria Fitness Feminina Premium</p>
       </div>
 
-      {/* Form */}
       <div className="neu-card p-6 w-full">
         <h2 className="text-lg font-heading text-foreground mb-6 text-center">
           {isLogin ? "Entrar na Alcateia" : "Criar Conta"}
@@ -38,42 +61,22 @@ const Auth = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label className="text-xs text-muted-foreground">E-mail</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="bg-input border-border text-foreground h-12 mt-1"
-              required
-            />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com" className="bg-input border-border text-foreground h-12 mt-1" required />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Senha</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="bg-input border-border text-foreground h-12 mt-1"
-              required
-              minLength={6}
-            />
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••" className="bg-input border-border text-foreground h-12 mt-1" required minLength={6} />
           </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl"
-          >
+          <Button type="submit" disabled={loading}
+            className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl">
             {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta"}
           </Button>
         </form>
 
         <div className="mt-4 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-primary hover:underline"
-          >
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
             {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
           </button>
         </div>
