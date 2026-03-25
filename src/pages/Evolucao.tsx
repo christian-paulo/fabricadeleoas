@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,50 +58,50 @@ const Evolucao = () => {
 
   return (
     <AppLayout>
-      <h1 className="text-2xl text-foreground uppercase mb-1">Metamorfose 🦋</h1>
+      <h1 className="text-2xl text-foreground mb-1">Metamorfose 🦋</h1>
       <p className="text-sm text-muted-foreground mb-6">Acompanhe sua evolução</p>
 
       <div className="neu-card p-5 mb-6">
-        <h3 className="section-title text-primary mb-4">Registrar Medidas</h3>
+        <h3 className="text-sm font-heading text-primary mb-4">Registrar Medidas</h3>
         <div className="grid grid-cols-2 gap-3">
           {fields.map((f) => (
             <div key={f.key}>
-              <label className="text-xs text-muted-foreground font-semibold mb-1 block">{f.label}</label>
+              <Label className="text-xs text-muted-foreground">{f.label}</Label>
               <Input type="number" value={form[f.key]} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                className="bg-input border-border text-foreground h-11 text-base font-bold text-center rounded-xl" placeholder="0" />
+                className="bg-input border-border text-foreground mt-1 h-10" placeholder="0" />
             </div>
           ))}
         </div>
         <Button onClick={handleSave} disabled={saving}
-          className="w-full gold-gradient text-primary-foreground font-heading mt-4 h-12 rounded-2xl text-base">
+          className="w-full gold-gradient text-primary-foreground font-heading mt-4 h-10 rounded-xl">
           {saving ? "Salvando..." : "Salvar Medidas"}
         </Button>
       </div>
 
       <div className="neu-card p-5">
-        <h3 className="section-title text-primary mb-4">Evolução</h3>
+        <h3 className="text-sm font-heading text-primary mb-4">Evolução</h3>
         {chartData.length > 0 ? (
           <>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 22%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(0 0% 65%)" }} />
-                <YAxis tick={{ fontSize: 11, fill: "hsl(0 0% 65%)" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 14%)", border: "1px solid hsl(0 0% 22%)", borderRadius: "12px", fontSize: 13 }}
-                  labelStyle={{ color: "hsl(46 80% 50%)" }} />
-                <Line type="monotone" dataKey="peso" stroke="hsl(46 80% 50%)" strokeWidth={3} dot={{ fill: "hsl(46 80% 50%)", r: 4 }} />
-                <Line type="monotone" dataKey="cintura" stroke="hsl(0 71% 86%)" strokeWidth={3} dot={{ fill: "hsl(0 71% 86%)", r: 4 }} />
-                <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 70%)" strokeWidth={3} dot={{ fill: "hsl(0 0% 70%)", r: 4 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 55%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 55%)" }} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 13%)", border: "1px solid hsl(0 0% 20%)", borderRadius: "12px", fontSize: 12 }}
+                  labelStyle={{ color: "hsl(46 65% 52%)" }} />
+                <Line type="monotone" dataKey="peso" stroke="hsl(46 65% 52%)" strokeWidth={2} dot={{ fill: "hsl(46 65% 52%)" }} />
+                <Line type="monotone" dataKey="cintura" stroke="hsl(0 71% 86%)" strokeWidth={2} dot={{ fill: "hsl(0 71% 86%)" }} />
+                <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 70%)" strokeWidth={2} dot={{ fill: "hsl(0 0% 70%)" }} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex gap-4 mt-3 justify-center">
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-primary inline-block" /> Peso</span>
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-accent inline-block" /> Cintura</span>
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-muted-foreground inline-block" /> Quadril</span>
+              <span className="flex items-center gap-1 text-xs"><span className="w-3 h-1 rounded bg-primary inline-block" /> Peso</span>
+              <span className="flex items-center gap-1 text-xs"><span className="w-3 h-1 rounded bg-accent inline-block" /> Cintura</span>
+              <span className="flex items-center gap-1 text-xs"><span className="w-3 h-1 rounded bg-muted-foreground inline-block" /> Quadril</span>
             </div>
           </>
         ) : (
-          <p className="text-base text-muted-foreground text-center py-8">Adicione suas primeiras medidas acima</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Adicione suas primeiras medidas acima</p>
         )}
       </div>
     </AppLayout>
