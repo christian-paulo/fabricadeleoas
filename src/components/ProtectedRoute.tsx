@@ -16,6 +16,7 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, profile, subscription, loading } = useAuth();
 
+  // Still loading auth state
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -29,7 +30,7 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // No profile yet (still loading or trigger hasn't fired)
+  // Profile not yet loaded — wait
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -38,19 +39,20 @@ const ProtectedRoute = ({
     );
   }
 
-  // Check subscription: must be active or trialing
-  if (requireSubscription) {
-    const isSubscribed = subscription?.subscribed === true;
-    const hasStripeSubscription = !!profile.stripe_subscription_id;
-    
-    if (!isSubscribed && !hasStripeSubscription) {
+  // Check subscription (only if subscription data has loaded)
+  if (requireSubscription && subscription !== null) {
+    if (!subscription.subscribed) {
       return <Navigate to="/checkout" replace />;
     }
-    
-    // If has stripe sub but subscription check says not active (cancelled/expired)
-    if (hasStripeSubscription && subscription && !subscription.subscribed) {
-      return <Navigate to="/checkout" replace />;
-    }
+  }
+
+  // If subscription is still null (loading), wait instead of redirecting
+  if (requireSubscription && subscription === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   // Check onboarding
