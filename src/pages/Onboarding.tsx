@@ -40,7 +40,7 @@ const Onboarding = () => {
     setSaving(true);
     try {
       const { error } = await supabase.from("profiles").update({
-        full_name: data.fullName,
+        full_name: data.fullName || profile?.full_name,
         goal: data.goal,
         target_area: data.targetArea.join(", "),
         training_experience: data.trainingExperience,
@@ -56,8 +56,7 @@ const Onboarding = () => {
       if (error) throw error;
       await refreshProfile();
 
-      // Redirect to embedded checkout
-      navigate("/checkout");
+      navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Erro ao salvar perfil");
       setSaving(false);

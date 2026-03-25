@@ -6,21 +6,27 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      if (profile?.onboarding_completed) {
+    if (user && profile) {
+      if (profile.is_subscriber && profile.onboarding_completed) {
         navigate("/dashboard");
-      } else {
+      } else if (profile.is_subscriber || profile.stripe_subscription_id) {
         navigate("/onboarding");
+      } else {
+        navigate("/checkout");
       }
     }
   }, [user, profile]);
@@ -35,8 +41,23 @@ const Auth = () => {
         if (error) throw error;
         toast.success("Bem-vinda de volta, Leoa! 🦁");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName, whatsapp },
+          },
+        });
         if (error) throw error;
+
+        // Update profile with name and whatsapp
+        if (data.user) {
+          await supabase.from("profiles").update({
+            full_name: fullName,
+            whatsapp,
+          }).eq("id", data.user.id);
+        }
+
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
       }
     } catch (error: any) {
@@ -59,24 +80,78 @@ const Auth = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <>
+              <div>
+                <Label className="text-xs text-muted-foreground">Nome completo</Label>
+                <Input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Seu nome completo"
+                  className="bg-input border-border text-foreground h-12 mt-1"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">WhatsApp</Label>
+                <Input
+                  type="tel"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                  className="bg-input border-border text-foreground h-12 mt-1"
+                  required
+                />
+              </div>
+            </>
+          )}
           <div>
             <Label className="text-xs text-muted-foreground">E-mail</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com" className="bg-input border-border text-foreground h-12 mt-1" required />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              className="bg-input border-border text-foreground h-12 mt-1"
+              required
+            />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Senha</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••" className="bg-input border-border text-foreground h-12 mt-1" required minLength={6} />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="bg-input border-border text-foreground h-12 mt-1 pr-12"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
-          <Button type="submit" disabled={loading}
-            className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl"
+          >
             {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta"}
           </Button>
         </form>
 
         <div className="mt-4 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-sm text-primary hover:underline"
+          >
             {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
           </button>
         </div>
