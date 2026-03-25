@@ -28,7 +28,7 @@ const Treinos = () => {
       if (data) {
         setWorkout(data);
         setCompleted(data.completed);
-        setFeedback(data.feedback_effort);
+        setFeedback(data.feedback_effort as FeedbackType);
       } else {
         // Generate workout
         const { data: genData, error } = await supabase.functions.invoke("generate-workout", {
