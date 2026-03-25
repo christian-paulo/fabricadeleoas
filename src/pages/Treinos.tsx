@@ -17,37 +17,44 @@ const Treinos = () => {
   const [completed, setCompleted] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [videoModal, setVideoModal] = useState<{ name: string; url: string } | null>(null);
+  const [phase, setPhase] = useState<string>("initial");
+  const [workoutNumber, setWorkoutNumber] = useState<number>(1);
+  const [completedCount, setCompletedCount] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
-    const fetchWorkout = async () => {
-      const today = new Date().toISOString().split("T")[0];
-      const { data } = await supabase.from("workouts")
-        .select("*").eq("profile_id", user.id).eq("date", today).maybeSingle();
-
-      if (data) {
-        setWorkout(data);
-        setCompleted(data.completed);
-        setFeedback(data.feedback_effort as FeedbackType);
-      } else {
-        // Generate workout
-        const { data: genData, error } = await supabase.functions.invoke("generate-workout", {
-          body: { date: today },
-        });
-        if (error) toast.error("Erro ao gerar treino");
-        else if (genData?.workout) setWorkout(genData.workout);
-      }
-      setLoading(false);
-    };
-    fetchWorkout();
+    fetchCurrentWorkout();
   }, [user]);
+
+  const fetchCurrentWorkout = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-workout", {
+        body: {},
+      });
+      if (error) {
+        toast.error("Erro ao carregar treino");
+      } else if (data?.workout) {
+        setWorkout(data.workout);
+        setCompleted(data.workout.completed || false);
+        setFeedback(data.workout.feedback_effort as FeedbackType);
+        setPhase(data.phase || "initial");
+        setWorkoutNumber(data.workoutNumber || 1);
+        setCompletedCount(data.completedCount || 0);
+      }
+    } catch {
+      toast.error("Erro ao carregar treino");
+    }
+    setLoading(false);
+  };
 
   const submitFeedback = async (fb: FeedbackType) => {
     if (!workout) return;
     const { error } = await supabase.from("workouts")
       .update({ completed: true, feedback_effort: fb }).eq("id", workout.id);
-    if (error) toast.error("Erro ao salvar feedback");
-    else {
+    if (error) {
+      toast.error("Erro ao salvar feedback");
+    } else {
       setFeedback(fb);
       setCompleted(true);
       setShowFeedback(false);
@@ -55,12 +62,24 @@ const Treinos = () => {
     }
   };
 
+  const generateNextWorkout = async () => {
+    setCompleted(false);
+    setFeedback(null);
+    setWorkout(null);
+    await fetchCurrentWorkout();
+  };
+
   const workoutJson = workout?.workout_json;
   const triSets = workoutJson?.tri_sets || [];
+
+  const phaseLabel = phase === "monthly"
+    ? `Programa Mensal • Treino ${workoutNumber}`
+    : `Fase Inicial • Treino ${workoutNumber} de 3`;
 
   return (
     <AppLayout>
       <h1 className="text-2xl text-foreground mb-1">Treino do Dia</h1>
+      <p className="text-xs text-muted-foreground mb-1">{phaseLabel}</p>
       <p className="text-sm text-muted-foreground mb-6">
         {workoutJson?.title || "Carregando..."} {workoutJson?.total_series ? `• ${workoutJson.total_series} séries` : ""}
       </p>
@@ -110,9 +129,13 @@ const Treinos = () => {
             <div className="neu-card p-4 text-center mb-4">
               <CheckCircle2 className="mx-auto text-primary mb-2" size={32} />
               <p className="text-sm text-foreground">Caçada concluída! 🎉</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mb-3">
                 Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
               </p>
+              <Button onClick={generateNextWorkout}
+                className="gold-gradient text-primary-foreground font-heading h-10 rounded-xl px-6">
+                Gerar Próximo Treino
+              </Button>
             </div>
           )}
         </>
