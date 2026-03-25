@@ -12,6 +12,7 @@ import Treinos from "./pages/Treinos";
 import Evolucao from "./pages/Evolucao";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/evolucao" element={<Evolucao />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
