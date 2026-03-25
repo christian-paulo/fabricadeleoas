@@ -35,7 +35,7 @@ const CheckoutForm = () => {
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard?checkout=success`,
+          return_url: `${window.location.origin}/onboarding?checkout=success`,
         },
         redirect: "if_required",
       });
@@ -44,8 +44,8 @@ const CheckoutForm = () => {
         toast.error(error.message || "Erro ao processar pagamento");
       } else {
         await checkSubscription();
-        toast.success("Assinatura ativada! Bem-vinda à Alcateia! 🦁");
-        navigate("/dashboard?checkout=success");
+        toast.success("Assinatura ativada! Agora vamos montar seu treino! 🦁");
+        navigate("/onboarding");
       }
     } catch (err: any) {
       toast.error(err.message || "Erro inesperado");

@@ -116,6 +116,7 @@ export type Database = {
           trial_start_date: string | null
           updated_at: string | null
           uses_medication: boolean | null
+          whatsapp: string | null
           workout_days: number | null
           workout_duration: number | null
         }
@@ -137,6 +138,7 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
+          whatsapp?: string | null
           workout_days?: number | null
           workout_duration?: number | null
         }
@@ -158,6 +160,7 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
+          whatsapp?: string | null
           workout_days?: number | null
           workout_duration?: number | null
         }
