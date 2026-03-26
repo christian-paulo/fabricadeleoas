@@ -1,5 +1,10 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Flame, Target, Dumbbell, Brain, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import heroBg from "@/assets/hero-bg.jpg";
+import trainerImg from "@/assets/trainer-gilvan.png";
+import { captureUtms } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 import trainerImg from "@/assets/trainer-gilvan.png";
@@ -8,6 +13,8 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const goToAuth = () => navigate("/auth");
+
+  useEffect(() => { captureUtms(); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">

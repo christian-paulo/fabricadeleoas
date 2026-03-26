@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +19,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => { captureUtms(); }, []);
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -43,12 +46,15 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Update profile with name and whatsapp
+        // Update profile with name, whatsapp and UTMs
         if (data.user) {
+          const utms = getStoredUtms();
           await supabase.from("profiles").update({
             full_name: fullName,
             whatsapp,
-          }).eq("id", data.user.id);
+            ...utms,
+          } as any).eq("id", data.user.id);
+          clearStoredUtms();
         }
 
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
