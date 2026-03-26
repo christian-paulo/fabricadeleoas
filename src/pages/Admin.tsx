@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -15,8 +16,13 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
-  Users, Dumbbell, BarChart3, Plus, Pencil, Trash2, Eye, LogOut, Menu,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar,
+} from "recharts";
+import {
+  Users, Dumbbell, Plus, Pencil, Trash2, Eye, LogOut,
   ChevronLeft, ChevronRight, Search, LayoutDashboard, ArrowLeft,
+  DollarSign, TrendingDown, TrendingUp, UserPlus, AlertTriangle,
+  Activity, Target, Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,6 +44,7 @@ const emptyExercise: Exercise = {
 };
 
 const ITEMS_PER_PAGE = 10;
+const PRICE = 49.90;
 
 type Section = "overview" | "students" | "exercises";
 
@@ -46,19 +53,20 @@ const Admin = () => {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<any[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [stats, setStats] = useState({ total: 0, active: 0, trial: 0 });
   const [exerciseForm, setExerciseForm] = useState<Exercise>(emptyExercise);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showExerciseModal, setShowExerciseModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
-  const [studentMeasurements, setStudentMeasurements] = useState<any[]>([]);
   const [activeSection, setActiveSection] = useState<Section>("overview");
+
+  // CRM Drawer
+  const [drawerStudent, setDrawerStudent] = useState<any>(null);
+  const [drawerMeasurements, setDrawerMeasurements] = useState<any[]>([]);
+  const [drawerWorkouts, setDrawerWorkouts] = useState<any[]>([]);
 
   // Filters
   const [studentSearch, setStudentSearch] = useState("");
   const [studentStatusFilter, setStudentStatusFilter] = useState("all");
   const [studentPage, setStudentPage] = useState(1);
-
   const [exerciseSearch, setExerciseSearch] = useState("");
   const [exerciseMuscleFilter, setExerciseMuscleFilter] = useState("all");
   const [exerciseEquipFilter, setExerciseEquipFilter] = useState("all");
@@ -69,12 +77,10 @@ const Admin = () => {
   }, [user, isAdmin, loading]);
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchProfiles();
-      fetchExercises();
-    }
+    if (isAdmin) { fetchProfiles(); fetchExercises(); }
   }, [isAdmin]);
 
+  // ─── Helpers ───
   const isInTrial = (p: any) => {
     if (!p.trial_start_date) return false;
     const trialEnd = new Date(p.trial_start_date);
@@ -82,22 +88,24 @@ const Admin = () => {
     return new Date() < trialEnd;
   };
 
-  const getStatus = (p: any) => {
+  const getStatus = (p: any): "trial" | "ativa" | "cancelada" | "inativa" => {
+    if (p.canceled_at) return "cancelada";
     if (p.is_subscriber && isInTrial(p)) return "trial";
     if (p.is_subscriber) return "ativa";
     return "inativa";
   };
 
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    trial: { label: "Trial", color: "bg-primary/20 text-primary" },
+    ativa: { label: "Ativa", color: "bg-green-500/20 text-green-400" },
+    cancelada: { label: "Cancelada", color: "bg-destructive/20 text-destructive" },
+    inativa: { label: "Inativa", color: "bg-muted text-muted-foreground" },
+  };
+
+  // ─── Data fetching ───
   const fetchProfiles = async () => {
     const { data } = await supabase.from("profiles").select("*");
-    if (data) {
-      setProfiles(data);
-      setStats({
-        total: data.length,
-        active: data.filter((p: any) => p.is_subscriber && !isInTrial(p)).length,
-        trial: data.filter((p: any) => p.is_subscriber && isInTrial(p)).length,
-      });
-    }
+    if (data) setProfiles(data);
   };
 
   const fetchExercises = async () => {
@@ -129,14 +137,95 @@ const Admin = () => {
     else { toast.success("Exercício excluído"); fetchExercises(); }
   };
 
-  const viewStudentHistory = async (profile: any) => {
-    setSelectedStudent(profile);
-    const { data } = await supabase.from("measurements")
-      .select("*").eq("profile_id", profile.id).order("date", { ascending: false });
-    setStudentMeasurements(data || []);
+  // ─── CRM Drawer ───
+  const openDrawer = async (profile: any) => {
+    setDrawerStudent(profile);
+    const [{ data: mData }, { data: wData }] = await Promise.all([
+      supabase.from("measurements").select("*").eq("profile_id", profile.id).order("date", { ascending: true }),
+      supabase.from("workouts").select("*").eq("profile_id", profile.id).order("date", { ascending: false }).limit(30),
+    ]);
+    setDrawerMeasurements(mData || []);
+    setDrawerWorkouts(wData || []);
   };
 
-  // Filtered & paginated students
+  // ─── KPI Calculations ───
+  const kpis = useMemo(() => {
+    const active = profiles.filter((p) => getStatus(p) === "ativa");
+    const trial = profiles.filter((p) => getStatus(p) === "trial");
+    const canceled = profiles.filter((p) => getStatus(p) === "cancelada");
+    const mrr = active.length * PRICE;
+
+    // Conversion: profiles that were in trial and became active
+    const totalEverTrial = profiles.filter((p) => p.trial_start_date).length;
+    const conversionRate = totalEverTrial > 0 ? ((active.length / totalEverTrial) * 100) : 0;
+
+    // Churn: canceled in last 30 days / (active + canceled in last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentCanceled = canceled.filter((p) => p.canceled_at && new Date(p.canceled_at) > thirtyDaysAgo).length;
+    const churnBase = active.length + recentCanceled;
+    const churnRate = churnBase > 0 ? ((recentCanceled / churnBase) * 100) : 0;
+
+    // LTV
+    const avgMonths = churnRate > 0 ? (100 / churnRate) : 24;
+    const ltv = PRICE * avgMonths;
+
+    return {
+      total: profiles.length,
+      active: active.length,
+      trial: trial.length,
+      canceled: canceled.length,
+      inativa: profiles.filter((p) => getStatus(p) === "inativa").length,
+      mrr,
+      conversionRate,
+      churnRate,
+      ltv,
+    };
+  }, [profiles]);
+
+  // ─── Chart Data ───
+  const signupChartData = useMemo(() => {
+    const days: Record<string, number> = {};
+    const now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      days[d.toISOString().split("T")[0]] = 0;
+    }
+    profiles.forEach((p) => {
+      if (p.created_at) {
+        const day = p.created_at.split("T")[0];
+        if (days[day] !== undefined) days[day]++;
+      }
+    });
+    return Object.entries(days).map(([date, count]) => ({
+      date: new Date(date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+      cadastros: count,
+    }));
+  }, [profiles]);
+
+  const mrrChartData = useMemo(() => {
+    // Simplified: show cumulative active subscribers over last 30 days
+    const days: { date: string; mrr: number }[] = [];
+    const now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const activeAtDate = profiles.filter((p) => {
+        const created = p.created_at?.split("T")[0];
+        const canceled = p.canceled_at?.split("T")[0];
+        return created && created <= dateStr && p.is_subscriber && (!canceled || canceled > dateStr);
+      }).length;
+      days.push({
+        date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        mrr: activeAtDate * PRICE,
+      });
+    }
+    return days;
+  }, [profiles]);
+
+  // ─── Filtered tables ───
   const filteredStudents = useMemo(() => {
     let list = profiles;
     if (studentSearch) {
@@ -152,7 +241,6 @@ const Admin = () => {
   const studentTotalPages = Math.max(1, Math.ceil(filteredStudents.length / ITEMS_PER_PAGE));
   const paginatedStudents = filteredStudents.slice((studentPage - 1) * ITEMS_PER_PAGE, studentPage * ITEMS_PER_PAGE);
 
-  // Filtered & paginated exercises
   const muscleGroups = useMemo(() => [...new Set(exercises.map((e: any) => e.muscle_group).filter(Boolean))], [exercises]);
   const equipmentTypes = useMemo(() => [...new Set(exercises.map((e: any) => e.equipment).filter(Boolean))], [exercises]);
 
@@ -162,19 +250,14 @@ const Admin = () => {
       const q = exerciseSearch.toLowerCase();
       list = list.filter((e: any) => e.name.toLowerCase().includes(q));
     }
-    if (exerciseMuscleFilter !== "all") {
-      list = list.filter((e: any) => e.muscle_group === exerciseMuscleFilter);
-    }
-    if (exerciseEquipFilter !== "all") {
-      list = list.filter((e: any) => e.equipment === exerciseEquipFilter);
-    }
+    if (exerciseMuscleFilter !== "all") list = list.filter((e: any) => e.muscle_group === exerciseMuscleFilter);
+    if (exerciseEquipFilter !== "all") list = list.filter((e: any) => e.equipment === exerciseEquipFilter);
     return list;
   }, [exercises, exerciseSearch, exerciseMuscleFilter, exerciseEquipFilter]);
 
   const exerciseTotalPages = Math.max(1, Math.ceil(filteredExercises.length / ITEMS_PER_PAGE));
   const paginatedExercises = filteredExercises.slice((exercisePage - 1) * ITEMS_PER_PAGE, exercisePage * ITEMS_PER_PAGE);
 
-  // Reset pages on filter change
   useEffect(() => { setStudentPage(1); }, [studentSearch, studentStatusFilter]);
   useEffect(() => { setExercisePage(1); }, [exerciseSearch, exerciseMuscleFilter, exerciseEquipFilter]);
 
@@ -186,6 +269,17 @@ const Admin = () => {
     { title: "Exercícios", section: "exercises" as Section, icon: Dumbbell },
   ];
 
+  // Drawer helpers
+  const drawerStatus = drawerStudent ? getStatus(drawerStudent) : "inativa";
+  const drawerChartData = drawerMeasurements.map((m: any) => ({
+    date: new Date(m.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+    peso: m.weight, cintura: m.waist, quadril: m.hip,
+  }));
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekWorkouts = drawerWorkouts.filter((w) => new Date(w.date) >= weekAgo);
+  const weekCompleted = weekWorkouts.filter((w) => w.completed).length;
+  const weekGenerated = weekWorkouts.length;
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -193,17 +287,15 @@ const Admin = () => {
           <SidebarContent className="bg-card pt-4">
             <SidebarGroup>
               <SidebarGroupLabel className="text-primary font-heading text-xs tracking-widest uppercase">
-                Admin
+                Centro de Comando
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {sidebarItems.map((item) => (
                     <SidebarMenuItem key={item.section}>
-                      <SidebarMenuButton
-                        onClick={() => setActiveSection(item.section)}
+                      <SidebarMenuButton onClick={() => setActiveSection(item.section)}
                         isActive={activeSection === item.section}
-                        className={`${activeSection === item.section ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
-                      >
+                        className={activeSection === item.section ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </SidebarMenuButton>
@@ -212,20 +304,17 @@ const Admin = () => {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-
             <SidebarGroup className="mt-auto">
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-foreground">
-                      <ArrowLeft className="h-4 w-4" />
-                      <span>Voltar ao App</span>
+                      <ArrowLeft className="h-4 w-4" /><span>Voltar ao App</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton onClick={async () => { await signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-destructive">
-                      <LogOut className="h-4 w-4" />
-                      <span>Sair</span>
+                      <LogOut className="h-4 w-4" /><span>Sair</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -247,40 +336,55 @@ const Admin = () => {
           <main className="flex-1 p-6 overflow-auto">
             {/* ===== OVERVIEW ===== */}
             {activeSection === "overview" && (
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  {[
-                    { label: "Total de Alunas", value: stats.total, icon: Users, color: "text-primary" },
-                    { label: "Alunas Ativas (Pagas)", value: stats.active, icon: BarChart3, color: "text-green-400" },
-                    { label: "Alunas em Trial", value: stats.trial, icon: BarChart3, color: "text-accent" },
-                  ].map((kpi) => (
-                    <div key={kpi.label} className="neu-card p-6 flex items-center gap-4 cursor-pointer hover:gold-glow transition-shadow"
-                      onClick={() => setActiveSection("students")}>
-                      <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center">
-                        <kpi.icon size={24} className={kpi.color} />
-                      </div>
-                      <div>
-                        <p className="text-3xl font-heading text-foreground">{kpi.value}</p>
-                        <p className="text-sm text-muted-foreground">{kpi.label}</p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="space-y-6">
+                {/* Financial KPIs */}
+                <div>
+                  <h2 className="text-sm font-heading text-muted-foreground uppercase tracking-widest mb-3">💰 Financeiro</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <KpiCard icon={DollarSign} label="MRR" value={`R$ ${kpis.mrr.toFixed(2).replace('.', ',')}`} color="text-primary" highlight />
+                    <KpiCard icon={TrendingUp} label="Conversão Trial→Pago" value={`${kpis.conversionRate.toFixed(1)}%`} color="text-green-400" />
+                    <KpiCard icon={TrendingDown} label="Churn Rate (30d)" value={`${kpis.churnRate.toFixed(1)}%`} color="text-destructive" />
+                    <KpiCard icon={Target} label="LTV Estimado" value={`R$ ${kpis.ltv.toFixed(0)}`} color="text-accent" />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="neu-card p-6 cursor-pointer hover:gold-glow transition-shadow" onClick={() => setActiveSection("students")}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Users className="text-primary" size={20} />
-                      <h3 className="font-heading text-foreground text-lg">Alunas</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Gerencie alunas, veja status e acompanhe medidas.</p>
+                {/* User KPIs */}
+                <div>
+                  <h2 className="text-sm font-heading text-muted-foreground uppercase tracking-widest mb-3">🦁 A Alcateia</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <KpiCard icon={UserPlus} label="Total Cadastros" value={kpis.total} color="text-foreground" onClick={() => setActiveSection("students")} />
+                    <KpiCard icon={Activity} label="Trial" value={kpis.trial} color="text-primary" onClick={() => { setStudentStatusFilter("trial"); setActiveSection("students"); }} />
+                    <KpiCard icon={Users} label="Ativas (Pagas)" value={kpis.active} color="text-green-400" onClick={() => { setStudentStatusFilter("ativa"); setActiveSection("students"); }} />
+                    <KpiCard icon={AlertTriangle} label="Canceladas" value={kpis.canceled} color="text-destructive" onClick={() => { setStudentStatusFilter("cancelada"); setActiveSection("students"); }} />
                   </div>
-                  <div className="neu-card p-6 cursor-pointer hover:gold-glow transition-shadow" onClick={() => setActiveSection("exercises")}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <Dumbbell className="text-primary" size={20} />
-                      <h3 className="font-heading text-foreground text-lg">Exercícios</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{exercises.length} exercícios cadastrados na biblioteca.</p>
+                </div>
+
+                {/* Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="neu-card p-5">
+                    <h3 className="text-sm font-heading text-primary mb-4 uppercase tracking-widest">MRR (30 dias)</h3>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <LineChart data={mrrChartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} interval={4} />
+                        <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} tickFormatter={(v) => `R$${v}`} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 11%)", border: "1px solid hsl(0 0% 22%)", borderRadius: "8px", fontSize: 12 }}
+                          formatter={(v: number) => [`R$ ${v.toFixed(2)}`, "MRR"]} />
+                        <Line type="monotone" dataKey="mrr" stroke="hsl(46 85% 55%)" strokeWidth={2.5} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="neu-card p-5">
+                    <h3 className="text-sm font-heading text-primary mb-4 uppercase tracking-widest">Novos Cadastros (30 dias)</h3>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={signupChartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} interval={4} />
+                        <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} allowDecimals={false} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 11%)", border: "1px solid hsl(0 0% 22%)", borderRadius: "8px", fontSize: 12 }} />
+                        <Bar dataKey="cadastros" fill="hsl(46 85% 55%)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
@@ -297,13 +401,14 @@ const Admin = () => {
                       className="pl-9 bg-input border-border text-foreground h-10" />
                   </div>
                   <Select value={studentStatusFilter} onValueChange={setStudentStatusFilter}>
-                    <SelectTrigger className="w-40 bg-input border-border text-foreground h-10">
+                    <SelectTrigger className="w-44 bg-input border-border text-foreground h-10">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border">
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="ativa">Ativa</SelectItem>
                       <SelectItem value="trial">Trial</SelectItem>
+                      <SelectItem value="cancelada">Cancelada</SelectItem>
                       <SelectItem value="inativa">Inativa</SelectItem>
                     </SelectContent>
                   </Select>
@@ -317,27 +422,25 @@ const Admin = () => {
                         <TableHead className="text-muted-foreground">Email</TableHead>
                         <TableHead className="text-muted-foreground">Status</TableHead>
                         <TableHead className="text-muted-foreground">Objetivo</TableHead>
+                        <TableHead className="text-muted-foreground">Origem</TableHead>
                         <TableHead className="text-muted-foreground">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {paginatedStudents.map((p) => {
-                        const status = getStatus(p);
+                        const st = getStatus(p);
+                        const cfg = statusConfig[st];
                         return (
                           <TableRow key={p.id} className="border-border">
                             <TableCell className="text-foreground font-medium">{p.full_name || "—"}</TableCell>
                             <TableCell className="text-muted-foreground text-sm">{p.email}</TableCell>
                             <TableCell>
-                              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                                status === "trial" ? "bg-primary/20 text-primary" :
-                                status === "ativa" ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"
-                              }`}>
-                                {status === "trial" ? "Trial" : status === "ativa" ? "Ativa" : "Inativa"}
-                              </span>
+                              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cfg.color}`}>{cfg.label}</span>
                             </TableCell>
                             <TableCell className="text-muted-foreground text-sm">{p.goal || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{p.utm_source || "Orgânico"}</TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm" onClick={() => viewStudentHistory(p)}>
+                              <Button variant="ghost" size="sm" onClick={() => openDrawer(p)}>
                                 <Eye size={16} className="text-primary" />
                               </Button>
                             </TableCell>
@@ -345,31 +448,14 @@ const Admin = () => {
                         );
                       })}
                       {paginatedStudents.length === 0 && (
-                        <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                          Nenhuma aluna encontrada
-                        </TableCell></TableRow>
+                        <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma aluna encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    {filteredStudents.length} aluna{filteredStudents.length !== 1 ? "s" : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" disabled={studentPage <= 1}
-                      onClick={() => setStudentPage(studentPage - 1)} className="border-border text-foreground h-8 w-8 p-0">
-                      <ChevronLeft size={16} />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">{studentPage} / {studentTotalPages}</span>
-                    <Button variant="outline" size="sm" disabled={studentPage >= studentTotalPages}
-                      onClick={() => setStudentPage(studentPage + 1)} className="border-border text-foreground h-8 w-8 p-0">
-                      <ChevronRight size={16} />
-                    </Button>
-                  </div>
-                </div>
+                <Pagination current={studentPage} total={studentTotalPages} count={filteredStudents.length}
+                  label="aluna" onPrev={() => setStudentPage(studentPage - 1)} onNext={() => setStudentPage(studentPage + 1)} />
               </div>
             )}
 
@@ -384,18 +470,14 @@ const Admin = () => {
                       className="pl-9 bg-input border-border text-foreground h-10" />
                   </div>
                   <Select value={exerciseMuscleFilter} onValueChange={setExerciseMuscleFilter}>
-                    <SelectTrigger className="w-44 bg-input border-border text-foreground h-10">
-                      <SelectValue placeholder="Músculo" />
-                    </SelectTrigger>
+                    <SelectTrigger className="w-44 bg-input border-border text-foreground h-10"><SelectValue placeholder="Músculo" /></SelectTrigger>
                     <SelectContent className="bg-card border-border">
                       <SelectItem value="all">Todos Músculos</SelectItem>
                       {muscleGroups.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <Select value={exerciseEquipFilter} onValueChange={setExerciseEquipFilter}>
-                    <SelectTrigger className="w-44 bg-input border-border text-foreground h-10">
-                      <SelectValue placeholder="Equipamento" />
-                    </SelectTrigger>
+                    <SelectTrigger className="w-44 bg-input border-border text-foreground h-10"><SelectValue placeholder="Equipamento" /></SelectTrigger>
                     <SelectContent className="bg-card border-border">
                       <SelectItem value="all">Todos Equip.</SelectItem>
                       {equipmentTypes.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}
@@ -431,9 +513,7 @@ const Admin = () => {
                           <TableCell className="text-muted-foreground text-sm">{ex.therapeutic_focus || "—"}</TableCell>
                           <TableCell>
                             <div className="flex gap-1">
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                setExerciseForm(ex); setEditingId(ex.id); setShowExerciseModal(true);
-                              }}>
+                              <Button variant="ghost" size="sm" onClick={() => { setExerciseForm(ex); setEditingId(ex.id); setShowExerciseModal(true); }}>
                                 <Pencil size={14} className="text-primary" />
                               </Button>
                               <Button variant="ghost" size="sm" onClick={() => deleteExercise(ex.id)}>
@@ -444,38 +524,21 @@ const Admin = () => {
                         </TableRow>
                       ))}
                       {paginatedExercises.length === 0 && (
-                        <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                          Nenhum exercício encontrado
-                        </TableCell></TableRow>
+                        <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum exercício encontrado</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    {filteredExercises.length} exercício{filteredExercises.length !== 1 ? "s" : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" disabled={exercisePage <= 1}
-                      onClick={() => setExercisePage(exercisePage - 1)} className="border-border text-foreground h-8 w-8 p-0">
-                      <ChevronLeft size={16} />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">{exercisePage} / {exerciseTotalPages}</span>
-                    <Button variant="outline" size="sm" disabled={exercisePage >= exerciseTotalPages}
-                      onClick={() => setExercisePage(exercisePage + 1)} className="border-border text-foreground h-8 w-8 p-0">
-                      <ChevronRight size={16} />
-                    </Button>
-                  </div>
-                </div>
+                <Pagination current={exercisePage} total={exerciseTotalPages} count={filteredExercises.length}
+                  label="exercício" onPrev={() => setExercisePage(exercisePage - 1)} onNext={() => setExercisePage(exercisePage + 1)} />
               </div>
             )}
           </main>
         </div>
       </div>
 
-      {/* Exercise Form Modal */}
+      {/* ===== EXERCISE MODAL ===== */}
       <Dialog open={showExerciseModal} onOpenChange={setShowExerciseModal}>
         <DialogContent className="bg-card border-border max-w-lg">
           <DialogHeader>
@@ -500,56 +563,172 @@ const Admin = () => {
             ))}
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowExerciseModal(false)} className="border-border text-foreground">
-              Cancelar
-            </Button>
-            <Button onClick={saveExercise} className="gold-gradient text-primary-foreground font-heading">
-              {editingId ? "Atualizar" : "Criar"}
-            </Button>
+            <Button variant="outline" onClick={() => setShowExerciseModal(false)} className="border-border text-foreground">Cancelar</Button>
+            <Button onClick={saveExercise} className="gold-gradient text-primary-foreground font-heading">{editingId ? "Atualizar" : "Criar"}</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Student History Modal */}
-      <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
-        <DialogContent className="bg-card border-border max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-primary">Evolução de {selectedStudent?.full_name || "Aluna"}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 max-h-80 overflow-y-auto">
-            {studentMeasurements.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Nenhuma medida registrada</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead className="text-muted-foreground">Data</TableHead>
-                    <TableHead className="text-muted-foreground">Peso</TableHead>
-                    <TableHead className="text-muted-foreground">Cintura</TableHead>
-                    <TableHead className="text-muted-foreground">Quadril</TableHead>
-                    <TableHead className="text-muted-foreground">Coxa</TableHead>
-                    <TableHead className="text-muted-foreground">Braço</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {studentMeasurements.map((m: any) => (
-                    <TableRow key={m.id} className="border-border">
-                      <TableCell className="text-foreground">{new Date(m.date).toLocaleDateString("pt-BR")}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.weight || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.waist || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.hip || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.thigh || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{m.arm || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* ===== CRM DRAWER ===== */}
+      <Sheet open={!!drawerStudent} onOpenChange={() => setDrawerStudent(null)}>
+        <SheetContent className="bg-card border-border w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-primary text-xl">Perfil da Aluna</SheetTitle>
+          </SheetHeader>
+
+          {drawerStudent && (
+            <div className="mt-6 space-y-6">
+              {/* Section 1: Overview & Financial */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-heading text-muted-foreground uppercase tracking-widest">Visão Geral & Financeiro</h3>
+                <div className="neu-card p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-heading text-foreground">{drawerStudent.full_name || "Sem nome"}</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${statusConfig[drawerStatus].color}`}>
+                      {statusConfig[drawerStatus].label}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{drawerStudent.email}</p>
+                  {drawerStudent.whatsapp && <p className="text-sm text-muted-foreground">📱 {drawerStudent.whatsapp}</p>}
+                  <p className="text-sm text-muted-foreground">
+                    Cadastro: {drawerStudent.created_at ? new Date(drawerStudent.created_at).toLocaleDateString("pt-BR") : "—"}
+                  </p>
+                </div>
+
+                {/* UTM / Aquisição */}
+                <div className="neu-card p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe size={14} className="text-primary" />
+                    <span className="text-xs font-heading text-muted-foreground uppercase tracking-widest">Origem da Aquisição</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag label="Source" value={drawerStudent.utm_source || "Orgânico"} />
+                    {drawerStudent.utm_medium && <Tag label="Medium" value={drawerStudent.utm_medium} />}
+                    {drawerStudent.utm_campaign && <Tag label="Campaign" value={drawerStudent.utm_campaign} />}
+                    {drawerStudent.utm_content && <Tag label="Content" value={drawerStudent.utm_content} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: DNA da Leoa */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-heading text-muted-foreground uppercase tracking-widest">🧬 DNA da Leoa (Quiz)</h3>
+                <div className="neu-card p-4">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {drawerStudent.goal && <Tag label="Objetivo" value={drawerStudent.goal} />}
+                    {drawerStudent.target_area && <Tag label="Área Alvo" value={drawerStudent.target_area} />}
+                    {drawerStudent.training_experience && <Tag label="Experiência" value={drawerStudent.training_experience} />}
+                    <Tag label="Dias/semana" value={drawerStudent.workout_days || "—"} />
+                    <Tag label="Duração" value={drawerStudent.workout_duration ? `${drawerStudent.workout_duration} min` : "—"} />
+                  </div>
+
+                  {drawerStudent.has_pain && drawerStudent.pain_location && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-2">
+                      <p className="text-sm font-semibold text-destructive flex items-center gap-1">
+                        <AlertTriangle size={14} /> Dores: {drawerStudent.pain_location}
+                      </p>
+                    </div>
+                  )}
+
+                  {drawerStudent.uses_medication && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                      <p className="text-sm font-semibold text-destructive flex items-center gap-1">
+                        <AlertTriangle size={14} /> Usa medicação
+                      </p>
+                      {drawerStudent.medication_feeling && (
+                        <p className="text-xs text-muted-foreground mt-1">"{drawerStudent.medication_feeling}"</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 3: Engagement */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-heading text-muted-foreground uppercase tracking-widest">📊 Engajamento & Evolução</h3>
+                <div className="neu-card p-4">
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-2xl font-heading text-primary">{weekGenerated}</p>
+                      <p className="text-xs text-muted-foreground">Treinos gerados (7d)</p>
+                    </div>
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-2xl font-heading text-green-400">{weekCompleted}</p>
+                      <p className="text-xs text-muted-foreground">Treinos concluídos (7d)</p>
+                    </div>
+                  </div>
+
+                  <h4 className="text-xs text-muted-foreground uppercase mb-2">Evolução de Medidas</h4>
+                  {drawerChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={180}>
+                      <LineChart data={drawerChartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} />
+                        <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} />
+                        <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 11%)", border: "1px solid hsl(0 0% 22%)", borderRadius: "8px", fontSize: 11 }} />
+                        <Line type="monotone" dataKey="peso" stroke="hsl(46 85% 55%)" strokeWidth={2} dot={{ r: 3 }} />
+                        <Line type="monotone" dataKey="cintura" stroke="hsl(0 71% 86%)" strokeWidth={2} dot={{ r: 3 }} />
+                        <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 70%)" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-6">Nenhuma medida registrada</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </SidebarProvider>
   );
 };
+
+// ─── Sub-components ───
+
+function KpiCard({ icon: Icon, label, value, color, highlight, onClick }: {
+  icon: any; label: string; value: string | number; color: string; highlight?: boolean; onClick?: () => void;
+}) {
+  return (
+    <div onClick={onClick}
+      className={`neu-card p-5 flex items-center gap-4 transition-shadow ${onClick ? "cursor-pointer hover:gold-glow" : ""} ${highlight ? "border border-primary/30 gold-glow" : ""}`}>
+      <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+        <Icon size={22} className={color} />
+      </div>
+      <div>
+        <p className="text-2xl font-heading text-foreground">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+function Tag({ label, value }: { label: string; value: string | number }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs bg-secondary rounded-lg px-2.5 py-1.5">
+      <span className="text-muted-foreground">{label}:</span>
+      <span className="text-foreground font-medium">{value}</span>
+    </span>
+  );
+}
+
+function Pagination({ current, total, count, label, onPrev, onNext }: {
+  current: number; total: number; count: number; label: string; onPrev: () => void; onNext: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between mt-4">
+      <p className="text-sm text-muted-foreground">{count} {label}{count !== 1 ? "s" : ""}</p>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" disabled={current <= 1} onClick={onPrev} className="border-border text-foreground h-8 w-8 p-0">
+          <ChevronLeft size={16} />
+        </Button>
+        <span className="text-sm text-muted-foreground">{current} / {total}</span>
+        <Button variant="outline" size="sm" disabled={current >= total} onClick={onNext} className="border-border text-foreground h-8 w-8 p-0">
+          <ChevronRight size={16} />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default Admin;
