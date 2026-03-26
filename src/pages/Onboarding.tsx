@@ -286,6 +286,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
+    case "equipamentos":
       return (
         <div>
           <h2 className="text-2xl text-foreground mb-2">Qual o tipo de protocolo?</h2>
