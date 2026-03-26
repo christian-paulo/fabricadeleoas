@@ -177,7 +177,7 @@ const LandingPage = () => {
             <ul className="space-y-4 mb-10">
               {[
                 "Treinos diários personalizados por mim",
-                "Adaptação inteligente a dores e lesões",
+                "Adaptação a dores e lesões",
                 "Acompanhamento de medidas e evolução",
                 "E-books exclusivos de nutrição",
                 "Suporte e comunidade de Leoas",
