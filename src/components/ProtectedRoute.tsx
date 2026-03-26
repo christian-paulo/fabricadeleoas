@@ -16,7 +16,6 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, profile, subscription, loading } = useAuth();
 
-  // Still loading auth state
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -25,12 +24,8 @@ const ProtectedRoute = ({
     );
   }
 
-  // Not logged in
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  if (!user) return <Navigate to="/auth" replace />;
 
-  // Profile not yet loaded — wait
   if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -39,25 +34,24 @@ const ProtectedRoute = ({
     );
   }
 
-  // Check subscription (only if subscription data has loaded)
+  // Check onboarding first (quiz needs to be done before subscription check)
+  if (requireOnboarding && !profile.onboarding_completed) {
+    return <Navigate to="/onboarding/motivacao" replace />;
+  }
+
+  // Check subscription
   if (requireSubscription && subscription !== null) {
     if (!subscription.subscribed) {
-      return <Navigate to="/checkout" replace />;
+      return <Navigate to="/onboarding/checkout" replace />;
     }
   }
 
-  // If subscription is still null (loading), wait instead of redirecting
   if (requireSubscription && subscription === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
-  }
-
-  // Check onboarding
-  if (requireOnboarding && !profile.onboarding_completed) {
-    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;

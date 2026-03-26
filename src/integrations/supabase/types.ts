@@ -97,11 +97,80 @@ export type Database = {
           },
         ]
       }
+      onboarding_responses: {
+        Row: {
+          altura: number | null
+          biotipo: string | null
+          celebracao: string | null
+          corpo_atual: string | null
+          corpo_desejado: string | null
+          created_at: string | null
+          dificuldade: string | null
+          flexibilidade: string | null
+          id: string
+          idade: number | null
+          local_treino: string | null
+          meta_peso: number | null
+          motivacao: string | null
+          peso_atual: number | null
+          profile_id: string
+          psicologico: string[] | null
+          rotina: string | null
+        }
+        Insert: {
+          altura?: number | null
+          biotipo?: string | null
+          celebracao?: string | null
+          corpo_atual?: string | null
+          corpo_desejado?: string | null
+          created_at?: string | null
+          dificuldade?: string | null
+          flexibilidade?: string | null
+          id?: string
+          idade?: number | null
+          local_treino?: string | null
+          meta_peso?: number | null
+          motivacao?: string | null
+          peso_atual?: number | null
+          profile_id: string
+          psicologico?: string[] | null
+          rotina?: string | null
+        }
+        Update: {
+          altura?: number | null
+          biotipo?: string | null
+          celebracao?: string | null
+          corpo_atual?: string | null
+          corpo_desejado?: string | null
+          created_at?: string | null
+          dificuldade?: string | null
+          flexibilidade?: string | null
+          id?: string
+          idade?: number | null
+          local_treino?: string | null
+          meta_peso?: number | null
+          motivacao?: string | null
+          peso_atual?: number | null
+          profile_id?: string
+          psicologico?: string[] | null
+          rotina?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_responses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           canceled_at: string | null
           created_at: string | null
           email: string | null
+          equipment: string | null
           full_name: string | null
           goal: string | null
           has_pain: boolean | null
@@ -129,6 +198,7 @@ export type Database = {
           canceled_at?: string | null
           created_at?: string | null
           email?: string | null
+          equipment?: string | null
           full_name?: string | null
           goal?: string | null
           has_pain?: boolean | null
@@ -156,6 +226,7 @@ export type Database = {
           canceled_at?: string | null
           created_at?: string | null
           email?: string | null
+          equipment?: string | null
           full_name?: string | null
           goal?: string | null
           has_pain?: boolean | null

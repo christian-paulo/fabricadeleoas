@@ -23,12 +23,10 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          glow: "hsl(var(--gold-glow))",
-        },
         pink: {
           DEFAULT: "hsl(var(--pink))",
+          soft: "hsl(var(--pink-soft))",
+          glow: "hsl(var(--pink-glow))",
         },
         surface: {
           DEFAULT: "hsl(var(--surface))",
@@ -87,15 +85,16 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-gold": {
-          "0%, 100%": { boxShadow: "0 0 0 0 hsl(46 65% 52% / 0.4)" },
-          "50%": { boxShadow: "0 0 0 12px hsl(46 65% 52% / 0)" },
+        "pulse-pink": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(330 100% 56% / 0.4)" },
+          "50%": { boxShadow: "0 0 0 12px hsl(330 100% 56% / 0)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-gold": "pulse-gold 2s infinite",
+        "pulse-pink": "pulse-pink 2s infinite",
+        "pulse-gold": "pulse-pink 2s infinite",
       },
     },
   },

@@ -5,7 +5,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Check, Shield, Loader2 } from "lucide-react";
+import { Check, Shield, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
@@ -23,7 +23,7 @@ const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
-  const { checkSubscription } = useAuth();
+  const { checkSubscription, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ const CheckoutForm = () => {
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/onboarding?checkout=success`,
+          return_url: `${window.location.origin}/dashboard`,
         },
         redirect: "if_required",
       });
@@ -45,15 +45,22 @@ const CheckoutForm = () => {
         return;
       }
 
+      // Mark onboarding as completed
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user.id);
+      }
+
       const nextSubscription = await checkSubscription();
+      await refreshProfile();
 
       if (nextSubscription?.subscribed) {
-        toast.success("Cartão confirmado! Agora vamos montar seu treino! 🦁");
-        navigate("/onboarding");
+        toast.success("Bem-vinda à Fábrica de Leoas! 🦁");
+        navigate("/dashboard");
         return;
       }
 
-      toast.error("Cadastre um cartão válido para liberar o onboarding.");
+      toast.error("Cadastre um cartão válido para liberar o acesso.");
     } catch (err: any) {
       toast.error(err.message || "Erro inesperado");
     } finally {
@@ -63,16 +70,9 @@ const CheckoutForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement
-        options={{
-          layout: "tabs",
-        }}
-      />
-      <Button
-        type="submit"
-        disabled={!stripe || loading}
-        className="w-full gold-gradient text-primary-foreground font-heading h-14 rounded-xl text-lg"
-      >
+      <PaymentElement options={{ layout: "tabs" }} />
+      <Button type="submit" disabled={!stripe || loading}
+        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
         {loading ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -101,31 +101,23 @@ const Checkout = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
+    if (!user) { navigate("/auth"); return; }
   }, [user, navigate]);
 
   useEffect(() => {
     if (!user) return;
-
     const createIntent = async () => {
       try {
         const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent");
         if (fnError) throw fnError;
-
         if (data.already_subscribed) {
+          await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user.id);
           toast.info("Você já possui uma assinatura ativa!");
           navigate("/dashboard");
           return;
         }
-
-        if (data.client_secret) {
-          setClientSecret(data.client_secret);
-        } else {
-          throw new Error("Não foi possível iniciar o checkout");
-        }
+        if (data.client_secret) setClientSecret(data.client_secret);
+        else throw new Error("Não foi possível iniciar o checkout");
       } catch (err: any) {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
@@ -133,7 +125,6 @@ const Checkout = () => {
         setLoading(false);
       }
     };
-
     createIntent();
   }, [user, navigate]);
 
@@ -148,11 +139,9 @@ const Checkout = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="neu-card p-8 max-w-md w-full text-center">
+        <div className="soft-card p-8 max-w-md w-full text-center">
           <p className="text-destructive mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Tentar novamente
-          </Button>
+          <Button onClick={() => window.location.reload()} variant="outline">Tentar novamente</Button>
         </div>
       </div>
     );
@@ -161,13 +150,14 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="neu-card p-6 md:p-8 order-2 md:order-1 h-fit">
+        {/* Order Summary */}
+        <div className="soft-card p-6 md:p-8 order-2 md:order-1 h-fit">
           <div className="mb-6">
-            <h1 className="font-heading text-2xl text-primary mb-1">Fábrica de Leoas</h1>
+            <h1 className="font-heading text-2xl text-primary mb-1">O seu plano está pronto! 🦁</h1>
             <p className="text-sm text-muted-foreground">Consultoria Fitness com IA</p>
           </div>
 
-          <div className="border border-border rounded-xl p-5 mb-6 bg-card">
+          <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
             <h2 className="font-heading text-lg text-foreground mb-4">Resumo do Pedido</h2>
             <div className="flex items-center justify-between mb-2">
               <div>
@@ -178,8 +168,8 @@ const Checkout = () => {
             </div>
             <div className="border-t border-border my-3" />
             <div className="flex items-center justify-between">
-              <span className="text-sm text-accent font-medium">3 dias grátis</span>
-              <span className="text-sm text-accent font-medium">- R$ 49,90</span>
+              <span className="text-sm text-primary font-medium">3 dias grátis</span>
+              <span className="text-sm text-primary font-medium">- R$ 49,90</span>
             </div>
             <div className="border-t border-border my-3" />
             <div className="flex items-center justify-between">
@@ -203,42 +193,40 @@ const Checkout = () => {
           </p>
         </div>
 
-        <div className="neu-card p-6 md:p-8 order-1 md:order-2">
+        {/* Payment Form */}
+        <div className="soft-card p-6 md:p-8 order-1 md:order-2">
           <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
-
           {clientSecret && (
-            <Elements
-              stripe={stripePromise}
+            <Elements stripe={stripePromise}
               options={{
                 clientSecret,
                 appearance: {
-                  theme: "night",
+                  theme: "stripe",
                   variables: {
-                    colorPrimary: "#D4AF37",
-                    colorBackground: "#242424",
-                    colorText: "#e0e0e0",
+                    colorPrimary: "#FF69B4",
+                    colorBackground: "#FFFFF4",
+                    colorText: "#4A4A4A",
                     colorDanger: "#ef4444",
                     fontFamily: "system-ui, sans-serif",
-                    borderRadius: "12px",
+                    borderRadius: "16px",
                     spacingUnit: "4px",
                   },
                   rules: {
                     ".Input": {
-                      backgroundColor: "#1A1A1A",
-                      border: "1px solid #333",
+                      backgroundColor: "#FFFFF4",
+                      border: "1px solid hsl(340 20% 90%)",
                     },
                     ".Input:focus": {
-                      borderColor: "#D4AF37",
-                      boxShadow: "0 0 0 1px #D4AF37",
+                      borderColor: "#FF69B4",
+                      boxShadow: "0 0 0 1px #FF69B4",
                     },
                     ".Label": {
-                      color: "#a0a0a0",
+                      color: "#808080",
                     },
                   },
                 },
                 locale: "pt-BR",
-              }}
-            >
+              }}>
               <CheckoutForm />
             </Elements>
           )}

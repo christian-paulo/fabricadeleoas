@@ -40,13 +40,10 @@ const Auth = () => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: { full_name: fullName, whatsapp },
-          },
+          options: { data: { full_name: fullName, whatsapp } },
         });
         if (error) throw error;
 
-        // Update profile with name, whatsapp and UTMs
         if (data.user) {
           const utms = getStoredUtms();
           await supabase.from("profiles").update({
@@ -73,7 +70,7 @@ const Auth = () => {
         <p className="text-sm text-muted-foreground">Consultoria Fitness Feminina Premium</p>
       </div>
 
-      <div className="neu-card p-6 w-full">
+      <div className="soft-card p-6 w-full">
         <h2 className="text-lg font-heading text-foreground mb-6 text-center">
           {isLogin ? "Entrar na Alcateia" : "Criar Conta"}
         </h2>
@@ -83,74 +80,40 @@ const Auth = () => {
             <>
               <div>
                 <Label className="text-xs text-muted-foreground">Nome completo</Label>
-                <Input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Seu nome completo"
-                  className="bg-input border-border text-foreground h-12 mt-1"
-                  required
-                />
+                <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">WhatsApp</Label>
-                <Input
-                  type="tel"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="(11) 99999-9999"
-                  className="bg-input border-border text-foreground h-12 mt-1"
-                  required
-                />
+                <Input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="(11) 99999-9999" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
               </div>
             </>
           )}
           <div>
             <Label className="text-xs text-muted-foreground">E-mail</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="bg-input border-border text-foreground h-12 mt-1"
-              required
-            />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Senha</Label>
             <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="bg-input border-border text-foreground h-12 mt-1 pr-12"
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-muted-foreground hover:text-foreground transition-colors"
-              >
+              <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••" className="bg-background border-border text-foreground h-12 mt-1 pr-12 rounded-xl" required minLength={6} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-muted-foreground hover:text-foreground transition-colors">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full gold-gradient text-primary-foreground font-heading h-12 rounded-xl"
-          >
+          <Button type="submit" disabled={loading}
+            className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
             {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta"}
           </Button>
         </form>
 
         <div className="mt-4 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-primary hover:underline"
-          >
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
             {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
           </button>
         </div>

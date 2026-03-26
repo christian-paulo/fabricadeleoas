@@ -27,9 +27,9 @@ const Perfil = () => {
 
   const getStatusLabel = () => {
     if (!subscription) return { label: "Carregando...", color: "bg-muted text-muted-foreground" };
-    if (subscription.status === "trialing") return { label: "Trial Ativo", color: "bg-primary/20 text-primary" };
-    if (subscription.subscribed) return { label: "Assinante Ativa", color: "bg-green-500/20 text-green-400" };
-    return { label: "Inativa", color: "bg-destructive/20 text-destructive" };
+    if (subscription.status === "trialing") return { label: "Trial Ativo", color: "bg-primary/15 text-primary" };
+    if (subscription.subscribed) return { label: "Assinante Ativa", color: "bg-green-100 text-green-600" };
+    return { label: "Inativa", color: "bg-destructive/15 text-destructive" };
   };
 
   const status = getStatusLabel();
@@ -39,7 +39,7 @@ const Perfil = () => {
       <h1 className="text-3xl text-foreground mb-6 uppercase">Meu Perfil</h1>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-20 h-20 rounded-full gold-gradient flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full pink-gradient flex items-center justify-center shadow-lg">
           <User size={32} className="text-primary-foreground" />
         </div>
         <div>
@@ -48,7 +48,7 @@ const Perfil = () => {
         </div>
       </div>
 
-      <div className="neu-card p-5 mb-6">
+      <div className="soft-card p-5 mb-6">
         <div className="flex items-center justify-between mb-3">
           <span className="text-base font-heading text-primary">Status da Assinatura</span>
           <span className={`text-sm px-3 py-1 rounded-full font-bold ${status.color}`}>{status.label}</span>
@@ -59,18 +59,18 @@ const Perfil = () => {
           </p>
         )}
         <Button onClick={handleCancelSubscription} variant="outline"
-          className="w-full border-destructive text-destructive hover:bg-destructive/10 h-12 text-base rounded-xl font-bold">
+          className="w-full border-destructive text-destructive hover:bg-destructive/10 h-12 text-base rounded-2xl font-bold">
           Gerenciar Assinatura
         </Button>
       </div>
 
       <div className="space-y-3">
         {[
-          { icon: User, label: "Editar dados do Quiz", desc: "Atualize suas informações", action: () => navigate("/onboarding") },
+          { icon: User, label: "Editar dados do Quiz", desc: "Atualize suas informações", action: () => navigate("/onboarding/motivacao") },
           { icon: CreditCard, label: "Assinatura", desc: "Gerenciar plano e pagamento", action: handleCancelSubscription },
           { icon: HelpCircle, label: "Suporte", desc: "Fale com a Alcateia", action: () => {} },
         ].map((item) => (
-          <button key={item.label} onClick={item.action} className="neu-card p-5 w-full flex items-center gap-4 text-left">
+          <button key={item.label} onClick={item.action} className="soft-card p-5 w-full flex items-center gap-4 text-left">
             <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
               <item.icon size={22} className="text-primary" />
             </div>
