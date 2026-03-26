@@ -5,9 +5,6 @@ import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 import trainerImg from "@/assets/trainer-gilvan.png";
 import { captureUtms } from "@/lib/utm";
-import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.jpg";
-import trainerImg from "@/assets/trainer-gilvan.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
