@@ -29,7 +29,7 @@ const Treinos = () => {
     setLoading(true);
     try {
       const { data: rawData, error } = await supabase.functions.invoke("generate-workout", { body: {} });
-      if (error) { toast.error("Erro ao carregar treino"); return; }
+      if (error) { toast.error("Erro ao carregar protocolo"); return; }
       const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
       if (data?.workout) {
         setWorkout(data.workout);
@@ -37,8 +37,8 @@ const Treinos = () => {
         setFeedback(data.workout.feedback_effort as FeedbackType);
         setPhase(data.phase || "initial");
         setWorkoutNumber(data.workoutNumber || 1);
-      } else { toast.error("Treino não encontrado"); }
-    } catch { toast.error("Erro ao carregar treino"); }
+      } else { toast.error("Protocolo não encontrado"); }
+    } catch { toast.error("Erro ao carregar protocolo"); }
     setLoading(false);
   };
 
@@ -56,11 +56,11 @@ const Treinos = () => {
 
   const workoutJson = workout?.workout_json;
   const triSets = workoutJson?.tri_sets || [];
-  const phaseLabel = phase === "monthly" ? `Programa Mensal • Treino ${workoutNumber}` : `Fase Inicial • Treino ${workoutNumber} de 3`;
+  const phaseLabel = phase === "monthly" ? `Programa Mensal • Protocolo ${workoutNumber}` : `Fase Inicial • Protocolo ${workoutNumber} de 3`;
 
   return (
     <AppLayout>
-      <h1 className="text-3xl text-foreground mb-1 uppercase">Treino do Dia</h1>
+      <h1 className="text-3xl text-foreground mb-1 uppercase">Protocolo do Dia</h1>
       <p className="text-sm text-primary font-heading mb-1">{phaseLabel}</p>
       <p className="text-base text-muted-foreground mb-6">
         {workoutJson?.title || "Carregando..."} {workoutJson?.total_series ? `• ${workoutJson.total_series} séries` : ""}
@@ -69,11 +69,11 @@ const Treinos = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
-          <span className="text-muted-foreground text-base">Preparando seu treino...</span>
+          <span className="text-muted-foreground text-base">Preparando seu protocolo...</span>
         </div>
       ) : triSets.length === 0 ? (
         <div className="soft-card p-6 text-center">
-          <p className="text-muted-foreground text-base">Nenhum treino disponível.</p>
+          <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
         </div>
       ) : (
         <>
@@ -116,7 +116,7 @@ const Treinos = () => {
               </p>
               <Button onClick={generateNextWorkout}
                 className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg">
-                Gerar Próximo Treino
+                Gerar Próximo Protocolo
               </Button>
             </div>
           )}

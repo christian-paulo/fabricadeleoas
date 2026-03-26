@@ -53,7 +53,7 @@ const LandingPage = () => {
             Eu desenhei a Fábrica de Leoas para você que quer <span className="text-primary">eliminar:</span>
           </h2>
           <p className="text-center text-muted-foreground mb-14 max-w-lg mx-auto">
-            Eu monto cada treino com foco cirúrgico nas suas queixas.
+            Eu monto cada protocolo com foco cirúrgico nas suas queixas.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
@@ -82,8 +82,8 @@ const LandingPage = () => {
           <div className="space-y-12">
             {[
               { step: "01", title: "DNA da Leoa", desc: "Você responde um quiz rápido sobre seu corpo, tempo disponível e dores. Leva menos de 2 minutos." },
-              { step: "02", title: "Eu Monto Seu Treino", desc: "Eu cruzo seus dados com meus 142 exercícios e monto seus Tri-sets diários personalizados." },
-              { step: "03", title: "Eu Acompanho Você", desc: "A cada treino, eu ajusto a intensidade baseado no seu feedback. Se doer, eu adapto. Se ficar fácil, eu exijo mais." },
+              { step: "02", title: "Eu Monto Seu Protocolo", desc: "Eu cruzo seus dados com meus 142 exercícios e monto seus Tri-sets diários personalizados." },
+              { step: "03", title: "Eu Acompanho Você", desc: "A cada protocolo, eu ajusto a intensidade baseado no seu feedback. Se doer, eu adapto. Se ficar fácil, eu exijo mais." },
             ].map((item, i) => (
               <div key={i} className="flex gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 rounded-2xl pink-gradient flex items-center justify-center shadow-lg">
@@ -115,7 +115,7 @@ const LandingPage = () => {
             </div>
             <ul className="space-y-4 mb-10">
               {[
-                "Treinos diários personalizados por mim",
+              "Protocolos diários personalizados por mim",
                 "Adaptação a dores e lesões",
                 "Acompanhamento de medidas e evolução",
                 "E-books exclusivos de nutrição",
