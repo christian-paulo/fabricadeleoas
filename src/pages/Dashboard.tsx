@@ -113,11 +113,11 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdo de Leoa</h2>
+      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
       <div className="space-y-3 mb-4">
         {[
-          { title: "Kit Corpinho de Verão Suprema", desc: "Treinos intensos para resultados rápidos" },
-          { title: "Drink Anti Pochete Suprema", desc: "Receita exclusiva para queima de gordura" },
+          { title: "Ciclo dos Carboidratos", desc: "Guia completo para otimizar sua alimentação" },
+          { title: "Comportamentos", desc: "Hábitos e mindset para resultados duradouros" },
         ].map((ebook) => (
           <div key={ebook.title} className="neu-card p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl gold-gradient flex items-center justify-center flex-shrink-0">
