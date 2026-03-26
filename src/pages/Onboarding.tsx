@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
