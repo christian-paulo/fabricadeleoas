@@ -50,14 +50,21 @@ const Admin = () => {
     }
   }, [isAdmin]);
 
+  const isInTrial = (p: any) => {
+    if (!p.trial_start_date) return false;
+    const trialEnd = new Date(p.trial_start_date);
+    trialEnd.setDate(trialEnd.getDate() + 3);
+    return new Date() < trialEnd;
+  };
+
   const fetchProfiles = async () => {
     const { data } = await supabase.from("profiles").select("*");
     if (data) {
       setProfiles(data);
       setStats({
         total: data.length,
-        active: data.filter((p: any) => p.is_subscriber).length,
-        trial: data.filter((p: any) => p.trial_start_date && !p.is_subscriber).length,
+        active: data.filter((p: any) => p.is_subscriber && !isInTrial(p)).length,
+        trial: data.filter((p: any) => p.is_subscriber && isInTrial(p)).length,
       });
     }
   };
@@ -164,10 +171,10 @@ const Admin = () => {
                       <TableCell className="text-muted-foreground text-sm">{p.email}</TableCell>
                       <TableCell>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          p.is_subscriber ? "bg-green-500/20 text-green-400" :
-                          p.trial_start_date ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                          p.is_subscriber && isInTrial(p) ? "bg-primary/20 text-primary" :
+                          p.is_subscriber ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground"
                         }`}>
-                          {p.is_subscriber ? "Ativa" : p.trial_start_date ? "Trial" : "Inativa"}
+                          {p.is_subscriber && isInTrial(p) ? "Trial" : p.is_subscriber ? "Ativa" : "Inativa"}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">{p.goal || "—"}</TableCell>
