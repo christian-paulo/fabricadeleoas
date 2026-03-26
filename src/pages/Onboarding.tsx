@@ -286,27 +286,6 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
-    case "local":
-      return (
-        <div>
-          <div className="mb-1"><Dumbbell className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Onde prefere treinar?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Adapto o protocolo ao seu espaço</p>
-          <div className="space-y-3">
-            {[
-              { val: "Casa", icon: "🏠" },
-              { val: "Academia", icon: "🏋️" },
-              { val: "Sem preferência", icon: "🤷" },
-            ].map((l) => (
-              <OptionCard key={l.val} selected={data.local_treino === l.val} onClick={() => updateField("local_treino", l.val)} icon={l.icon}>
-                {l.val}
-              </OptionCard>
-            ))}
-          </div>
-        </div>
-      );
-
-    case "equipamentos":
       return (
         <div>
           <h2 className="text-2xl text-foreground mb-2">Qual o tipo de protocolo?</h2>
@@ -730,7 +709,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "meta": return data.meta_peso !== "";
     case "biotipo": return data.biotipo !== "";
     case "idade": return data.idade !== "";
-    case "local": return data.local_treino !== "";
+    
     case "equipamentos": return data.equipment !== "";
     case "dificuldade": return data.dificuldade !== "";
     case "momento": return data.trainingExperience !== "";
