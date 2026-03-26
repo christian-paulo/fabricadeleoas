@@ -199,6 +199,8 @@ const Admin = () => {
                     <TableHead className="text-muted-foreground">Músculo</TableHead>
                     <TableHead className="text-muted-foreground">Equipamento</TableHead>
                     <TableHead className="text-muted-foreground">Nível</TableHead>
+                    <TableHead className="text-muted-foreground">Tipo</TableHead>
+                    <TableHead className="text-muted-foreground">Foco Terapêutico</TableHead>
                     <TableHead className="text-muted-foreground">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -209,6 +211,8 @@ const Admin = () => {
                       <TableCell className="text-muted-foreground text-sm">{ex.muscle_group}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{ex.equipment}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{ex.internal_level}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{ex.exercise_type || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{ex.therapeutic_focus || "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="sm" onClick={() => {
