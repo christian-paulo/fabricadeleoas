@@ -96,7 +96,7 @@ const Treinos = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
-          <span className="text-muted-foreground text-base">Gerando seu treino com IA...</span>
+          <span className="text-muted-foreground text-base">Preparando seu treino...</span>
         </div>
       ) : triSets.length === 0 ? (
         <div className="neu-card p-6 text-center">
