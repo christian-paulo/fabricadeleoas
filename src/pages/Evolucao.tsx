@@ -61,42 +61,42 @@ const Evolucao = () => {
       <h1 className="text-3xl text-foreground mb-1 uppercase">Metamorfose 🦋</h1>
       <p className="text-base text-muted-foreground mb-6">Acompanhe sua evolução</p>
 
-      <div className="neu-card p-6 mb-6">
+      <div className="soft-card p-6 mb-6">
         <h3 className="text-base font-heading text-primary mb-4 uppercase">Registrar Medidas</h3>
         <div className="grid grid-cols-2 gap-4">
           {fields.map((f) => (
             <div key={f.key}>
               <Label className="text-sm text-muted-foreground font-medium">{f.label}</Label>
               <Input type="number" value={form[f.key]} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                className="bg-input border-border text-foreground mt-1 h-12 text-base" placeholder="0" />
+                className="bg-background border-border text-foreground mt-1 h-12 text-base rounded-xl" placeholder="0" />
             </div>
           ))}
         </div>
         <Button onClick={handleSave} disabled={saving}
-          className="w-full gold-gradient text-primary-foreground font-heading mt-5 h-12 rounded-xl text-base">
+          className="w-full pink-gradient text-primary-foreground font-heading mt-5 h-12 rounded-2xl text-base shadow-lg">
           {saving ? "Salvando..." : "Salvar Medidas"}
         </Button>
       </div>
 
-      <div className="neu-card p-6">
+      <div className="soft-card p-6">
         <h3 className="text-base font-heading text-primary mb-4 uppercase">Evolução</h3>
         {chartData.length > 0 ? (
           <>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(0 0% 60%)" }} />
-                <YAxis tick={{ fontSize: 12, fill: "hsl(0 0% 60%)" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 11%)", border: "1px solid hsl(0 0% 22%)", borderRadius: "12px", fontSize: 14 }}
-                  labelStyle={{ color: "hsl(46 85% 55%)" }} />
-                <Line type="monotone" dataKey="peso" stroke="hsl(46 85% 55%)" strokeWidth={2.5} dot={{ fill: "hsl(46 85% 55%)", r: 4 }} />
-                <Line type="monotone" dataKey="cintura" stroke="hsl(0 71% 86%)" strokeWidth={2.5} dot={{ fill: "hsl(0 71% 86%)", r: 4 }} />
-                <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 70%)" strokeWidth={2.5} dot={{ fill: "hsl(0 0% 70%)", r: 4 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(340 20% 90%)" />
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(0 0% 50%)" }} />
+                <YAxis tick={{ fontSize: 12, fill: "hsl(0 0% 50%)" }} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(340 100% 98%)", border: "1px solid hsl(340 20% 90%)", borderRadius: "12px", fontSize: 14 }}
+                  labelStyle={{ color: "hsl(330 100% 56%)" }} />
+                <Line type="monotone" dataKey="peso" stroke="hsl(330 100% 56%)" strokeWidth={2.5} dot={{ fill: "hsl(330 100% 56%)", r: 4 }} />
+                <Line type="monotone" dataKey="cintura" stroke="hsl(330 80% 75%)" strokeWidth={2.5} dot={{ fill: "hsl(330 80% 75%)", r: 4 }} />
+                <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 60%)" strokeWidth={2.5} dot={{ fill: "hsl(0 0% 60%)", r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex gap-5 mt-4 justify-center">
               <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-primary inline-block" /> Peso</span>
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-accent inline-block" /> Cintura</span>
+              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-pink-glow inline-block" /> Cintura</span>
               <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-muted-foreground inline-block" /> Quadril</span>
             </div>
           </>

@@ -19,7 +19,6 @@ const Treinos = () => {
   const [videoModal, setVideoModal] = useState<{ name: string; url: string } | null>(null);
   const [phase, setPhase] = useState<string>("initial");
   const [workoutNumber, setWorkoutNumber] = useState<number>(1);
-  const [completedCount, setCompletedCount] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
@@ -29,61 +28,35 @@ const Treinos = () => {
   const fetchCurrentWorkout = async () => {
     setLoading(true);
     try {
-      const { data: rawData, error } = await supabase.functions.invoke("generate-workout", {
-        body: {},
-      });
-      if (error) {
-        console.error("generate-workout error:", error);
-        toast.error("Erro ao carregar treino");
-      } else {
-        const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
-        console.log("generate-workout response:", data);
-        if (data?.workout) {
-          setWorkout(data.workout);
-          setCompleted(data.workout.completed || false);
-          setFeedback(data.workout.feedback_effort as FeedbackType);
-          setPhase(data.phase || "initial");
-          setWorkoutNumber(data.workoutNumber || 1);
-          setCompletedCount(data.completedCount || 0);
-        } else {
-          console.error("No workout in response:", data);
-          toast.error("Treino não encontrado");
-        }
-      }
-    } catch (err) {
-      console.error("generate-workout catch:", err);
-      toast.error("Erro ao carregar treino");
-    }
+      const { data: rawData, error } = await supabase.functions.invoke("generate-workout", { body: {} });
+      if (error) { toast.error("Erro ao carregar treino"); return; }
+      const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+      if (data?.workout) {
+        setWorkout(data.workout);
+        setCompleted(data.workout.completed || false);
+        setFeedback(data.workout.feedback_effort as FeedbackType);
+        setPhase(data.phase || "initial");
+        setWorkoutNumber(data.workoutNumber || 1);
+      } else { toast.error("Treino não encontrado"); }
+    } catch { toast.error("Erro ao carregar treino"); }
     setLoading(false);
   };
 
   const submitFeedback = async (fb: FeedbackType) => {
     if (!workout) return;
-    const { error } = await supabase.from("workouts")
-      .update({ completed: true, feedback_effort: fb }).eq("id", workout.id);
-    if (error) {
-      toast.error("Erro ao salvar feedback");
-    } else {
-      setFeedback(fb);
-      setCompleted(true);
-      setShowFeedback(false);
-      toast.success("Caçada concluída! 🎉");
-    }
+    const { error } = await supabase.from("workouts").update({ completed: true, feedback_effort: fb }).eq("id", workout.id);
+    if (error) { toast.error("Erro ao salvar feedback"); }
+    else { setFeedback(fb); setCompleted(true); setShowFeedback(false); toast.success("Caçada concluída! 🎉"); }
   };
 
   const generateNextWorkout = async () => {
-    setCompleted(false);
-    setFeedback(null);
-    setWorkout(null);
+    setCompleted(false); setFeedback(null); setWorkout(null);
     await fetchCurrentWorkout();
   };
 
   const workoutJson = workout?.workout_json;
   const triSets = workoutJson?.tri_sets || [];
-
-  const phaseLabel = phase === "monthly"
-    ? `Programa Mensal • Treino ${workoutNumber}`
-    : `Fase Inicial • Treino ${workoutNumber} de 3`;
+  const phaseLabel = phase === "monthly" ? `Programa Mensal • Treino ${workoutNumber}` : `Fase Inicial • Treino ${workoutNumber} de 3`;
 
   return (
     <AppLayout>
@@ -99,8 +72,8 @@ const Treinos = () => {
           <span className="text-muted-foreground text-base">Preparando seu treino...</span>
         </div>
       ) : triSets.length === 0 ? (
-        <div className="neu-card p-6 text-center">
-          <p className="text-muted-foreground text-base">Nenhum treino disponível. Cadastre exercícios no painel admin.</p>
+        <div className="soft-card p-6 text-center">
+          <p className="text-muted-foreground text-base">Nenhum treino disponível.</p>
         </div>
       ) : (
         <>
@@ -109,8 +82,8 @@ const Treinos = () => {
               <h3 className="text-sm font-heading text-primary mb-3 uppercase tracking-widest">{ts.label}</h3>
               <div className="space-y-3">
                 {ts.exercises?.map((ex: any, i: number) => (
-                  <div key={i} className="neu-card p-5 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-sm font-heading text-primary-foreground font-bold">
+                  <div key={i} className="soft-card p-5 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full pink-gradient flex items-center justify-center text-sm font-heading text-primary-foreground font-bold shadow-md">
                       {i + 1}
                     </div>
                     <div className="flex-1">
@@ -119,7 +92,7 @@ const Treinos = () => {
                     </div>
                     {ex.video_url && (
                       <button onClick={() => setVideoModal({ name: ex.name, url: ex.video_url })}
-                        className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-primary-foreground">
+                        className="w-10 h-10 rounded-full pink-gradient flex items-center justify-center text-primary-foreground shadow-md">
                         <Play size={16} />
                       </button>
                     )}
@@ -131,18 +104,18 @@ const Treinos = () => {
 
           {!completed ? (
             <Button onClick={() => setShowFeedback(true)}
-              className="w-full gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl mb-4">
+              className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl mb-4 shadow-lg">
               <CheckCircle2 size={20} className="mr-2" /> Concluir Caçada
             </Button>
           ) : (
-            <div className="neu-card p-5 text-center mb-4">
+            <div className="soft-card p-5 text-center mb-4">
               <CheckCircle2 className="mx-auto text-primary mb-3" size={40} />
               <p className="text-base text-foreground font-bold">Caçada concluída! 🎉</p>
               <p className="text-sm text-muted-foreground mb-4">
                 Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
               </p>
               <Button onClick={generateNextWorkout}
-                className="gold-gradient text-primary-foreground font-heading text-base h-12 rounded-xl px-8">
+                className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg">
                 Gerar Próximo Treino
               </Button>
             </div>
@@ -150,9 +123,8 @@ const Treinos = () => {
         </>
       )}
 
-      {/* Feedback Modal */}
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
-        <DialogContent className="bg-card border-border max-w-sm mx-auto">
+        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-primary text-center text-xl">Como foi o esforço de hoje?</DialogTitle>
           </DialogHeader>
@@ -163,7 +135,7 @@ const Treinos = () => {
               { value: "dificil" as FeedbackType, label: "🔥 Muito Difícil", desc: "Quase não consegui" },
             ].map((opt) => (
               <button key={opt.value} onClick={() => submitFeedback(opt.value)}
-                className="neu-card p-5 text-left hover:ring-2 hover:ring-primary transition-all">
+                className="soft-card p-5 text-left hover:ring-2 hover:ring-primary transition-all">
                 <p className="text-base font-bold text-foreground">{opt.label}</p>
                 <p className="text-sm text-muted-foreground">{opt.desc}</p>
               </button>
@@ -172,9 +144,8 @@ const Treinos = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Video Modal */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
-        <DialogContent className="bg-card border-border max-w-md mx-auto">
+        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-primary text-lg">{videoModal?.name}</DialogTitle>
           </DialogHeader>
