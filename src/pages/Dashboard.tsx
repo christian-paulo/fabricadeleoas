@@ -105,11 +105,11 @@ const Dashboard = () => {
 
       <div className="neu-card p-6 mb-6 gold-glow">
         <h2 className="text-xl text-primary mb-1 uppercase">Treino do Dia</h2>
-        <p className="text-sm text-muted-foreground mb-5">Gerado pela IA Guia das Leoas</p>
+        <p className="text-sm text-muted-foreground mb-5">Preparado pelo Personal Gilvan</p>
         <Button onClick={handleStartWorkout} disabled={loadingWorkout}
           className="w-full gold-gradient text-primary-foreground font-heading text-base h-14 rounded-xl animate-pulse-gold">
           {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={20} /> : <Play size={20} className="mr-2" />}
-          {loadingWorkout ? "Gerando Treino..." : "Iniciar Caçada"}
+          {loadingWorkout ? "Preparando Treino..." : "Iniciar Caçada"}
         </Button>
       </div>
 

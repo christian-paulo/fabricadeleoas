@@ -37,14 +37,14 @@ const LandingPage = () => {
         <div className="relative z-10 container mx-auto px-4 text-center max-w-3xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary font-medium">Powered by AI</span>
+            <span className="text-sm text-primary font-medium">Método Exclusivo</span>
           </div>
           <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-primary leading-tight mb-6">
-            O Método do Personal Gilvan, agora guiado pela Inteligência Artificial.
+            Eu sou o Gilvan, e criei o método que vai transformar o seu corpo.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             Destrua a pochete, elimine o braço merendeira e construa seu legado treinando em casa ou na academia.
-            Teste o cérebro da <span className="text-accent font-semibold">Guia das Leoas</span> por 3 dias gratuitos.
+            Entre na <span className="text-accent font-semibold">Fábrica de Leoas</span> e teste por 3 dias gratuitos.
           </p>
           <Button
             size="lg"
@@ -61,10 +61,10 @@ const LandingPage = () => {
       <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-center text-primary mb-4">
-            A Fábrica de Leoas foi desenhada para você que quer eliminar:
+            Eu desenhei a Fábrica de Leoas para você que quer eliminar:
           </h2>
           <p className="text-center text-muted-foreground mb-14 max-w-lg mx-auto">
-            Cada treino é montado com foco cirúrgico nas suas queixas.
+            Eu monto cada treino com foco cirúrgico nas suas queixas.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
@@ -98,17 +98,17 @@ const LandingPage = () => {
               {
                 step: "01",
                 title: "DNA da Leoa",
-                desc: "Você responde um quiz rápido sobre seu corpo, tempo disponível e dores. Levamos menos de 2 minutos.",
+                desc: "Você responde um quiz rápido sobre seu corpo, tempo disponível e dores. Leva menos de 2 minutos.",
               },
               {
                 step: "02",
-                title: "A Guia das Leoas",
-                desc: "Nossa IA cruza seus dados com os 142 exercícios do Gilvan e monta seus Tri-sets diários personalizados.",
+                title: "Eu Monto Seu Treino",
+                desc: "Eu cruzo seus dados com meus 142 exercícios e monto seus Tri-sets diários personalizados.",
               },
               {
                 step: "03",
-                title: "Acompanhamento Inteligente",
-                desc: "A cada treino, a IA ajusta a intensidade baseada no seu feedback. Se doer, ela adapta. Se ficar fácil, ela exige mais.",
+                title: "Eu Acompanho Você",
+                desc: "A cada treino, eu ajusto a intensidade baseado no seu feedback. Se doer, eu adapto. Se ficar fácil, eu exijo mais.",
               },
             ].map((item, i) => (
               <div key={i} className="flex gap-6 md:gap-8 items-start">
@@ -143,16 +143,16 @@ const LandingPage = () => {
             </div>
             <div>
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-6">
-                Quem é o Personal Gilvan?
+                Quem sou eu?
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                Com mais de 15 anos transformando corpos femininos, Gilvan desenvolveu um método único de Tri-sets
-                que ataca simultaneamente estética e saúde. Ele treinou a IA da Fábrica de Leoas para replicar
-                seu cérebro de personal: a mesma lógica de progressão, as mesmas combinações inteligentes de
-                exercícios, a mesma atenção a dores e limitações.
+                Sou o Gilvan, personal trainer com mais de 15 anos transformando corpos femininos. Desenvolvi um método único de Tri-sets
+                que ataca simultaneamente estética e saúde. Cada treino que você recebe na Fábrica de Leoas
+                carrega a minha lógica de progressão, as minhas combinações inteligentes de
+                exercícios e a minha atenção a dores e limitações.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Agora, o método que era exclusivo para suas alunas presenciais está disponível para você —
+                Agora, o meu método que era exclusivo para minhas alunas presenciais está disponível para você —
                 <span className="text-accent font-semibold"> 24h por dia, 7 dias por semana</span>, no seu bolso.
               </p>
             </div>
@@ -176,8 +176,8 @@ const LandingPage = () => {
             </div>
             <ul className="space-y-4 mb-10">
               {[
-                "Treinos diários personalizados por IA",
-                "Adaptação inteligente a dores e lesões",
+                "Treinos diários personalizados por mim",
+                "Adaptação a dores e lesões",
                 "Acompanhamento de medidas e evolução",
                 "E-books exclusivos de nutrição",
                 "Suporte e comunidade de Leoas",
