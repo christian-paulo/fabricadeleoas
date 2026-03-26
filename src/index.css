@@ -4,56 +4,60 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 29%;
+    --background: 0 0% 10%;
+    --foreground: 43 30% 90%;
 
-    --card: 340 100% 98%;
-    --card-foreground: 0 0% 29%;
+    --card: 0 0% 13%;
+    --card-foreground: 43 30% 90%;
 
-    --popover: 340 100% 98%;
-    --popover-foreground: 0 0% 29%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 43 30% 90%;
 
-    --primary: 330 100% 56%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 76% 52%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 340 60% 95%;
-    --secondary-foreground: 0 0% 29%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 43 30% 90%;
 
-    --muted: 340 30% 93%;
-    --muted-foreground: 0 0% 50%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 330 100% 56%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 76% 52%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 340 20% 90%;
-    --input: 340 30% 93%;
-    --ring: 330 100% 56%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 43 76% 52%;
 
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 29%;
-    --sidebar-primary: 330 100% 56%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 340 60% 95%;
-    --sidebar-accent-foreground: 0 0% 29%;
-    --sidebar-border: 340 20% 90%;
-    --sidebar-ring: 330 100% 56%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 43 30% 90%;
+    --sidebar-primary: 43 76% 52%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 43 30% 90%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 43 76% 52%;
 
     /* Custom tokens */
-    --pink: 330 100% 56%;
-    --pink-soft: 340 100% 98%;
-    --pink-glow: 330 100% 64%;
-    --surface: 340 100% 98%;
-    --surface-raised: 0 0% 100%;
+    --gold: 43 76% 52%;
+    --gold-soft: 43 40% 20%;
+    --gold-glow: 43 80% 60%;
+    --pink: 43 76% 52%;
+    --pink-soft: 43 40% 20%;
+    --pink-glow: 43 80% 60%;
+    --surface: 0 0% 13%;
+    --surface-raised: 0 0% 15%;
 
     /* Shadows */
-    --shadow-soft: 0 2px 16px hsl(330 30% 80% / 0.18);
-    --shadow-card: 0 4px 24px hsl(330 30% 80% / 0.12);
-    --shadow-pink: 0 4px 24px hsl(330 100% 56% / 0.25);
+    --shadow-soft: 0 2px 16px hsl(0 0% 0% / 0.3);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.25);
+    --shadow-gold: 0 4px 24px hsl(43 76% 52% / 0.25);
+    --shadow-pink: 0 4px 24px hsl(43 76% 52% / 0.25);
   }
 }
 
@@ -88,11 +92,11 @@
   }
 
   .pink-gradient {
-    background: linear-gradient(135deg, hsl(var(--pink)), hsl(var(--pink-glow)));
+    background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-glow)));
   }
 
   .gold-gradient {
-    background: linear-gradient(135deg, hsl(var(--pink)), hsl(var(--pink-glow)));
+    background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-glow)));
   }
 
   .gold-text {
@@ -100,7 +104,7 @@
   }
 
   .gold-glow {
-    box-shadow: var(--shadow-pink);
+    box-shadow: var(--shadow-gold);
   }
 
   .bottom-nav-safe {
