@@ -168,7 +168,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <div className="mb-1"><Target className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Qual o seu principal objetivo?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Este dado é fundamental para o seu treino</p>
+          <p className="text-sm text-muted-foreground mb-6">Este dado é fundamental para o seu protocolo</p>
           <div className="space-y-3">
             {["Emagrecimento", "Ganho de Massa", "Saúde", "Melhorar Dores"].map((g) => (
               <OptionCard key={g} selected={data.goal === g} onClick={() => updateField("goal", g)} icon="🎯">{g}</OptionCard>
@@ -268,7 +268,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <h2 className="text-2xl text-foreground mb-2">Qual tipo de corpo mais combina consigo?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o treino</p>
+          <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o protocolo</p>
           <div className="space-y-3">
             {["Ampulheta", "Retangular", "Triângulo", "Triângulo invertido", "Oval"].map((b) => (
               <OptionCard key={b} selected={data.biotipo === b} onClick={() => updateField("biotipo", b)}>{b}</OptionCard>
@@ -295,7 +295,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <div className="mb-1"><Dumbbell className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Onde prefere treinar?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Adapto o treino ao seu espaço</p>
+          <p className="text-sm text-muted-foreground mb-6">Adapto o protocolo ao seu espaço</p>
           <div className="space-y-3">
             {[
               { val: "Casa", icon: "🏠" },
@@ -313,7 +313,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "equipamentos":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual o tipo de treino?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Qual o tipo de protocolo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Defina os equipamentos disponíveis</p>
           <div className="space-y-3">
             {[
@@ -344,7 +344,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <div className="space-y-3">
             {[
               { val: "Fácil", icon: "😊", desc: "Quero começar devagar" },
-              { val: "Suar um pouco", icon: "💧", desc: "Moderado, mas sentir o treino" },
+              { val: "Suar um pouco", icon: "💧", desc: "Moderado, mas sentir o protocolo" },
               { val: "Desafiador", icon: "🔥", desc: "Quero ser desafiada!" },
             ].map((d) => (
               <button key={d.val} onClick={() => updateField("dificuldade", d.val)}
@@ -372,8 +372,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             {[
               { val: "Nunca treinei", desc: "Estou começando do zero" },
               { val: "Retomando", desc: "Já treinei mas parei faz tempo" },
-              { val: "Treino com frequência", desc: "Treino regularmente há meses" },
-              { val: "Avançada", desc: "Treino há mais de 2 anos" },
+              { val: "Treino com frequência", desc: "Pratico regularmente há meses" },
+              { val: "Avançada", desc: "Pratico há mais de 2 anos" },
             ].map((e) => (
               <OptionCard key={e.val} selected={data.trainingExperience === e.val} onClick={() => updateField("trainingExperience", e.val)}>
                 <div>
@@ -528,7 +528,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             {[
               "Me sinto insatisfeita no espelho",
               "Começo e desisto fácil",
-              "Não tenho motivação para treinar",
+              "Não tenho motivação para me exercitar",
               "Tenho vergonha do meu corpo",
               "Quero recuperar minha autoestima",
               "Quero ser exemplo para minha família",
@@ -580,7 +580,7 @@ const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any
       <h2 className="text-2xl font-heading text-foreground mb-3">Resultados são possíveis!</h2>
       <p className="text-muted-foreground mb-8 leading-relaxed">
         Milhares de mulheres já transformaram seus corpos com o método Gilvan. 
-        Com consistência e o treino certo, você também vai chegar lá. 💪
+        Com consistência e o protocolo certo, você também vai chegar lá. 💪
       </p>
       <div className="soft-card p-6 w-full mb-8">
         <p className="text-sm text-muted-foreground mb-2">Média de resultados em 12 semanas</p>

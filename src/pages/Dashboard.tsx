@@ -41,7 +41,7 @@ const Dashboard = () => {
       if (error) throw error;
       navigate("/treinos");
     } catch (err: any) {
-      toast.error(err.message || "Erro ao gerar treino");
+      toast.error(err.message || "Erro ao gerar protocolo");
     } finally {
       setLoadingWorkout(false);
     }
@@ -104,12 +104,12 @@ const Dashboard = () => {
       </div>
 
       <div className="soft-card p-6 mb-6 border-2 border-primary/20">
-        <h2 className="text-xl text-primary mb-1 uppercase">Treino do Dia</h2>
+        <h2 className="text-xl text-primary mb-1 uppercase">Protocolo do Dia</h2>
         <p className="text-sm text-muted-foreground mb-5">Preparado pelo Personal Gilvan</p>
         <Button onClick={handleStartWorkout} disabled={loadingWorkout}
           className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl animate-pulse-pink shadow-lg">
           {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={20} /> : <Play size={20} className="mr-2" />}
-          {loadingWorkout ? "Preparando Treino..." : "Iniciar Caçada"}
+          {loadingWorkout ? "Preparando Protocolo..." : "Iniciar Caçada"}
         </Button>
       </div>
 
