@@ -99,6 +99,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          canceled_at: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
@@ -116,11 +117,16 @@ export type Database = {
           trial_start_date: string | null
           updated_at: string | null
           uses_medication: boolean | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
           whatsapp: string | null
           workout_days: number | null
           workout_duration: number | null
         }
         Insert: {
+          canceled_at?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -138,11 +144,16 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           whatsapp?: string | null
           workout_days?: number | null
           workout_duration?: number | null
         }
         Update: {
+          canceled_at?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -160,6 +171,10 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
           whatsapp?: string | null
           workout_days?: number | null
           workout_duration?: number | null
