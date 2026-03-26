@@ -103,10 +103,6 @@ const Onboarding = () => {
     <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
       {/* Progress */}
       <div className="px-4 pt-6 pb-2">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-muted-foreground font-heading uppercase tracking-wider">DNA DA LEOA</span>
-          <span className="text-xs text-primary font-heading font-bold">{currentIndex + 1}/{totalSteps}</span>
-        </div>
         <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div className="h-full pink-gradient rounded-full transition-all duration-500 ease-out"
             style={{ width: `${((currentIndex + 1) / totalSteps) * 100}%` }} />
