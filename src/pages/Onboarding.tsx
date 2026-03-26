@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -592,8 +593,10 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
   const pesoAtual = parseFloat(data.peso_atual) || 75;
   const metaPeso = parseFloat(data.meta_peso) || 65;
   const diff = pesoAtual - metaPeso;
-  const weeks = [0, 4, 8, 12];
-  const values = weeks.map((w) => pesoAtual - (diff * (w / 12)));
+  const chartData = [0, 2, 4, 6, 8, 10, 12].map((w) => ({
+    semana: `Sem ${w}`,
+    peso: parseFloat((pesoAtual - diff * (1 - Math.pow(1 - w / 12, 1.3))).toFixed(1)),
+  }));
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
@@ -608,18 +611,29 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
         <h2 className="text-2xl font-heading text-foreground mb-2">Sua previsão de resultado</h2>
         <p className="text-sm text-muted-foreground mb-8">Com base nos seus dados e no método Gilvan</p>
 
-        <div className="soft-card p-6 w-full mb-6">
-          <div className="flex justify-between items-end h-40 mb-4">
-            {weeks.map((w, i) => {
-              const height = 30 + ((pesoAtual - values[i]) / diff) * 70;
-              return (
-                <div key={w} className="flex flex-col items-center gap-2 flex-1">
-                  <span className="text-xs font-heading text-primary font-bold">{values[i].toFixed(1)}kg</span>
-                  <div className="w-8 rounded-t-lg pink-gradient transition-all" style={{ height: `${height}%` }} />
-                  <span className="text-xs text-muted-foreground">Sem {w}</span>
-                </div>
-              );
-            })}
+        <div className="soft-card p-4 w-full mb-6">
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
+              <XAxis dataKey="semana" tick={{ fill: "hsl(0 0% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[Math.floor(metaPeso - 2), Math.ceil(pesoAtual + 2)]} tick={{ fill: "hsl(0 0% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="kg" />
+              <Tooltip
+                contentStyle={{ background: "hsl(0 0% 13%)", border: "1px solid hsl(0 0% 20%)", borderRadius: "12px", color: "hsl(43 30% 90%)" }}
+                formatter={(value: number) => [`${value}kg`, "Peso"]}
+              />
+              <Line type="monotone" dataKey="peso" stroke="hsl(43 76% 52%)" strokeWidth={3} dot={{ fill: "hsl(43 76% 52%)", r: 5, strokeWidth: 0 }} activeDot={{ r: 7, fill: "hsl(43 80% 60%)" }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="flex gap-3 w-full mb-4">
+          <div className="soft-card p-4 flex-1 text-center">
+            <p className="text-xs text-muted-foreground">Peso atual</p>
+            <p className="text-lg font-heading text-foreground font-bold">{pesoAtual}kg</p>
+          </div>
+          <div className="soft-card p-4 flex-1 text-center">
+            <p className="text-xs text-muted-foreground">Meta</p>
+            <p className="text-lg font-heading text-primary font-bold">{metaPeso}kg</p>
           </div>
         </div>
 
