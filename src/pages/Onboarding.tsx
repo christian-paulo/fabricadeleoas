@@ -154,7 +154,7 @@ const Onboarding = () => {
 // ─── Option Card Component ─────────────────────────────────────
 const OptionCard = ({ selected, onClick, children, icon, index = 0 }: { selected: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ReactNode; index?: number }) => (
   <button onClick={onClick}
-    className={`soft-card w-full p-4 text-left text-sm transition-all flex items-center gap-3 animate-[fade-in_0.4s_ease-out_both] ${
+    className={`soft-card w-full py-5 px-5 text-left text-base transition-all flex items-center gap-3 animate-[fade-in_0.4s_ease-out_both] ${
       selected ? "ring-2 ring-primary bg-primary/5 text-primary scale-[1.02]" : "text-foreground hover:bg-secondary/50"
     }`}
     style={{ animationDelay: `${index * 80}ms` }}>
@@ -393,8 +393,14 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <h2 className="text-2xl text-foreground mb-2">Qual tipo de corpo mais combina consigo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o protocolo</p>
           <div className="space-y-3">
-            {["Ampulheta", "Retangular", "Triângulo", "Triângulo invertido", "Oval"].map((b, i) => (
-              <OptionCard key={b} selected={data.biotipo === b} onClick={() => updateField("biotipo", b)} index={i}>{b}</OptionCard>
+            {[
+              { label: "Ampulheta", emoji: "⏳" },
+              { label: "Retangular", emoji: "▬" },
+              { label: "Triângulo", emoji: "🔻" },
+              { label: "Triângulo invertido", emoji: "🔺" },
+              { label: "Oval", emoji: "🟠" },
+            ].map((b, i) => (
+              <OptionCard key={b.label} selected={data.biotipo === b.label} onClick={() => updateField("biotipo", b.label)} icon={<span>{b.emoji}</span>} index={i}>{b.label}</OptionCard>
             ))}
           </div>
         </div>
@@ -476,12 +482,12 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Seu nível de experiência atual</p>
           <div className="space-y-3">
             {[
-              { val: "Nunca treinei", desc: "Estou começando do zero" },
-              { val: "Retomando", desc: "Já treinei mas parei faz tempo" },
-              { val: "Treino com frequência", desc: "Pratico regularmente há meses" },
-              { val: "Avançada", desc: "Pratico há mais de 2 anos" },
+              { val: "Nunca treinei", desc: "Estou começando do zero", emoji: "🌱" },
+              { val: "Retomando", desc: "Já treinei mas parei faz tempo", emoji: "🔄" },
+              { val: "Treino com frequência", desc: "Pratico regularmente há meses", emoji: "💪" },
+              { val: "Avançada", desc: "Pratico há mais de 2 anos", emoji: "🏆" },
             ].map((e, i) => (
-              <OptionCard key={e.val} selected={data.trainingExperience === e.val} onClick={() => updateField("trainingExperience", e.val)} index={i}>
+              <OptionCard key={e.val} selected={data.trainingExperience === e.val} onClick={() => updateField("trainingExperience", e.val)} icon={<span>{e.emoji}</span>} index={i}>
                 <div>
                   <p className="font-medium">{e.val}</p>
                   <p className="text-xs text-muted-foreground">{e.desc}</p>
@@ -553,12 +559,21 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             <div className="space-y-3 mt-4">
               <p className="text-sm text-muted-foreground mb-2">Onde sente dor?</p>
               <div className="grid grid-cols-2 gap-3">
-                {["Nenhum", "Lombar", "Joelho", "Ombro", "Cervical", "Quadril", "Tornozelo", "Cotovelo"].map((p) => {
-                  const selected = data.painLocation.includes(p);
+                {[
+                  { label: "Nenhum", emoji: "✅" },
+                  { label: "Lombar", emoji: "🔙" },
+                  { label: "Joelho", emoji: "🦵" },
+                  { label: "Ombro", emoji: "💪" },
+                  { label: "Cervical", emoji: "🤕" },
+                  { label: "Quadril", emoji: "🦴" },
+                  { label: "Tornozelo", emoji: "🦶" },
+                  { label: "Cotovelo", emoji: "💫" },
+                ].map((p) => {
+                  const selected = data.painLocation.includes(p.label);
                   return (
-                    <OptionCard key={p} selected={selected}
-                      onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p) : [...data.painLocation, p])}>
-                      {p}
+                    <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
+                      onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
+                      {p.label}
                     </OptionCard>
                   );
                 })}
@@ -641,18 +656,18 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Selecione as que mais combinam</p>
           <div className="space-y-3">
             {[
-              "Me sinto insatisfeita no espelho",
-              "Começo e desisto fácil",
-              "Não tenho motivação para me exercitar",
-              "Tenho vergonha do meu corpo",
-              "Quero recuperar minha autoestima",
-              "Quero ser exemplo para minha família",
+              { label: "Me sinto insatisfeita no espelho", emoji: "🪞" },
+              { label: "Começo e desisto fácil", emoji: "😔" },
+              { label: "Não tenho motivação para me exercitar", emoji: "😴" },
+              { label: "Tenho vergonha do meu corpo", emoji: "🫣" },
+              { label: "Quero recuperar minha autoestima", emoji: "💖" },
+              { label: "Quero ser exemplo para minha família", emoji: "👨‍👩‍👧" },
             ].map((p, i) => {
-              const selected = data.psicologico.includes(p);
+              const selected = data.psicologico.includes(p.label);
               return (
-                <OptionCard key={p} selected={selected} index={i}
-                  onClick={() => updateField("psicologico", selected ? data.psicologico.filter((x: string) => x !== p) : [...data.psicologico, p])}>
-                  {p}
+                <OptionCard key={p.label} selected={selected} index={i} icon={<span>{p.emoji}</span>}
+                  onClick={() => updateField("psicologico", selected ? data.psicologico.filter((x: string) => x !== p.label) : [...data.psicologico, p.label])}>
+                  {p.label}
                 </OptionCard>
               );
             })}
