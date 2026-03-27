@@ -379,7 +379,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             <div className="soft-card p-4 mt-4 text-center">
               <p className="text-sm text-muted-foreground">Diferença</p>
               <p className="text-3xl font-heading text-primary font-bold">
-                {Math.abs(parseFloat(data.peso_atual) - parseFloat(data.meta_peso)).toFixed(1)} kg
+                {parseFloat(data.meta_peso) >= parseFloat(data.peso_atual) ? "+" : "-"}{Math.abs(parseFloat(data.peso_atual) - parseFloat(data.meta_peso)).toFixed(1)} kg
               </p>
             </div>
           )}
