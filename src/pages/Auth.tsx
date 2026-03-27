@@ -46,11 +46,19 @@ const Auth = () => {
 
         if (data.user) {
           const utms = getStoredUtms();
-          await supabase.from("profiles").update({
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: data.user.id,
+            email,
             full_name: fullName,
             whatsapp,
+            onboarding_completed: false,
             ...utms,
-          } as any).eq("id", data.user.id);
+          } as any, { onConflict: "id" });
+
+          if (profileError) {
+            console.warn("Profile bootstrap on signup failed:", profileError);
+          }
+
           clearStoredUtms();
         }
 

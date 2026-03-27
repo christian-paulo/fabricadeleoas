@@ -1,18 +1,15 @@
-import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 type ProtectedRouteProps = {
-  children: ReactNode;
   requireSubscription?: boolean;
   requireOnboarding?: boolean;
 };
 
-const ProtectedRoute = ({ 
-  children, 
-  requireSubscription = true, 
-  requireOnboarding = true 
+const ProtectedRoute = ({
+  requireSubscription = true,
+  requireOnboarding = true,
 }: ProtectedRouteProps) => {
   const { user, profile, subscription, loading } = useAuth();
 
@@ -34,16 +31,8 @@ const ProtectedRoute = ({
     );
   }
 
-  // Check onboarding first (quiz needs to be done before subscription check)
   if (requireOnboarding && !profile.onboarding_completed) {
-    return <Navigate to="/onboarding/motivacao" replace />;
-  }
-
-  // Check subscription
-  if (requireSubscription && subscription !== null) {
-    if (!subscription.subscribed) {
-      return <Navigate to="/onboarding/checkout" replace />;
-    }
+    return <Navigate to="/onboarding/boas-vindas" replace />;
   }
 
   if (requireSubscription && subscription === null) {
@@ -54,7 +43,11 @@ const ProtectedRoute = ({
     );
   }
 
-  return <>{children}</>;
+  if (requireSubscription && !subscription?.subscribed) {
+    return <Navigate to="/onboarding/checkout" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

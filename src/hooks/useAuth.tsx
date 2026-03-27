@@ -33,8 +33,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = async () => {
     if (!user) return;
-    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-    if (data) setProfile(data);
+
+    const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+
+    if (error) {
+      console.error("Profile fetch failed:", error);
+      return;
+    }
+
+    if (data) {
+      setProfile(data);
+      return;
+    }
+
+    const fallbackProfile = {
+      id: user.id,
+      email: user.email ?? null,
+      onboarding_completed: false,
+    };
+
+    const { data: createdProfile, error: createError } = await supabase
+      .from("profiles")
+      .upsert(fallbackProfile as any, { onConflict: "id" })
+      .select("*")
+      .maybeSingle();
+
+    if (createError) {
+      console.error("Profile bootstrap failed:", createError);
+      setProfile(fallbackProfile as any);
+      return;
+    }
+
+    setProfile(createdProfile ?? (fallbackProfile as any));
   };
 
   const checkSubscription = async (): Promise<SubscriptionStatus | null> => {
