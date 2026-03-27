@@ -386,26 +386,6 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
-    case "biotipo":
-      return (
-        <div>
-          <div className="mb-1"><Hourglass className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de corpo mais combina consigo?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o protocolo</p>
-          <div className="space-y-3">
-            {[
-              { label: "Ampulheta", emoji: "⏳" },
-              { label: "Retangular", emoji: "▬" },
-              { label: "Triângulo", emoji: "🔻" },
-              { label: "Triângulo invertido", emoji: "🔺" },
-              { label: "Oval", emoji: "🟠" },
-            ].map((b, i) => (
-              <OptionCard key={b.label} selected={data.biotipo === b.label} onClick={() => updateField("biotipo", b.label)} icon={<span>{b.emoji}</span>} index={i}>{b.label}</OptionCard>
-            ))}
-          </div>
-        </div>
-      );
-
     case "idade":
       return (
         <div>
@@ -902,7 +882,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "altura": return data.altura !== "";
     case "peso": return data.peso_atual !== "";
     case "meta": return data.meta_peso !== "";
-    case "biotipo": return data.biotipo !== "";
+    
     case "idade": return data.idade !== "";
     
     case "equipamentos": return data.equipment !== "";

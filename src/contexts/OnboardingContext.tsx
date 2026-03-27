@@ -75,7 +75,6 @@ export const ONBOARDING_STEPS = [
   "altura",
   "peso",
   "meta",
-  "biotipo",
   "idade",
   "equipamentos",
   "dificuldade",
