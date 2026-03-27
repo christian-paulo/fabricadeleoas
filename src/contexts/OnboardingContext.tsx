@@ -66,6 +66,7 @@ type OnboardingContextType = {
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export const ONBOARDING_STEPS = [
+  "boas-vindas",
   "motivacao",
   "objetivo",
   "area-alvo",
