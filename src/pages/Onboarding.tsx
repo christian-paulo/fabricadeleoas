@@ -189,6 +189,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "objetivo":
       return (
         <div>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Target className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual o seu principal objetivo?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Este dado é fundamental para o seu protocolo</p>
           <div className="space-y-3">
@@ -218,6 +219,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "area-alvo":
       return (
         <div>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Dumbbell className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Em qual área quer focar?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione uma ou mais áreas</p>
           <div className="space-y-3">
@@ -257,6 +259,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       ];
       return (
         <div>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Eye className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu tipo de corpo atual?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione o que mais se aproxima</p>
           <div className="space-y-3">
@@ -283,6 +286,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       ];
       return (
         <div>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Sparkles className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu corpo desejado?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Onde gostaria de chegar?</p>
           <div className="space-y-3">
@@ -305,6 +309,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "altura":
       return (
         <div className="flex flex-col items-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Ruler className="w-8 h-8 text-primary" /></div>
           <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
             Qual é sua <span className="text-primary">altura</span>?
           </h2>
@@ -328,8 +333,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "peso":
       return (
         <div className="flex flex-col items-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Scale className="w-8 h-8 text-primary" /></div>
           <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
-            Qual é seu peso atual?
           </h2>
           <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
             Digite seu peso em Kilogramas (Ex:74kg)
@@ -351,6 +356,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "meta":
       return (
         <div>
+          <div className="mb-1"><TrendingDown className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Qual a sua meta de peso?</h2>
           <p className="text-sm text-muted-foreground mb-6">Seu objetivo em quilos</p>
           <div className="soft-card p-4">
@@ -372,6 +378,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "biotipo":
       return (
         <div>
+          <div className="mb-1"><Hourglass className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Qual tipo de corpo mais combina consigo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o protocolo</p>
           <div className="space-y-3">
@@ -385,6 +392,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "idade":
       return (
         <div>
+          <div className="mb-1"><Star className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Qual é a sua idade?</h2>
           <p className="text-sm text-muted-foreground mb-6">Importante para ajustar a intensidade</p>
           <div className="soft-card p-6 text-center">
@@ -398,6 +406,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "equipamentos":
       return (
         <div>
+          <div className="mb-1"><Dumbbell className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Qual o tipo de protocolo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Defina os equipamentos disponíveis</p>
           <div className="space-y-3">
@@ -424,6 +433,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "dificuldade":
       return (
         <div>
+          <div className="mb-1"><Flame className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Nível de dificuldade esperado?</h2>
           <p className="text-sm text-muted-foreground mb-6">Qual intensidade te parece ideal?</p>
           <div className="space-y-3">
@@ -496,6 +506,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tempo":
       return (
         <div>
+          <div className="mb-1"><Hourglass className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Quanto tempo por dia?</h2>
           <p className="text-sm text-muted-foreground mb-6">Para alcançar esses resultados</p>
           <div className="flex gap-4 justify-center mt-8">
@@ -514,6 +525,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "dores":
       return (
         <div>
+          <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Sente algum desconforto?</h2>
           <p className="text-sm text-muted-foreground mb-6">Precisamos saber para sua segurança</p>
           <div className="flex gap-4 justify-center mb-6">
@@ -548,6 +560,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "rotina":
       return (
         <div>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Sofa className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Como são os seus dias?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Descreva a sua rotina diária</p>
           <div className="space-y-3">
@@ -566,6 +579,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "flexibilidade":
       return (
         <div>
+          <div className="mb-1"><StretchHorizontal className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Nível aeróbico e flexibilidade</h2>
           <p className="text-sm text-muted-foreground mb-6">Ajuda a calibrar a intensidade</p>
           <div className="space-y-3">
