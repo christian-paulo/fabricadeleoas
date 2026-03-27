@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper } from "lucide-react";
+import logoLeoa from "@/assets/logo-leoa.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -23,7 +24,7 @@ const Onboarding = () => {
   const totalSteps = ONBOARDING_STEPS.length;
 
   useEffect(() => {
-    if (currentIndex === -1) navigate("/onboarding/motivacao", { replace: true });
+    if (currentIndex === -1) navigate("/onboarding/boas-vindas", { replace: true });
   }, [currentIndex, navigate]);
 
   const canProceed = useMemo(() => validateStep(currentStep, data), [currentStep, data]);
@@ -96,6 +97,7 @@ const Onboarding = () => {
   if (currentIndex === -1) return null;
 
   // Special screens without standard navigation
+  if (currentStep === "boas-vindas") return <BoasVindasScreen onNext={goNext} />;
   if (currentStep === "resultado-visual") return <ResultadoVisualScreen onNext={goNext} onBack={goBack} currentIndex={currentIndex} totalSteps={totalSteps} />;
   if (currentStep === "grafico-previsao") return <GraficoPrevisaoScreen onNext={goNext} onBack={goBack} currentIndex={currentIndex} totalSteps={totalSteps} data={data} />;
   if (currentStep === "analise-ia") return <AnaliseIAScreen onNext={goNext} saving={saving} />;
@@ -712,9 +714,31 @@ const AnaliseIAScreen = ({ onNext, saving }: { onNext: () => void; saving: boole
   );
 };
 
+// ─── Boas-vindas Screen ─────────────────────────────────────────
+const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
+  <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+    <div className="flex-1 flex flex-col items-center justify-center">
+      <img src={logoLeoa} alt="Fábrica de Leoas" className="w-32 h-32 mb-8 drop-shadow-lg" />
+      <h1 className="text-3xl font-heading text-primary mb-4 text-center">
+        Bem-vinda, Leoa!
+      </h1>
+      <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed">
+        Vou fazer algumas perguntas rápidas para montar o seu <span className="text-primary font-semibold">Protocolo personalizado</span> de treino em casa.
+      </p>
+    </div>
+    <div className="w-full pb-8">
+      <Button onClick={onNext}
+        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide">
+        COMEÇAR AGORA
+      </Button>
+    </div>
+  </div>
+);
+
 // ─── Validation ─────────────────────────────────────────────────
 function validateStep(step: OnboardingStep, data: any): boolean {
   switch (step) {
+    case "boas-vindas": return true;
     case "motivacao": return data.motivacao !== "";
     case "objetivo": return data.goal !== "";
     case "area-alvo": return data.targetArea.length > 0;
