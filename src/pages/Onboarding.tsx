@@ -204,7 +204,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
                 <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
                   data.goal === g.value ? "text-primary" : "text-foreground"
                 }`}>{g.label}</span>
-                <img src={g.img} alt={g.value} className="absolute right-0 top-0 h-full w-1/2 object-cover object-center" />
+                <img src={g.img} alt={g.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
               </button>
             ))}
           </div>
