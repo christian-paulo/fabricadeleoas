@@ -216,7 +216,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Em qual área quer focar?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione uma ou mais áreas</p>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               { label: "Pochete", value: "Pochete", img: foco1Img },
               { label: "Braço\nMerendeira", value: "Braço Merendeira", img: foco2Img },
@@ -227,7 +227,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               const selected = data.targetArea.includes(a.value);
               return (
                 <button key={a.value} onClick={() => updateField("targetArea", selected ? data.targetArea.filter((x: string) => x !== a.value) : [...data.targetArea, a.value])}
-                  className={`w-full rounded-2xl overflow-hidden relative h-28 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
+                  className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
                     selected 
                       ? "ring-2 ring-primary bg-primary/10 scale-[1.02]" 
                       : "bg-secondary/50 hover:bg-secondary/80"
@@ -236,7 +236,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
                   <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
                     selected ? "text-primary" : "text-foreground"
                   }`}>{a.label}</span>
-                  <img src={a.img} alt={a.value} className="absolute right-0 top-0 h-full w-1/2 object-cover object-center" />
+                  <img src={a.img} alt={a.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
                 </button>
               );
             })}
