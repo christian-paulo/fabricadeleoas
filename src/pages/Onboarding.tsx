@@ -135,12 +135,13 @@ const Onboarding = () => {
 };
 
 // ─── Option Card Component ─────────────────────────────────────
-const OptionCard = ({ selected, onClick, children, icon }: { selected: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ReactNode }) => (
+const OptionCard = ({ selected, onClick, children, icon, index = 0 }: { selected: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ReactNode; index?: number }) => (
   <button onClick={onClick}
-    className={`soft-card w-full p-4 text-left text-sm transition-all flex items-center gap-3 ${
-      selected ? "ring-2 ring-primary bg-primary/5 text-primary" : "text-foreground hover:bg-secondary/50"
-    }`}>
-    {icon && <span className="text-lg">{icon}</span>}
+    className={`soft-card w-full p-4 text-left text-sm transition-all flex items-center gap-3 animate-[fade-in_0.4s_ease-out_both] ${
+      selected ? "ring-2 ring-primary bg-primary/5 text-primary scale-[1.02]" : "text-foreground hover:bg-secondary/50"
+    }`}
+    style={{ animationDelay: `${index * 80}ms` }}>
+    {icon && <span className="text-xl shrink-0">{icon}</span>}
     <span className="font-medium">{children}</span>
   </button>
 );
