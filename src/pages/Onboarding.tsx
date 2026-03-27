@@ -356,14 +356,24 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
 
     case "meta":
       return (
-        <div>
-          <div className="mb-1"><TrendingDown className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual a sua meta de peso?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Seu objetivo em quilos</p>
-          <div className="soft-card p-4">
-            <label className="text-sm text-muted-foreground font-medium mb-2 block">Meta de Peso (kg)</label>
-            <Input type="number" value={data.meta_peso} onChange={(e) => updateField("meta_peso", e.target.value)}
-              placeholder="60" className="bg-background border-border text-foreground h-12 text-lg" />
+        <div className="flex flex-col items-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><TrendingDown className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Qual a sua meta de peso?
+          </h2>
+          <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
+            Arraste para indicar sua meta
+          </p>
+          <div className="w-full px-2">
+            <RulerSlider
+              min={40}
+              max={150}
+              value={data.meta_peso ? parseInt(data.meta_peso) : 60}
+              onChange={(v) => updateField("meta_peso", String(v))}
+              unit="kg"
+              step={1}
+              majorEvery={10}
+            />
           </div>
           {data.peso_atual && data.meta_peso && (
             <div className="soft-card p-4 mt-4 text-center">
