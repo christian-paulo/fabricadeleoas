@@ -113,7 +113,7 @@ const Onboarding = () => {
       </div>
 
       {/* Step Content */}
-      <div className="flex-1 px-4 pt-6 pb-4 overflow-y-auto">
+      <div key={currentStep} className="flex-1 px-4 pt-6 pb-4 overflow-y-auto animate-[fade-in_0.3s_ease-out_both]">
         {renderStep(currentStep, data, updateField)}
       </div>
 
