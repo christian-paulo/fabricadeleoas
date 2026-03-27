@@ -12,6 +12,10 @@ import foco2Img from "@/assets/foco2.webp";
 import foco3Img from "@/assets/foco3.webp";
 import foco4Img from "@/assets/foco4.webp";
 import foco5Img from "@/assets/foco5.webp";
+import atual1Img from "@/assets/atual1.webp";
+import atual2Img from "@/assets/atual2.webp";
+import atual3Img from "@/assets/atual3.webp";
+import atual4Img from "@/assets/atual4.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -241,13 +245,27 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       );
 
     case "corpo-atual":
+      const corpoAtualOptions = [
+        { label: "Médio", value: "Médio", img: atual1Img },
+        { label: "Flácida", value: "Flácida", img: atual2Img },
+        { label: "Magro", value: "Magro", img: atual3Img },
+        { label: "Tonificada", value: "Tonificada", img: atual4Img },
+      ];
       return (
         <div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu tipo de corpo atual?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione o que mais se aproxima</p>
-          <div className="space-y-3">
-            {["Médio", "Flácida", "Magro", "Tonificada"].map((c, i) => (
-              <OptionCard key={c} selected={data.corpo_atual === c} onClick={() => updateField("corpo_atual", c)} index={i}>{c}</OptionCard>
+          <div className="grid grid-cols-2 gap-3">
+            {corpoAtualOptions.map((c, i) => (
+              <button
+                key={c.value}
+                onClick={() => updateField("corpo_atual", c.value)}
+                className={`relative rounded-2xl overflow-hidden border-2 transition-all duration-200 animate-[fade-in_0.4s_ease-out_both] flex flex-col items-center ${data.corpo_atual === c.value ? "ring-2 ring-primary border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <img src={c.img} alt={c.label} className="w-full h-40 object-cover object-top" />
+                <span className="py-2 text-sm font-semibold text-foreground">{c.label}</span>
+              </button>
             ))}
           </div>
         </div>
