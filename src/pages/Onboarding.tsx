@@ -24,6 +24,11 @@ import barr2Img from "@/assets/barr2.webp";
 import barr3Img from "@/assets/barr3.webp";
 import barr4Img from "@/assets/barr4.webp";
 import barr5Img from "@/assets/barr5.webp";
+import quadril1Img from "@/assets/quadril1.png";
+import quadril2Img from "@/assets/quadril2.png";
+import quadril3Img from "@/assets/quadril3.png";
+import quadril4Img from "@/assets/quadril4.png";
+import quadril5Img from "@/assets/quadril5.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
@@ -405,6 +410,28 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             ].map((opt) => (
               <button key={opt.val} onClick={() => updateField("tipo_barriga", opt.val)}
                 className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_barriga === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
+                <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "tipo-quadril":
+      return (
+        <div>
+          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">quadril</span> combina mais com você?</h2>
+          <div className="space-y-3 mt-6">
+            {[
+              { val: "Normal", img: quadril1Img },
+              { val: "Chato", img: quadril2Img },
+              { val: "Caído", img: quadril3Img },
+              { val: "Duplo", img: quadril4Img },
+              { val: "Redondo", img: quadril5Img },
+            ].map((opt) => (
+              <button key={opt.val} onClick={() => updateField("tipo_quadril", opt.val)}
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_quadril === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
                 <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
                 <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
               </button>
@@ -910,6 +937,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "peso": return data.peso_atual !== "";
     case "meta": return data.meta_peso !== "";
     case "tipo-barriga": return data.tipo_barriga !== "";
+    case "tipo-quadril": return data.tipo_quadril !== "";
     case "idade": return data.idade !== "";
     
     case "equipamentos": return data.equipment !== "";
