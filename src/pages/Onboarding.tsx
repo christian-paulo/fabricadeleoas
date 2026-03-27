@@ -338,7 +338,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             Qual é seu peso atual?
           </h2>
           <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
-            Digite seu peso em Kilogramas (Ex:74kg)
+            Arraste para indicar seu peso
           </p>
           <div className="w-full px-2">
             <RulerSlider
