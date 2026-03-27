@@ -180,10 +180,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Este dado é fundamental para o seu protocolo</p>
           <div className="space-y-4">
             {[
-              { label: "Perder\nPeso", value: "Emagrecimento", img: obj1Img },
-              { label: "Aumentar\nOs Músculos", value: "Ganho de Massa", img: obj2Img },
-              { label: "Manter\nA Forma", value: "Saúde", img: obj3Img },
-              { label: "Melhorar\nDores", value: "Melhorar Dores", img: obj4Img },
+              { label: "Perder\npeso", value: "Emagrecimento", img: obj1Img },
+              { label: "Ganhar massa\nmuscular", value: "Ganho de Massa", img: obj2Img },
+              { label: "Melhorar\na saúde", value: "Saúde", img: obj3Img },
+              { label: "Melhorar as\ndores", value: "Melhorar Dores", img: obj4Img },
             ].map((g, i) => (
               <button key={g.value} onClick={() => updateField("goal", g.value)}
                 className={`w-full rounded-2xl overflow-hidden relative h-28 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
