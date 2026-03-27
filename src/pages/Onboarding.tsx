@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper } from "lucide-react";
+import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,7 +113,7 @@ const Onboarding = () => {
       </div>
 
       {/* Step Content */}
-      <div className="flex-1 px-4 pt-6 pb-4 overflow-y-auto">
+      <div key={currentStep} className="flex-1 px-4 pt-6 pb-4 overflow-y-auto animate-[fade-in_0.3s_ease-out_both]">
         {renderStep(currentStep, data, updateField)}
       </div>
 
@@ -135,12 +135,13 @@ const Onboarding = () => {
 };
 
 // ─── Option Card Component ─────────────────────────────────────
-const OptionCard = ({ selected, onClick, children, icon }: { selected: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ReactNode }) => (
+const OptionCard = ({ selected, onClick, children, icon, index = 0 }: { selected: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ReactNode; index?: number }) => (
   <button onClick={onClick}
-    className={`soft-card w-full p-4 text-left text-sm transition-all flex items-center gap-3 ${
-      selected ? "ring-2 ring-primary bg-primary/5 text-primary" : "text-foreground hover:bg-secondary/50"
-    }`}>
-    {icon && <span className="text-lg">{icon}</span>}
+    className={`soft-card w-full p-4 text-left text-sm transition-all flex items-center gap-3 animate-[fade-in_0.4s_ease-out_both] ${
+      selected ? "ring-2 ring-primary bg-primary/5 text-primary scale-[1.02]" : "text-foreground hover:bg-secondary/50"
+    }`}
+    style={{ animationDelay: `${index * 80}ms` }}>
+    {icon && <span className="text-xl shrink-0">{icon}</span>}
     <span className="font-medium">{children}</span>
   </button>
 );
@@ -151,12 +152,18 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "motivacao":
       return (
         <div>
-          <div className="mb-1"><Heart className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">O que mais te motiva hoje?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Escolha o que mais combina com o seu momento</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Heart className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">O que mais te motiva hoje?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Escolha o que mais combina com o seu momento</p>
           <div className="space-y-3">
-            {["Entrar em forma", "Melhorar aparência", "Cuidar da saúde", "Ter mais energia", "Ganhar confiança"].map((m) => (
-              <OptionCard key={m} selected={data.motivacao === m} onClick={() => updateField("motivacao", m)}>{m}</OptionCard>
+            {[
+              { label: "Entrar em forma", icon: <Flame className="w-5 h-5" /> },
+              { label: "Melhorar aparência", icon: <Eye className="w-5 h-5" /> },
+              { label: "Cuidar da saúde", icon: <HeartPulse className="w-5 h-5" /> },
+              { label: "Ter mais energia", icon: <Zap className="w-5 h-5" /> },
+              { label: "Ganhar confiança", icon: <ThumbsUp className="w-5 h-5" /> },
+            ].map((m, i) => (
+              <OptionCard key={m.label} selected={data.motivacao === m.label} onClick={() => updateField("motivacao", m.label)} icon={m.icon} index={i}>{m.label}</OptionCard>
             ))}
           </div>
         </div>
@@ -165,12 +172,17 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "objetivo":
       return (
         <div>
-          <div className="mb-1"><Target className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual o seu principal objetivo?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Este dado é fundamental para o seu protocolo</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Target className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">Qual o seu principal objetivo?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Este dado é fundamental para o seu protocolo</p>
           <div className="space-y-3">
-            {["Emagrecimento", "Ganho de Massa", "Saúde", "Melhorar Dores"].map((g) => (
-              <OptionCard key={g} selected={data.goal === g} onClick={() => updateField("goal", g)} icon="🎯">{g}</OptionCard>
+            {[
+              { label: "Emagrecimento", icon: <TrendingDown className="w-5 h-5" /> },
+              { label: "Ganho de Massa", icon: <Dumbbell className="w-5 h-5" /> },
+              { label: "Saúde", icon: <HeartPulse className="w-5 h-5" /> },
+              { label: "Melhorar Dores", icon: <Activity className="w-5 h-5" /> },
+            ].map((g, i) => (
+              <OptionCard key={g.label} selected={data.goal === g.label} onClick={() => updateField("goal", g.label)} icon={g.icon} index={i}>{g.label}</OptionCard>
             ))}
           </div>
         </div>
@@ -179,14 +191,14 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "area-alvo":
       return (
         <div>
-          <div className="mb-1"><Flame className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Em qual área quer focar?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Selecione uma ou mais áreas</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Flame className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">Em qual área quer focar?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Selecione uma ou mais áreas</p>
           <div className="space-y-3">
-            {["Pochete", "Braço Merendeira", "Bumbum Caído", "Coxa de Amoeba", "Flancos"].map((a) => {
+            {["Pochete", "Braço Merendeira", "Bumbum Caído", "Coxa de Amoeba", "Flancos"].map((a, i) => {
               const selected = data.targetArea.includes(a);
               return (
-                <OptionCard key={a} selected={selected}
+                <OptionCard key={a} selected={selected} index={i}
                   onClick={() => updateField("targetArea", selected ? data.targetArea.filter((x: string) => x !== a) : [...data.targetArea, a])}>
                   {a}
                 </OptionCard>
@@ -199,11 +211,11 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "corpo-atual":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual é o seu tipo de corpo atual?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Selecione o que mais se aproxima</p>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu tipo de corpo atual?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione o que mais se aproxima</p>
           <div className="space-y-3">
-            {["Médio", "Flácida", "Magro", "Tonificada"].map((c) => (
-              <OptionCard key={c} selected={data.corpo_atual === c} onClick={() => updateField("corpo_atual", c)}>{c}</OptionCard>
+            {["Médio", "Flácida", "Magro", "Tonificada"].map((c, i) => (
+              <OptionCard key={c} selected={data.corpo_atual === c} onClick={() => updateField("corpo_atual", c)} index={i}>{c}</OptionCard>
             ))}
           </div>
         </div>
@@ -212,11 +224,11 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "corpo-desejado":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual é o seu corpo desejado?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Onde gostaria de chegar?</p>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu corpo desejado?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Onde gostaria de chegar?</p>
           <div className="space-y-3">
-            {["Definida e seca", "Tonificada com curvas", "Atlética", "Saudável e funcional"].map((c) => (
-              <OptionCard key={c} selected={data.corpo_desejado === c} onClick={() => updateField("corpo_desejado", c)}>{c}</OptionCard>
+            {["Definida e seca", "Tonificada com curvas", "Atlética", "Saudável e funcional"].map((c, i) => (
+              <OptionCard key={c} selected={data.corpo_desejado === c} onClick={() => updateField("corpo_desejado", c)} index={i}>{c}</OptionCard>
             ))}
           </div>
         </div>
@@ -269,8 +281,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <h2 className="text-2xl text-foreground mb-2">Qual tipo de corpo mais combina consigo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Ajuda-nos a personalizar o protocolo</p>
           <div className="space-y-3">
-            {["Ampulheta", "Retangular", "Triângulo", "Triângulo invertido", "Oval"].map((b) => (
-              <OptionCard key={b} selected={data.biotipo === b} onClick={() => updateField("biotipo", b)}>{b}</OptionCard>
+            {["Ampulheta", "Retangular", "Triângulo", "Triângulo invertido", "Oval"].map((b, i) => (
+              <OptionCard key={b} selected={data.biotipo === b} onClick={() => updateField("biotipo", b)} index={i}>{b}</OptionCard>
             ))}
           </div>
         </div>
@@ -353,8 +365,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               { val: "Retomando", desc: "Já treinei mas parei faz tempo" },
               { val: "Treino com frequência", desc: "Pratico regularmente há meses" },
               { val: "Avançada", desc: "Pratico há mais de 2 anos" },
-            ].map((e) => (
-              <OptionCard key={e.val} selected={data.trainingExperience === e.val} onClick={() => updateField("trainingExperience", e.val)}>
+            ].map((e, i) => (
+              <OptionCard key={e.val} selected={data.trainingExperience === e.val} onClick={() => updateField("trainingExperience", e.val)} index={i}>
                 <div>
                   <p className="font-medium">{e.val}</p>
                   <p className="text-xs text-muted-foreground">{e.desc}</p>
@@ -442,11 +454,16 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "rotina":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Como são os seus dias?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Descreva a sua rotina diária</p>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Como são os seus dias?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Descreva a sua rotina diária</p>
           <div className="space-y-3">
-            {["Sedentária (muito tempo sentada)", "Caminhada leve", "Muito tempo de pé", "Ativa (ando bastante)"].map((r) => (
-              <OptionCard key={r} selected={data.rotina === r} onClick={() => updateField("rotina", r)}>{r}</OptionCard>
+            {[
+              { label: "Sedentária (muito tempo sentada)", icon: <Sofa className="w-5 h-5" /> },
+              { label: "Caminhada leve", icon: <Footprints className="w-5 h-5" /> },
+              { label: "Muito tempo de pé", icon: <Activity className="w-5 h-5" /> },
+              { label: "Ativa (ando bastante)", icon: <Zap className="w-5 h-5" /> },
+            ].map((r, i) => (
+              <OptionCard key={r.label} selected={data.rotina === r.label} onClick={() => updateField("rotina", r.label)} icon={r.icon} index={i}>{r.label}</OptionCard>
             ))}
           </div>
         </div>
@@ -459,12 +476,12 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Ajuda a calibrar a intensidade</p>
           <div className="space-y-3">
             {[
-              "Fico ofegante subindo escadas",
-              "Consigo subir sem dificuldade",
-              "Não consigo alcançar os pés",
-              "Consigo tocar os pés facilmente",
-            ].map((f) => (
-              <OptionCard key={f} selected={data.flexibilidade === f} onClick={() => updateField("flexibilidade", f)}>{f}</OptionCard>
+              { label: "Fico ofegante subindo escadas", icon: <Wind className="w-5 h-5" /> },
+              { label: "Consigo subir sem dificuldade", icon: <Footprints className="w-5 h-5" /> },
+              { label: "Não consigo alcançar os pés", icon: <StretchHorizontal className="w-5 h-5" /> },
+              { label: "Consigo tocar os pés facilmente", icon: <Star className="w-5 h-5" /> },
+            ].map((f, i) => (
+              <OptionCard key={f.label} selected={data.flexibilidade === f.label} onClick={() => updateField("flexibilidade", f.label)} icon={f.icon} index={i}>{f.label}</OptionCard>
             ))}
           </div>
         </div>
@@ -511,10 +528,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               "Tenho vergonha do meu corpo",
               "Quero recuperar minha autoestima",
               "Quero ser exemplo para minha família",
-            ].map((p) => {
+            ].map((p, i) => {
               const selected = data.psicologico.includes(p);
               return (
-                <OptionCard key={p} selected={selected}
+                <OptionCard key={p} selected={selected} index={i}
                   onClick={() => updateField("psicologico", selected ? data.psicologico.filter((x: string) => x !== p) : [...data.psicologico, p])}>
                   {p}
                 </OptionCard>
