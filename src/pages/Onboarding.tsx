@@ -97,7 +97,7 @@ const Onboarding = () => {
         altura: data.altura ? parseFloat(data.altura) : null,
         peso_atual: data.peso_atual ? parseFloat(data.peso_atual) : null,
         meta_peso: data.meta_peso ? parseFloat(data.meta_peso) : null,
-        biotipo: data.biotipo,
+        biotipo: data.tipo_barriga,
         idade: data.idade ? parseInt(data.idade) : null,
         local_treino: data.local_treino,
         dificuldade: data.dificuldade,
