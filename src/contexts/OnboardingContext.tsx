@@ -10,6 +10,7 @@ export type OnboardingData = {
   meta_peso: string;
   tipo_barriga: string;
   tipo_quadril: string;
+  tipo_perna: string;
   idade: string;
   local_treino: string;
   dificuldade: string;
@@ -40,6 +41,7 @@ const initialData: OnboardingData = {
   meta_peso: "",
   tipo_barriga: "",
   tipo_quadril: "",
+  tipo_perna: "",
   idade: "",
   local_treino: "Casa",
   dificuldade: "",
@@ -79,6 +81,7 @@ export const ONBOARDING_STEPS = [
   "meta",
   "tipo-barriga",
   "tipo-quadril",
+  "tipo-perna",
   "idade",
   "equipamentos",
   "dificuldade",
