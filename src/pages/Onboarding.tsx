@@ -403,7 +403,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               { val: "Barriga de álcool", img: barr4Img },
               { val: "Barriga estressada", img: barr5Img },
             ].map((opt) => (
-              <button key={opt.val} onClick={() => { updateField("tipo_barriga", opt.val); goNext(); }}
+              <button key={opt.val} onClick={() => updateField("tipo_barriga", opt.val)}
                 className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_barriga === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
                 <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
                 <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
