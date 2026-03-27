@@ -716,19 +716,23 @@ const AnaliseIAScreen = ({ onNext, saving }: { onNext: () => void; saving: boole
 
 // ─── Boas-vindas Screen ─────────────────────────────────────────
 const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
-  <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+  <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto overflow-hidden">
     <div className="flex-1 flex flex-col items-center justify-center">
-      <img src={logoLeoa} alt="Fábrica de Leoas" className="w-32 h-32 mb-8 drop-shadow-lg" />
-      <h1 className="text-3xl font-heading text-primary mb-4 text-center">
+      <img
+        src={logoLeoa}
+        alt="Fábrica de Leoas"
+        className="w-32 h-32 mb-8 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] animate-[scale-in_0.8s_ease-out_both]"
+      />
+      <h1 className="text-3xl font-heading text-primary mb-4 text-center animate-[fade-in_0.7s_ease-out_0.4s_both]">
         Bem-vinda, Leoa!
       </h1>
-      <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed">
+      <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed animate-[fade-in_0.7s_ease-out_0.7s_both]">
         Vou fazer algumas perguntas rápidas para montar o seu <span className="text-primary font-semibold">Protocolo personalizado</span> de treino em casa.
       </p>
     </div>
-    <div className="w-full pb-8">
+    <div className="w-full pb-8 animate-[fade-in_0.6s_ease-out_1.1s_both]">
       <Button onClick={onNext}
-        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide">
+        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide hover-scale">
         COMEÇAR AGORA
       </Button>
     </div>
