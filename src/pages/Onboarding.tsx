@@ -29,6 +29,10 @@ import quadril2Img from "@/assets/quadril2.png";
 import quadril3Img from "@/assets/quadril3.png";
 import quadril4Img from "@/assets/quadril4.png";
 import quadril5Img from "@/assets/quadril5.png";
+import perna1Img from "@/assets/perna1.png";
+import perna2Img from "@/assets/perna2.png";
+import perna3Img from "@/assets/perna3.png";
+import perna4Img from "@/assets/perna4.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
@@ -440,7 +444,27 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
-    case "idade":
+    case "tipo-perna":
+      return (
+        <div>
+          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">perna</span> combina mais com você?</h2>
+          <div className="space-y-3 mt-6">
+            {[
+              { val: "Pernas normais", img: perna1Img },
+              { val: "Pernas em forma de X", img: perna2Img },
+              { val: "Pernas em forma de O", img: perna3Img },
+              { val: "Pernas em forma de XO", img: perna4Img },
+            ].map((opt) => (
+              <button key={opt.val} onClick={() => updateField("tipo_perna", opt.val)}
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_perna === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
+                <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
       return (
         <div>
           <div className="mb-1"><Star className="w-8 h-8 text-primary" /></div>
