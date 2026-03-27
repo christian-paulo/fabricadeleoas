@@ -962,6 +962,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "meta": return data.meta_peso !== "";
     case "tipo-barriga": return data.tipo_barriga !== "";
     case "tipo-quadril": return data.tipo_quadril !== "";
+    case "tipo-perna": return data.tipo_perna !== "";
     case "idade": return data.idade !== "";
     
     case "equipamentos": return data.equipment !== "";
