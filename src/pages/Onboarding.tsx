@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
@@ -21,6 +21,7 @@ import desejadoDefinidaImg from "@/assets/desejado-definida.webp";
 import desejadoMusculosaImg from "@/assets/desejado-musculosa.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import RulerSlider from "@/components/RulerSlider";
 import { Slider } from "@/components/ui/slider";
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from "@/contexts/OnboardingContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -301,22 +302,48 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       );
     }
 
-    case "medidas":
+    case "altura":
       return (
-        <div>
-          <h2 className="text-2xl text-foreground mb-2">Altura e Peso Atual</h2>
-          <p className="text-sm text-muted-foreground mb-6">Precisamos desses dados para calcular sua evolução</p>
-          <div className="space-y-4">
-            <div className="soft-card p-4">
-              <label className="text-sm text-muted-foreground font-medium mb-2 block">Altura (cm)</label>
-              <Input type="number" value={data.altura} onChange={(e) => updateField("altura", e.target.value)}
-                placeholder="165" className="bg-background border-border text-foreground h-12 text-lg" />
-            </div>
-            <div className="soft-card p-4">
-              <label className="text-sm text-muted-foreground font-medium mb-2 block">Peso Atual (kg)</label>
-              <Input type="number" value={data.peso_atual} onChange={(e) => updateField("peso_atual", e.target.value)}
-                placeholder="70" className="bg-background border-border text-foreground h-12 text-lg" />
-            </div>
+        <div className="flex flex-col items-center">
+          <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Qual é sua <span className="text-primary">altura</span>?
+          </h2>
+          <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
+            Digite sua altura desta forma (Ex:174cm)
+          </p>
+          <div className="w-full px-2">
+            <RulerSlider
+              min={140}
+              max={210}
+              value={data.altura ? parseInt(data.altura) : 165}
+              onChange={(v) => updateField("altura", String(v))}
+              unit="cm"
+              step={1}
+              majorEvery={10}
+            />
+          </div>
+        </div>
+      );
+
+    case "peso":
+      return (
+        <div className="flex flex-col items-center">
+          <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Qual é seu peso atual?
+          </h2>
+          <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
+            Digite seu peso em Kilogramas (Ex:74kg)
+          </p>
+          <div className="w-full px-2">
+            <RulerSlider
+              min={40}
+              max={150}
+              value={data.peso_atual ? parseInt(data.peso_atual) : 70}
+              onChange={(v) => updateField("peso_atual", String(v))}
+              unit="kg"
+              step={1}
+              majorEvery={10}
+            />
           </div>
         </div>
       );
@@ -832,7 +859,8 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "area-alvo": return data.targetArea.length > 0;
     case "corpo-atual": return data.corpo_atual !== "";
     case "corpo-desejado": return data.corpo_desejado !== "";
-    case "medidas": return data.altura !== "" && data.peso_atual !== "";
+    case "altura": return data.altura !== "";
+    case "peso": return data.peso_atual !== "";
     case "meta": return data.meta_peso !== "";
     case "biotipo": return data.biotipo !== "";
     case "idade": return data.idade !== "";
