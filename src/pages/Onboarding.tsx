@@ -19,6 +19,11 @@ import atual4Img from "@/assets/atual4.webp";
 import desejadoSaudavelImg from "@/assets/desejado-saudavel.webp";
 import desejadoDefinidaImg from "@/assets/desejado-definida.webp";
 import desejadoMusculosaImg from "@/assets/desejado-musculosa.webp";
+import barr1Img from "@/assets/barr1.webp";
+import barr2Img from "@/assets/barr2.webp";
+import barr3Img from "@/assets/barr3.webp";
+import barr4Img from "@/assets/barr4.webp";
+import barr5Img from "@/assets/barr5.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
@@ -92,7 +97,7 @@ const Onboarding = () => {
         altura: data.altura ? parseFloat(data.altura) : null,
         peso_atual: data.peso_atual ? parseFloat(data.peso_atual) : null,
         meta_peso: data.meta_peso ? parseFloat(data.meta_peso) : null,
-        biotipo: data.biotipo,
+        biotipo: data.tipo_barriga,
         idade: data.idade ? parseInt(data.idade) : null,
         local_treino: data.local_treino,
         dificuldade: data.dificuldade,
@@ -383,6 +388,28 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               </p>
             </div>
           )}
+        </div>
+      );
+
+    case "tipo-barriga":
+      return (
+        <div>
+          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">barriga</span> combina mais com você?</h2>
+          <div className="space-y-3 mt-6">
+            {[
+              { val: "Barriga normal", img: barr1Img },
+              { val: "Barriga de mãe", img: barr2Img },
+              { val: "Barriga hormonal", img: barr3Img },
+              { val: "Barriga de álcool", img: barr4Img },
+              { val: "Barriga estressada", img: barr5Img },
+            ].map((opt) => (
+              <button key={opt.val} onClick={() => updateField("tipo_barriga", opt.val)}
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_barriga === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
+                <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
+              </button>
+            ))}
+          </div>
         </div>
       );
 
@@ -882,7 +909,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "altura": return data.altura !== "";
     case "peso": return data.peso_atual !== "";
     case "meta": return data.meta_peso !== "";
-    
+    case "tipo-barriga": return data.tipo_barriga !== "";
     case "idade": return data.idade !== "";
     
     case "equipamentos": return data.equipment !== "";
