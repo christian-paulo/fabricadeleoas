@@ -314,7 +314,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             Qual é sua <span className="text-primary">altura</span>?
           </h2>
           <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
-            Digite sua altura desta forma (Ex:174cm)
+            Exemplo: 1.94m = 194cm
           </p>
           <div className="w-full px-2">
             <RulerSlider
