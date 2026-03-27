@@ -7,6 +7,11 @@ import obj1Img from "@/assets/obj1.webp";
 import obj2Img from "@/assets/obj2.webp";
 import obj3Img from "@/assets/obj3.webp";
 import obj4Img from "@/assets/obj4.webp";
+import foco1Img from "@/assets/foco1.webp";
+import foco2Img from "@/assets/foco2.webp";
+import foco3Img from "@/assets/foco3.webp";
+import foco4Img from "@/assets/foco4.webp";
+import foco5Img from "@/assets/foco5.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -205,17 +210,30 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "area-alvo":
       return (
         <div>
-          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Flame className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">Em qual área quer focar?</h2>
-          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Selecione uma ou mais áreas</p>
-          <div className="space-y-3">
-            {["Pochete", "Braço Merendeira", "Bumbum Caído", "Coxa de Amoeba", "Flancos"].map((a, i) => {
-              const selected = data.targetArea.includes(a);
+          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Em qual área quer focar?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione uma ou mais áreas</p>
+          <div className="space-y-4">
+            {[
+              { label: "Pochete", value: "Pochete", img: foco1Img },
+              { label: "Braço\nMerendeira", value: "Braço Merendeira", img: foco2Img },
+              { label: "Bumbum\nCaído", value: "Bumbum Caído", img: foco3Img },
+              { label: "Coxa de\nAmoeba", value: "Coxa de Amoeba", img: foco4Img },
+              { label: "Flancos", value: "Flancos", img: foco5Img },
+            ].map((a, i) => {
+              const selected = data.targetArea.includes(a.value);
               return (
-                <OptionCard key={a} selected={selected} index={i}
-                  onClick={() => updateField("targetArea", selected ? data.targetArea.filter((x: string) => x !== a) : [...data.targetArea, a])}>
-                  {a}
-                </OptionCard>
+                <button key={a.value} onClick={() => updateField("targetArea", selected ? data.targetArea.filter((x: string) => x !== a.value) : [...data.targetArea, a.value])}
+                  className={`w-full rounded-2xl overflow-hidden relative h-28 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
+                    selected 
+                      ? "ring-2 ring-primary bg-primary/10 scale-[1.02]" 
+                      : "bg-secondary/50 hover:bg-secondary/80"
+                  }`}
+                  style={{ animationDelay: `${i * 100}ms` }}>
+                  <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
+                    selected ? "text-primary" : "text-foreground"
+                  }`}>{a.label}</span>
+                  <img src={a.img} alt={a.value} className="absolute right-0 top-0 h-full w-1/2 object-cover object-center" />
+                </button>
               );
             })}
           </div>
