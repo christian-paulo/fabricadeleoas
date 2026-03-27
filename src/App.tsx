@@ -24,47 +24,26 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <OnboardingProvider>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/onboarding/:step" element={
-                <ProtectedRoute requireSubscription={false} requireOnboarding={false}>
-                  <Onboarding />
-                </ProtectedRoute>
-              } />
-              <Route path="/onboarding/checkout" element={
-                <ProtectedRoute requireSubscription={false} requireOnboarding={false}>
-                  <Checkout />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/treinos" element={
-                <ProtectedRoute>
-                  <Treinos />
-                </ProtectedRoute>
-              } />
-              <Route path="/evolucao" element={
-                <ProtectedRoute>
-                  <Evolucao />
-                </ProtectedRoute>
-              } />
-              <Route path="/perfil" element={
-                <ProtectedRoute>
-                  <Perfil />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              } />
+
+              <Route element={<ProtectedRoute requireSubscription={false} requireOnboarding={false} />}>
+                <Route path="/onboarding/:step" element={<Onboarding />} />
+                <Route path="/onboarding/checkout" element={<Checkout />} />
+              </Route>
+
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/treinos" element={<Treinos />} />
+                <Route path="/evolucao" element={<Evolucao />} />
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/admin" element={<Admin />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </OnboardingProvider>
