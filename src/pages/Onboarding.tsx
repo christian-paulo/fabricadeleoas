@@ -152,12 +152,18 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "motivacao":
       return (
         <div>
-          <div className="mb-1"><Heart className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">O que mais te motiva hoje?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Escolha o que mais combina com o seu momento</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Heart className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">O que mais te motiva hoje?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Escolha o que mais combina com o seu momento</p>
           <div className="space-y-3">
-            {["Entrar em forma", "Melhorar aparência", "Cuidar da saúde", "Ter mais energia", "Ganhar confiança"].map((m) => (
-              <OptionCard key={m} selected={data.motivacao === m} onClick={() => updateField("motivacao", m)}>{m}</OptionCard>
+            {[
+              { label: "Entrar em forma", icon: <Flame className="w-5 h-5" /> },
+              { label: "Melhorar aparência", icon: <Eye className="w-5 h-5" /> },
+              { label: "Cuidar da saúde", icon: <HeartPulse className="w-5 h-5" /> },
+              { label: "Ter mais energia", icon: <Zap className="w-5 h-5" /> },
+              { label: "Ganhar confiança", icon: <ThumbsUp className="w-5 h-5" /> },
+            ].map((m, i) => (
+              <OptionCard key={m.label} selected={data.motivacao === m.label} onClick={() => updateField("motivacao", m.label)} icon={m.icon} index={i}>{m.label}</OptionCard>
             ))}
           </div>
         </div>
