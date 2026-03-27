@@ -176,17 +176,27 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "objetivo":
       return (
         <div>
-          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Target className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">Qual o seu principal objetivo?</h2>
-          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Este dado é fundamental para o seu protocolo</p>
-          <div className="space-y-3">
+          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual o seu principal objetivo?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Este dado é fundamental para o seu protocolo</p>
+          <div className="space-y-4">
             {[
-              { label: "Emagrecimento", icon: <TrendingDown className="w-5 h-5" /> },
-              { label: "Ganho de Massa", icon: <Dumbbell className="w-5 h-5" /> },
-              { label: "Saúde", icon: <HeartPulse className="w-5 h-5" /> },
-              { label: "Melhorar Dores", icon: <Activity className="w-5 h-5" /> },
+              { label: "Perder\nPeso", value: "Emagrecimento", img: obj1Img },
+              { label: "Aumentar\nOs Músculos", value: "Ganho de Massa", img: obj2Img },
+              { label: "Manter\nA Forma", value: "Saúde", img: obj3Img },
+              { label: "Melhorar\nDores", value: "Melhorar Dores", img: obj4Img },
             ].map((g, i) => (
-              <OptionCard key={g.label} selected={data.goal === g.label} onClick={() => updateField("goal", g.label)} icon={g.icon} index={i}>{g.label}</OptionCard>
+              <button key={g.value} onClick={() => updateField("goal", g.value)}
+                className={`w-full rounded-2xl overflow-hidden relative h-28 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
+                  data.goal === g.value 
+                    ? "ring-2 ring-primary bg-primary/10 scale-[1.02]" 
+                    : "bg-secondary/50 hover:bg-secondary/80"
+                }`}
+                style={{ animationDelay: `${i * 100}ms` }}>
+                <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
+                  data.goal === g.value ? "text-primary" : "text-foreground"
+                }`}>{g.label}</span>
+                <img src={g.img} alt={g.value} className="absolute right-0 top-0 h-full w-1/2 object-cover object-center" />
+              </button>
             ))}
           </div>
         </div>
