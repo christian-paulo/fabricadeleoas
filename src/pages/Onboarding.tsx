@@ -260,11 +260,11 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               <button
                 key={c.value}
                 onClick={() => updateField("corpo_atual", c.value)}
-                className={`w-full relative h-24 rounded-2xl overflow-hidden border-2 transition-all duration-200 animate-[fade-in_0.4s_ease-out_both] flex items-center ${data.corpo_atual === c.value ? "ring-2 ring-primary border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                className={`w-full relative h-36 rounded-2xl overflow-hidden border-2 transition-all duration-200 animate-[fade-in_0.4s_ease-out_both] flex items-center ${data.corpo_atual === c.value ? "ring-2 ring-primary border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
                 style={{ animationDelay: `${i * 0.08}s` }}
               >
                 <span className="relative z-10 pl-5 text-xl font-bold text-foreground">{c.label}</span>
-                <img src={c.img} alt={c.label} className="absolute right-0 top-0 h-full w-1/2 object-cover object-center" />
+                <img src={c.img} alt={c.label} className="absolute right-0 top-0 h-full w-[55%] object-cover object-center" />
               </button>
             ))}
           </div>
