@@ -335,6 +335,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div className="flex flex-col items-center">
           <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Scale className="w-8 h-8 text-primary" /></div>
           <h2 className="text-3xl font-bold text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Qual é seu peso atual?
           </h2>
           <p className="text-sm text-muted-foreground mb-8 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
             Digite seu peso em Kilogramas (Ex:74kg)
