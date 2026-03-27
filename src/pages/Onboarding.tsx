@@ -16,6 +16,9 @@ import atual1Img from "@/assets/atual1.webp";
 import atual2Img from "@/assets/atual2.webp";
 import atual3Img from "@/assets/atual3.webp";
 import atual4Img from "@/assets/atual4.webp";
+import desejadoSaudavelImg from "@/assets/desejado-saudavel.webp";
+import desejadoDefinidaImg from "@/assets/desejado-definida.webp";
+import desejadoMusculosaImg from "@/assets/desejado-musculosa.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -271,18 +274,32 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
-    case "corpo-desejado":
+    case "corpo-desejado": {
+      const corpoDesejadoOptions = [
+        { value: "Saudável e Funcional", label: "Saudável e\nFuncional", img: desejadoSaudavelImg },
+        { value: "Definida e com Curvas", label: "Definida e\ncom Curvas", img: desejadoDefinidaImg },
+        { value: "Musculosa", label: "Musculosa", img: desejadoMusculosaImg },
+      ];
       return (
         <div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é o seu corpo desejado?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Onde gostaria de chegar?</p>
           <div className="space-y-3">
-            {["Definida e seca", "Tonificada com curvas", "Atlética", "Saudável e funcional"].map((c, i) => (
-              <OptionCard key={c} selected={data.corpo_desejado === c} onClick={() => updateField("corpo_desejado", c)} index={i}>{c}</OptionCard>
+            {corpoDesejadoOptions.map((cd, i) => (
+              <button
+                key={cd.value}
+                onClick={() => updateField("corpo_desejado", cd.value)}
+                className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-200 ${data.corpo_desejado === cd.value ? "bg-primary/10 ring-2 ring-primary" : "bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 0.07}s` }}
+              >
+                <span className="relative z-10 pl-5 text-xl font-bold text-foreground whitespace-pre-line text-left">{cd.label}</span>
+                <img src={cd.img} alt={cd.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
+              </button>
             ))}
           </div>
         </div>
       );
+    }
 
     case "medidas":
       return (
