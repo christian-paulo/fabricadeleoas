@@ -33,6 +33,15 @@ import perna1Img from "@/assets/perna1.png";
 import perna2Img from "@/assets/perna2.png";
 import perna3Img from "@/assets/perna3.png";
 import perna4Img from "@/assets/perna4.png";
+import dorCervicalImg from "@/assets/dor_cervical.webp";
+import dorToracicaImg from "@/assets/dor_toracica.webp";
+import dorLombarImg from "@/assets/dor_lombar.webp";
+import dorOmbroImg from "@/assets/dor_ombro.webp";
+import dorCotoveloImg from "@/assets/dor_cotovelo.webp";
+import dorPunhoImg from "@/assets/dor_punho.webp";
+import dorQuadrilImg from "@/assets/dor_quadril.webp";
+import dorJoelhoImg from "@/assets/dor_joelho.webp";
+import dorTornozeloImg from "@/assets/dor_tornozelo.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
@@ -634,21 +643,42 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Torácica", emoji: "🫁" },
-              { label: "Lombar", emoji: "🔙" },
-              { label: "Joelho", emoji: "🦵" },
-              { label: "Ombro", emoji: "💪" },
-              { label: "Cervical", emoji: "🤕" },
-              { label: "Quadril", emoji: "🦴" },
-              { label: "Tornozelo", emoji: "🦶" },
-              { label: "Cotovelo", emoji: "💫" },
+              { label: "Cervical", img: dorCervicalImg },
+              { label: "Torácica", img: dorToracicaImg },
+              { label: "Lombar", img: dorLombarImg },
+              { label: "Ombro", img: dorOmbroImg },
+              { label: "Cotovelo", img: dorCotoveloImg },
+              { label: "Punho", img: dorPunhoImg },
+              { label: "Quadril", img: dorQuadrilImg },
+              { label: "Joelho", img: dorJoelhoImg },
+              { label: "Tornozelo", img: dorTornozeloImg },
+              { label: "Todos", img: null },
             ].map((p) => {
-              const selected = data.painLocation.includes(p.label);
+              const selected = p.label === "Todos"
+                ? data.painLocation.includes("Todos")
+                : data.painLocation.includes(p.label);
               return (
-                <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
-                  onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
-                  {p.label}
-                </OptionCard>
+                <button
+                  key={p.label}
+                  onClick={() => {
+                    if (p.label === "Todos") {
+                      updateField("painLocation", selected ? [] : ["Todos"]);
+                    } else {
+                      const without = data.painLocation.filter((x: string) => x !== "Todos" && x !== p.label);
+                      updateField("painLocation", selected ? without : [...without, p.label]);
+                    }
+                  }}
+                  className={`relative rounded-2xl overflow-hidden border-2 transition-all flex flex-col items-center p-2 ${selected ? "border-primary bg-primary/10 shadow-lg" : "border-border bg-card"}`}
+                >
+                  {p.img ? (
+                    <img src={p.img} alt={p.label} className="w-full h-24 object-cover rounded-xl mb-1" />
+                  ) : (
+                    <div className="w-full h-24 rounded-xl mb-1 flex items-center justify-center bg-primary/10">
+                      <span className="text-3xl">🫸</span>
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-foreground">{p.label}</span>
+                </button>
               );
             })}
           </div>
