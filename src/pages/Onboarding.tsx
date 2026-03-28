@@ -791,11 +791,6 @@ const TransformacaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data }:
         </h2>
 
         <div className="relative flex items-center justify-center gap-2 mt-8 mb-6 w-full">
-          {/* Sparkles decorations */}
-          <div className="absolute -top-6 left-1/4 text-3xl animate-[scale-in_0.6s_ease-out_0.6s_both]">✨</div>
-          <div className="absolute -top-4 right-1/6 text-2xl animate-[scale-in_0.6s_ease-out_0.8s_both]">🎆</div>
-          <div className="absolute -bottom-8 left-1/6 text-3xl animate-[scale-in_0.6s_ease-out_1s_both]">🎇</div>
-          <div className="absolute -bottom-6 right-1/4 text-2xl animate-[scale-in_0.6s_ease-out_1.2s_both]">✨</div>
 
           {/* Before image */}
           <div className="relative w-[42%] animate-[fade-in_0.5s_ease-out_0.3s_both]">
