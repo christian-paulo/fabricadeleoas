@@ -685,6 +685,49 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
+    case "beneficios":
+      return (
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Descubra os benefícios do Protocolo das Leoas</h2>
+          <p className="text-sm text-muted-foreground mb-6 text-center">Veja por que nosso método é diferente</p>
+          <div className="flex gap-3 w-full">
+            {/* Outros */}
+            <div className="flex-1 rounded-2xl border border-border bg-card p-4 flex flex-col items-center">
+              <div className="w-full h-32 rounded-xl mb-3 bg-muted flex items-center justify-center overflow-hidden">
+                <span className="text-5xl opacity-60">😔</span>
+              </div>
+              <h3 className="text-lg font-bold text-muted-foreground italic mb-3">Outros</h3>
+              <ul className="space-y-2 w-full">
+                {["Transformação Lenta", "Falta de Personalização", "Falta de Especialização", "Progresso Limitado"].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="text-destructive mt-0.5">✕</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Nosso Programa */}
+            <div className="flex-1 rounded-2xl border-2 border-primary pink-gradient p-4 flex flex-col items-center shadow-lg">
+              <div className="w-full h-32 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-primary/20">
+                <span className="text-5xl">💪</span>
+              </div>
+              <div className="bg-background/80 backdrop-blur rounded-xl px-3 py-1.5 mb-3 text-center">
+                <h3 className="text-sm font-bold text-foreground">Protocolo das Leoas</h3>
+                <p className="text-xs text-muted-foreground">Plano personalizado</p>
+              </div>
+              <ul className="space-y-2 w-full">
+                {["Resultados Mais Rápidos", "Personalizado para você", "Orientação de Especialistas", "Progresso Impulsionado"].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-primary-foreground font-semibold">
+                    <span className="mt-0.5">✅</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+
     case "rotina":
       return (
         <div>
@@ -1136,6 +1179,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "tempo": return data.workoutDuration !== "";
     case "dores": return data.hasPain !== null;
     case "local-dor": return data.painLocation.length > 0;
+    case "beneficios": return true;
     case "rotina": return data.rotina !== "";
     case "flexibilidade": return data.flexibilidade !== "";
     case "medicacao": return data.usesMedication !== null;
