@@ -754,6 +754,87 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
   }
 }
 
+// ─── Transformação Screen ────────────────────────────────────────
+const TransformacaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data }: any) => {
+  const pesoAtual = data.peso_atual || "70";
+  const metaPeso = data.meta_peso || "60";
+
+  // Map corpo_atual to image
+  const corpoAtualMap: Record<string, string> = {
+    "Médio": atual1Img,
+    "Flácida": atual2Img,
+    "Magro": atual3Img,
+    "Tonificada": atual4Img,
+  };
+
+  // Map corpo_desejado to image
+  const corpoDesejadoMap: Record<string, string> = {
+    "Saudável e Funcional": desejadoSaudavelImg,
+    "Definida e com Curvas": desejadoDefinidaImg,
+    "Musculosa": desejadoMusculosaImg,
+  };
+
+  const imgAtual = corpoAtualMap[data.corpo_atual] || atual1Img;
+  const imgDesejado = corpoDesejadoMap[data.corpo_desejado] || desejadoSaudavelImg;
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
+      <div className="px-4 pt-6 pb-2">
+        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+          <div className="h-full pink-gradient rounded-full transition-all duration-500"
+            style={{ width: `${((currentIndex + 1) / totalSteps) * 100}%` }} />
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <h2 className="text-3xl font-heading text-foreground mb-2 animate-[fade-in_0.6s_ease-out_both]">
+          Veja as <span className="text-primary">mudanças incríveis</span> após atingir seu objetivo!
+        </h2>
+
+        <div className="relative flex items-center justify-center gap-2 mt-8 mb-6 w-full">
+          {/* Sparkles decorations */}
+          <div className="absolute -top-6 left-1/4 text-3xl animate-[scale-in_0.6s_ease-out_0.6s_both]">✨</div>
+          <div className="absolute -top-4 right-1/6 text-2xl animate-[scale-in_0.6s_ease-out_0.8s_both]">🎆</div>
+          <div className="absolute -bottom-8 left-1/6 text-3xl animate-[scale-in_0.6s_ease-out_1s_both]">🎇</div>
+          <div className="absolute -bottom-6 right-1/4 text-2xl animate-[scale-in_0.6s_ease-out_1.2s_both]">✨</div>
+
+          {/* Before image */}
+          <div className="relative w-[42%] animate-[fade-in_0.5s_ease-out_0.3s_both]">
+            <div className="rounded-2xl overflow-hidden border-2 border-border shadow-lg aspect-[3/4]">
+              <img src={imgAtual} alt="Corpo atual" className="w-full h-full object-cover" />
+            </div>
+            <div className="mt-2 bg-muted rounded-xl py-2 px-4 inline-block">
+              <span className="text-lg font-heading font-bold text-foreground">{pesoAtual} kg</span>
+            </div>
+          </div>
+
+          {/* Arrow */}
+          <div className="text-primary text-3xl font-bold animate-[scale-in_0.5s_ease-out_0.5s_both] mx-1">
+            ➜
+          </div>
+
+          {/* After image */}
+          <div className="relative w-[48%] animate-[fade-in_0.5s_ease-out_0.5s_both]">
+            <div className="rounded-2xl overflow-hidden border-2 border-primary shadow-xl aspect-[3/4]">
+              <img src={imgDesejado} alt="Corpo desejado" className="w-full h-full object-cover" />
+            </div>
+            <div className="mt-2 pink-gradient rounded-xl py-2 px-4 inline-block">
+              <span className="text-lg font-heading font-bold text-primary-foreground">{metaPeso} kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="px-4 pb-8 flex gap-3">
+        <Button variant="outline" onClick={onBack} className="border-border text-foreground h-12 rounded-2xl px-4">
+          <ChevronLeft size={18} />
+        </Button>
+        <Button onClick={onNext} className="flex-1 pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+          Continuar <ChevronRight size={18} className="ml-1" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 // ─── Resultado Visual Screen ────────────────────────────────────
 const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any) => (
   <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
