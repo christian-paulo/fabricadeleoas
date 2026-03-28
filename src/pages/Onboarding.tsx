@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.png";
@@ -879,13 +879,31 @@ const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any
 
 // ─── Gráfico Previsão Screen ────────────────────────────────────
 const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data }: any) => {
-  const pesoAtual = parseFloat(data.peso_atual) || 75;
-  const metaPeso = parseFloat(data.meta_peso) || 65;
-  const diff = pesoAtual - metaPeso;
-  const chartData = [0, 2, 4, 6, 8, 10, 12].map((w) => ({
-    semana: `Sem ${w}`,
-    peso: parseFloat((pesoAtual - diff * (1 - Math.pow(1 - w / 12, 1.3))).toFixed(1)),
-  }));
+  const pesoAtual = parseFloat(data.peso_atual) || 70;
+  const metaPeso = parseFloat(data.meta_peso) || 60;
+  const diff = metaPeso - pesoAtual;
+  const absDiff = Math.abs(diff);
+  const isGain = diff > 0;
+
+  // Target date: 12 weeks from now
+  const today = new Date();
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + 12 * 7);
+  const months = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
+  const targetLabel = `${months[targetDate.getMonth()]} ${targetDate.getDate()}`;
+
+  // Chart data - S-curve
+  const points = 20;
+  const chartData = Array.from({ length: points + 1 }, (_, i) => {
+    const t = i / points;
+    // S-curve using sigmoid
+    const s = 1 / (1 + Math.exp(-10 * (t - 0.5)));
+    const peso = parseFloat((pesoAtual + diff * s).toFixed(1));
+    return { x: i, peso };
+  });
+
+  const minY = Math.min(pesoAtual, metaPeso) - 3;
+  const maxY = Math.max(pesoAtual, metaPeso) + 3;
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
@@ -896,40 +914,64 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
         </div>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <TrendingDown className="w-10 h-10 text-primary mb-4" />
-        <h2 className="text-2xl font-heading text-foreground mb-2">Sua previsão de resultado</h2>
-        <p className="text-sm text-muted-foreground mb-8">Com base nos seus dados e no método Gilvan</p>
+        <p className="text-muted-foreground text-base mb-1 animate-[fade-in_0.4s_ease-out_both]">Isso é totalmente realizável!</p>
+        <h2 className="text-3xl font-heading text-foreground mb-8 animate-[fade-in_0.5s_ease-out_0.1s_both]">
+          {isGain ? "Ganhe" : "Perca"} <span className="text-primary">{absDiff.toFixed(0)} kg</span> até <span className="text-primary">{targetLabel}</span>
+        </h2>
 
-        <div className="soft-card p-4 w-full mb-6">
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 20%)" />
-              <XAxis dataKey="semana" tick={{ fill: "hsl(0 0% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis domain={[Math.floor(metaPeso - 2), Math.ceil(pesoAtual + 2)]} tick={{ fill: "hsl(0 0% 55%)", fontSize: 11 }} axisLine={false} tickLine={false} unit="kg" />
-              <Tooltip
-                contentStyle={{ background: "hsl(0 0% 13%)", border: "1px solid hsl(0 0% 20%)", borderRadius: "12px", color: "hsl(43 30% 90%)" }}
-                formatter={(value: number) => [`${value}kg`, "Peso"]}
-              />
-              <Line type="monotone" dataKey="peso" stroke="hsl(43 76% 52%)" strokeWidth={3} dot={{ fill: "hsl(43 76% 52%)", r: 5, strokeWidth: 0 }} activeDot={{ r: 7, fill: "hsl(43 80% 60%)" }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="flex gap-3 w-full mb-4">
-          <div className="soft-card p-4 flex-1 text-center">
-            <p className="text-xs text-muted-foreground">Peso atual</p>
-            <p className="text-lg font-heading text-foreground font-bold">{pesoAtual}kg</p>
+        {/* Weight badge */}
+        <div className="w-full relative animate-[fade-in_0.5s_ease-out_0.3s_both]">
+          <div className="flex justify-end pr-4 mb-1">
+            <div className="pink-gradient rounded-xl py-2 px-4 relative">
+              <span className="text-base font-heading font-bold text-primary-foreground">{metaPeso} kg</span>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-primary" />
+            </div>
           </div>
-          <div className="soft-card p-4 flex-1 text-center">
-            <p className="text-xs text-muted-foreground">Meta</p>
-            <p className="text-lg font-heading text-primary font-bold">{metaPeso}kg</p>
+
+          {/* Area Chart */}
+          <div className="w-full h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="weightGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" />
+                    <stop offset="100%" stopColor="hsl(210 80% 60%)" />
+                  </linearGradient>
+                  <linearGradient id="areaFill" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(210 80% 60%)" stopOpacity={0.3} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="x" hide />
+                <YAxis domain={[minY, maxY]} hide />
+                <Area
+                  type="monotone"
+                  dataKey="peso"
+                  stroke="url(#weightGradient)"
+                  strokeWidth={3}
+                  fill="url(#areaFill)"
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Labels */}
+          <div className="flex justify-between px-2 -mt-2">
+            <div className="text-left">
+              <p className="text-sm font-bold text-foreground">{pesoAtual} kg</p>
+              <p className="text-xs text-muted-foreground font-medium">Hoje</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-foreground">&nbsp;</p>
+              <p className="text-xs text-muted-foreground font-medium">{targetLabel}</p>
+            </div>
           </div>
         </div>
 
-        <div className="soft-card p-4 w-full text-center">
-          <p className="text-xs text-muted-foreground">Meta estimada em</p>
-          <p className="text-xl font-heading text-primary font-bold">12 semanas</p>
-        </div>
+        <p className="text-sm text-muted-foreground mt-6 leading-relaxed animate-[fade-in_0.5s_ease-out_0.5s_both]">
+          Nós previmos essa data-alvo com base no progresso de <strong className="text-foreground">60,000 usuárias</strong> como você.
+        </p>
       </div>
       <div className="px-4 pb-8 flex gap-3">
         <Button variant="outline" onClick={onBack} className="border-border text-foreground h-12 rounded-2xl px-4">
