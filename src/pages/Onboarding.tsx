@@ -634,7 +634,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Nenhum", emoji: "✅" },
+              { label: "Torácica", emoji: "🫁" },
               { label: "Lombar", emoji: "🔙" },
               { label: "Joelho", emoji: "🦵" },
               { label: "Ombro", emoji: "💪" },
