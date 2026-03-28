@@ -488,9 +488,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
           <p className="text-sm text-muted-foreground mb-6">Defina os equipamentos disponíveis</p>
           <div className="space-y-3">
             {[
-              { val: "Sem equipamento", icon: "🙌", desc: "Apenas peso corporal" },
+              { val: "Sem equipamento", icon: "🙌", desc: "Apenas peso corporal e materiais simples" },
               { val: "Halteres e elásticos", icon: "💪", desc: "Equipamento básico em casa" },
-              { val: "Academia completa", icon: "🏋️", desc: "Acesso a máquinas e aparelhos" },
+              { val: "Equipamentos completos", icon: "🏋️", desc: "Acesso a máquinas e aparelhos em casa" },
             ].map((e) => (
               <button key={e.val} onClick={() => updateField("equipment", e.val)}
                 className={`soft-card w-full p-4 text-left transition-all ${data.equipment === e.val ? "ring-2 ring-primary bg-primary/5" : "hover:bg-secondary/50"}`}>
