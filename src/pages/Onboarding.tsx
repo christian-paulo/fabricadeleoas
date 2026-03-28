@@ -76,8 +76,13 @@ const Onboarding = () => {
   };
 
   const goBack = () => {
-    if (currentIndex > 0) {
-      navigate(`/onboarding/${ONBOARDING_STEPS[currentIndex - 1]}`);
+    let prevIndex = currentIndex - 1;
+    // Skip "local-dor" going back if user has no pain
+    if (ONBOARDING_STEPS[prevIndex] === "local-dor" && !data.hasPain) {
+      prevIndex--;
+    }
+    if (prevIndex >= 0) {
+      navigate(`/onboarding/${ONBOARDING_STEPS[prevIndex]}`);
     }
   };
 
