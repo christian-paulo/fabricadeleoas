@@ -971,6 +971,7 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
               <p className="text-xs text-muted-foreground">Hoje</p>
             </div>
             <div className="text-right">
+              <p className="text-sm font-bold text-foreground">{metaPeso} kg</p>
               <p className="text-xs text-muted-foreground">{targetLabel}</p>
             </div>
           </div>
