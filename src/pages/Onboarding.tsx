@@ -62,19 +62,27 @@ const Onboarding = () => {
 
   const goNext = async () => {
     if (currentStep === "analise-ia") {
-      // Save all data then go to checkout
       await saveAllData();
       return;
     }
-    const nextIndex = currentIndex + 1;
+    let nextIndex = currentIndex + 1;
+    // Skip "local-dor" if user has no pain
+    if (ONBOARDING_STEPS[nextIndex] === "local-dor" && !data.hasPain) {
+      nextIndex++;
+    }
     if (nextIndex < totalSteps) {
       navigate(`/onboarding/${ONBOARDING_STEPS[nextIndex]}`);
     }
   };
 
   const goBack = () => {
-    if (currentIndex > 0) {
-      navigate(`/onboarding/${ONBOARDING_STEPS[currentIndex - 1]}`);
+    let prevIndex = currentIndex - 1;
+    // Skip "local-dor" going back if user has no pain
+    if (ONBOARDING_STEPS[prevIndex] === "local-dor" && !data.hasPain) {
+      prevIndex--;
+    }
+    if (prevIndex >= 0) {
+      navigate(`/onboarding/${ONBOARDING_STEPS[prevIndex]}`);
     }
   };
 
@@ -615,31 +623,35 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               </button>
             ))}
           </div>
-          {data.hasPain && (
-            <div className="space-y-3 mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Onde sente dor?</p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Nenhum", emoji: "✅" },
-                  { label: "Lombar", emoji: "🔙" },
-                  { label: "Joelho", emoji: "🦵" },
-                  { label: "Ombro", emoji: "💪" },
-                  { label: "Cervical", emoji: "🤕" },
-                  { label: "Quadril", emoji: "🦴" },
-                  { label: "Tornozelo", emoji: "🦶" },
-                  { label: "Cotovelo", emoji: "💫" },
-                ].map((p) => {
-                  const selected = data.painLocation.includes(p.label);
-                  return (
-                    <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
-                      onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
-                      {p.label}
-                    </OptionCard>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        </div>
+      );
+
+    case "local-dor":
+      return (
+        <div>
+          <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2">Onde sente dor?</h2>
+          <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Nenhum", emoji: "✅" },
+              { label: "Lombar", emoji: "🔙" },
+              { label: "Joelho", emoji: "🦵" },
+              { label: "Ombro", emoji: "💪" },
+              { label: "Cervical", emoji: "🤕" },
+              { label: "Quadril", emoji: "🦴" },
+              { label: "Tornozelo", emoji: "🦶" },
+              { label: "Cotovelo", emoji: "💫" },
+            ].map((p) => {
+              const selected = data.painLocation.includes(p.label);
+              return (
+                <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
+                  onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
+                  {p.label}
+                </OptionCard>
+              );
+            })}
+          </div>
         </div>
       );
 
@@ -1093,6 +1105,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "frequencia": return data.workoutDays >= 2;
     case "tempo": return data.workoutDuration !== "";
     case "dores": return data.hasPain !== null;
+    case "local-dor": return data.painLocation.length > 0;
     case "rotina": return data.rotina !== "";
     case "flexibilidade": return data.flexibilidade !== "";
     case "medicacao": return data.usesMedication !== null;
