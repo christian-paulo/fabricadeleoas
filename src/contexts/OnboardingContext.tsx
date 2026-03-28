@@ -82,6 +82,7 @@ export const ONBOARDING_STEPS = [
   "tipo-barriga",
   "tipo-quadril",
   "tipo-perna",
+  "transformacao",
   "idade",
   "equipamentos",
   "dificuldade",
