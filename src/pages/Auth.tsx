@@ -24,6 +24,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (authLoading || !user) return;
+    // If user already completed everything, go to dashboard
     navigate("/dashboard", { replace: true });
   }, [user, authLoading, navigate]);
 
