@@ -885,25 +885,39 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
   const absDiff = Math.abs(diff);
   const isGain = diff > 0;
 
-  // Target date: 12 weeks from now
   const today = new Date();
   const targetDate = new Date(today);
   targetDate.setDate(today.getDate() + 12 * 7);
   const months = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
   const targetLabel = `${months[targetDate.getMonth()]} ${targetDate.getDate()}`;
 
-  // Chart data - S-curve
-  const points = 20;
-  const chartData = Array.from({ length: points + 1 }, (_, i) => {
-    const t = i / points;
-    // S-curve using sigmoid
-    const s = 1 / (1 + Math.exp(-10 * (t - 0.5)));
-    const peso = parseFloat((pesoAtual + diff * s).toFixed(1));
-    return { x: i, peso };
+  // SVG dimensions
+  const w = 360, h = 240, pad = 20;
+  const chartW = w - pad * 2;
+  const chartH = h - pad * 2;
+
+  // Normalize Y: map peso to SVG y coordinate
+  const minP = Math.min(pesoAtual, metaPeso);
+  const maxP = Math.max(pesoAtual, metaPeso);
+  const range = maxP - minP || 1;
+  const yOf = (peso: number) => pad + chartH - ((peso - minP + range * 0.15) / (range * 1.3)) * chartH;
+
+  // S-curve points
+  const pts = 50;
+  const points = Array.from({ length: pts + 1 }, (_, i) => {
+    const t = i / pts;
+    const s = 1 / (1 + Math.exp(-12 * (t - 0.45)));
+    const peso = pesoAtual + diff * s;
+    const x = pad + t * chartW;
+    const y = yOf(peso);
+    return { x, y };
   });
 
-  const minY = Math.min(pesoAtual, metaPeso) - 3;
-  const maxY = Math.max(pesoAtual, metaPeso) + 3;
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+  const areaPath = `${linePath} L${pad + chartW},${h} L${pad},${h} Z`;
+
+  const startPt = points[0];
+  const endPt = points[pts];
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-lg mx-auto">
@@ -915,56 +929,49 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
         <p className="text-muted-foreground text-base mb-1 animate-[fade-in_0.4s_ease-out_both]">Isso é totalmente realizável!</p>
-        <h2 className="text-3xl font-heading text-foreground mb-8 animate-[fade-in_0.5s_ease-out_0.1s_both]">
+        <h2 className="text-3xl font-heading text-foreground mb-6 animate-[fade-in_0.5s_ease-out_0.1s_both]">
           {isGain ? "Ganhe" : "Perca"} <span className="text-primary">{absDiff.toFixed(0)} kg</span> até <span className="text-primary">{targetLabel}</span>
         </h2>
 
-        {/* Weight badge */}
-        <div className="w-full relative animate-[fade-in_0.5s_ease-out_0.3s_both]">
-          <div className="flex justify-end pr-4 mb-1">
-            <div className="pink-gradient rounded-xl py-2 px-4 relative">
-              <span className="text-base font-heading font-bold text-primary-foreground">{metaPeso} kg</span>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-primary" />
+        <div className="w-full animate-[fade-in_0.5s_ease-out_0.3s_both]">
+          {/* Meta badge */}
+          <div className="flex justify-end pr-2 mb-1">
+            <div className="pink-gradient rounded-xl py-1.5 px-3 relative">
+              <span className="text-sm font-heading font-bold text-primary-foreground">{metaPeso} kg</span>
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-primary" />
             </div>
           </div>
 
-          {/* Area Chart */}
-          <div className="w-full h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="weightGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" />
-                    <stop offset="100%" stopColor="hsl(210 80% 60%)" />
-                  </linearGradient>
-                  <linearGradient id="areaFill" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                    <stop offset="100%" stopColor="hsl(210 80% 60%)" stopOpacity={0.3} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="x" hide />
-                <YAxis domain={[minY, maxY]} hide />
-                <Area
-                  type="monotone"
-                  dataKey="peso"
-                  stroke="url(#weightGradient)"
-                  strokeWidth={3}
-                  fill="url(#areaFill)"
-                  dot={false}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {/* SVG Chart */}
+          <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 220 }}>
+            <defs>
+              <linearGradient id="curveGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="hsl(var(--primary))" />
+                <stop offset="100%" stopColor="hsl(210 70% 55%)" />
+              </linearGradient>
+              <linearGradient id="fillGrad" x1="0" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="hsl(210 70% 55%)" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+            <path d={areaPath} fill="url(#fillGrad)" />
+            <path d={linePath} fill="none" stroke="url(#curveGrad)" strokeWidth="3" strokeLinecap="round" />
+            {/* Start dot */}
+            <circle cx={startPt.x} cy={startPt.y} r="6" fill="hsl(var(--primary))" />
+            <circle cx={startPt.x} cy={startPt.y} r="3" fill="hsl(var(--background))" />
+            {/* End dot */}
+            <circle cx={endPt.x} cy={endPt.y} r="6" fill="hsl(210 70% 55%)" />
+            <circle cx={endPt.x} cy={endPt.y} r="3" fill="hsl(var(--background))" />
+          </svg>
 
           {/* Labels */}
-          <div className="flex justify-between px-2 -mt-2">
+          <div className="flex justify-between px-1 mt-1">
             <div className="text-left">
               <p className="text-sm font-bold text-foreground">{pesoAtual} kg</p>
-              <p className="text-xs text-muted-foreground font-medium">Hoje</p>
+              <p className="text-xs text-muted-foreground">Hoje</p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold text-foreground">&nbsp;</p>
-              <p className="text-xs text-muted-foreground font-medium">{targetLabel}</p>
+              <p className="text-xs text-muted-foreground">{targetLabel}</p>
             </div>
           </div>
         </div>
