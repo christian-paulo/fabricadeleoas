@@ -62,11 +62,14 @@ const Onboarding = () => {
 
   const goNext = async () => {
     if (currentStep === "analise-ia") {
-      // Save all data then go to checkout
       await saveAllData();
       return;
     }
-    const nextIndex = currentIndex + 1;
+    let nextIndex = currentIndex + 1;
+    // Skip "local-dor" if user has no pain
+    if (ONBOARDING_STEPS[nextIndex] === "local-dor" && !data.hasPain) {
+      nextIndex++;
+    }
     if (nextIndex < totalSteps) {
       navigate(`/onboarding/${ONBOARDING_STEPS[nextIndex]}`);
     }
@@ -1097,6 +1100,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "frequencia": return data.workoutDays >= 2;
     case "tempo": return data.workoutDuration !== "";
     case "dores": return data.hasPain !== null;
+    case "local-dor": return data.painLocation.length > 0;
     case "rotina": return data.rotina !== "";
     case "flexibilidade": return data.flexibilidade !== "";
     case "medicacao": return data.usesMedication !== null;
