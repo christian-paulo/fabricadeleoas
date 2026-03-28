@@ -484,7 +484,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><Dumbbell className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual o tipo de protocolo?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Como você prefere fazer os exercícios?</h2>
           <p className="text-sm text-muted-foreground mb-6">Defina os equipamentos disponíveis</p>
           <div className="space-y-3">
             {[
