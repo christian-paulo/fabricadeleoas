@@ -639,7 +639,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Onde sente dor?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Onde você sente dor?</h2>
           <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
           <div className="grid grid-cols-2 gap-3">
             {[
