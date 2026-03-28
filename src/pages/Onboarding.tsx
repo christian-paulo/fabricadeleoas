@@ -129,6 +129,7 @@ const Onboarding = () => {
 
   // Special screens without standard navigation
   if (currentStep === "boas-vindas") return <BoasVindasScreen onNext={goNext} />;
+  if (currentStep === "transformacao") return <TransformacaoScreen onNext={goNext} onBack={goBack} currentIndex={currentIndex} totalSteps={totalSteps} data={data} />;
   if (currentStep === "resultado-visual") return <ResultadoVisualScreen onNext={goNext} onBack={goBack} currentIndex={currentIndex} totalSteps={totalSteps} />;
   if (currentStep === "grafico-previsao") return <GraficoPrevisaoScreen onNext={goNext} onBack={goBack} currentIndex={currentIndex} totalSteps={totalSteps} data={data} />;
   if (currentStep === "analise-ia") return <AnaliseIAScreen onNext={goNext} saving={saving} />;
@@ -465,10 +466,11 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         </div>
       );
 
+    case "idade":
       return (
         <div>
           <div className="mb-1"><Star className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual é a sua idade?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Qual é a sua <span className="text-primary">idade</span>?</h2>
           <p className="text-sm text-muted-foreground mb-6">Importante para ajustar a intensidade</p>
           <div className="soft-card p-6 text-center">
             <Input type="number" value={data.idade} onChange={(e) => updateField("idade", e.target.value)}
@@ -963,6 +965,7 @@ function validateStep(step: OnboardingStep, data: any): boolean {
     case "tipo-barriga": return data.tipo_barriga !== "";
     case "tipo-quadril": return data.tipo_quadril !== "";
     case "tipo-perna": return data.tipo_perna !== "";
+    case "transformacao": return true;
     case "idade": return data.idade !== "";
     
     case "equipamentos": return data.equipment !== "";
