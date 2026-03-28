@@ -615,31 +615,35 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               </button>
             ))}
           </div>
-          {data.hasPain && (
-            <div className="space-y-3 mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Onde sente dor?</p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Nenhum", emoji: "✅" },
-                  { label: "Lombar", emoji: "🔙" },
-                  { label: "Joelho", emoji: "🦵" },
-                  { label: "Ombro", emoji: "💪" },
-                  { label: "Cervical", emoji: "🤕" },
-                  { label: "Quadril", emoji: "🦴" },
-                  { label: "Tornozelo", emoji: "🦶" },
-                  { label: "Cotovelo", emoji: "💫" },
-                ].map((p) => {
-                  const selected = data.painLocation.includes(p.label);
-                  return (
-                    <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
-                      onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
-                      {p.label}
-                    </OptionCard>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        </div>
+      );
+
+    case "local-dor":
+      return (
+        <div>
+          <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2">Onde sente dor?</h2>
+          <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: "Nenhum", emoji: "✅" },
+              { label: "Lombar", emoji: "🔙" },
+              { label: "Joelho", emoji: "🦵" },
+              { label: "Ombro", emoji: "💪" },
+              { label: "Cervical", emoji: "🤕" },
+              { label: "Quadril", emoji: "🦴" },
+              { label: "Tornozelo", emoji: "🦶" },
+              { label: "Cotovelo", emoji: "💫" },
+            ].map((p) => {
+              const selected = data.painLocation.includes(p.label);
+              return (
+                <OptionCard key={p.label} selected={selected} icon={<span>{p.emoji}</span>}
+                  onClick={() => updateField("painLocation", selected ? data.painLocation.filter((x: string) => x !== p.label) : [...data.painLocation, p.label])}>
+                  {p.label}
+                </OptionCard>
+              );
+            })}
+          </div>
         </div>
       );
 
