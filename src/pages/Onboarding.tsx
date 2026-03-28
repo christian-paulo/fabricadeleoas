@@ -673,8 +673,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
                   {p.img ? (
                     <img src={p.img} alt={p.label} className="w-full h-24 object-cover rounded-xl mb-1" />
                   ) : (
-                    <div className="w-full h-24 rounded-xl mb-1 flex items-center justify-center bg-primary/10">
-                      <span className="text-3xl">🫸</span>
+                    <div className="w-full h-24 rounded-xl mb-1 flex items-center justify-center bg-red-500/20">
+                      <span className="text-3xl">❌</span>
                     </div>
                   )}
                   <span className="text-sm font-medium text-foreground">{p.label}</span>
