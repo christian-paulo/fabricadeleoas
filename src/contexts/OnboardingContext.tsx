@@ -93,6 +93,7 @@ export const ONBOARDING_STEPS = [
   "resultado-visual",
   "dores",
   "local-dor",
+  "beneficios",
   "rotina",
   "flexibilidade",
   "medicacao",

@@ -75,8 +75,8 @@ const Onboarding = () => {
       return;
     }
     let nextIndex = currentIndex + 1;
-    // Skip "local-dor" if user has no pain
-    if (ONBOARDING_STEPS[nextIndex] === "local-dor" && !data.hasPain) {
+    // Skip "local-dor" and "beneficios" if user has no pain
+    while (nextIndex < totalSteps && (ONBOARDING_STEPS[nextIndex] === "local-dor" || ONBOARDING_STEPS[nextIndex] === "beneficios") && !data.hasPain) {
       nextIndex++;
     }
     if (nextIndex < totalSteps) {
@@ -86,8 +86,8 @@ const Onboarding = () => {
 
   const goBack = () => {
     let prevIndex = currentIndex - 1;
-    // Skip "local-dor" going back if user has no pain
-    if (ONBOARDING_STEPS[prevIndex] === "local-dor" && !data.hasPain) {
+    // Skip "local-dor" and "beneficios" going back if user has no pain
+    while (prevIndex >= 0 && (ONBOARDING_STEPS[prevIndex] === "local-dor" || ONBOARDING_STEPS[prevIndex] === "beneficios") && !data.hasPain) {
       prevIndex--;
     }
     if (prevIndex >= 0) {
