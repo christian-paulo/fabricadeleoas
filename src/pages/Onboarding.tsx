@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { } from "recharts";
+
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.png";
