@@ -934,13 +934,6 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
         </h2>
 
         <div className="w-full animate-[fade-in_0.5s_ease-out_0.3s_both]">
-          {/* Meta badge */}
-          <div className="flex justify-end pr-2 mb-1">
-            <div className="pink-gradient rounded-xl py-1.5 px-3 relative">
-              <span className="text-sm font-heading font-bold text-primary-foreground">{metaPeso} kg</span>
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-primary" />
-            </div>
-          </div>
 
           {/* SVG Chart */}
           <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 220 }}>
@@ -971,7 +964,7 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
               <p className="text-xs text-muted-foreground">Hoje</p>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold text-foreground">{metaPeso} kg</p>
+              <p className="text-sm font-bold text-green-500">{metaPeso} kg</p>
               <p className="text-xs text-muted-foreground">{targetLabel}</p>
             </div>
           </div>
