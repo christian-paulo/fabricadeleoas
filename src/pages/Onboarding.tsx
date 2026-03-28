@@ -47,8 +47,6 @@ import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
 import { Slider } from "@/components/ui/slider";
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from "@/contexts/OnboardingContext";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 
@@ -56,7 +54,6 @@ const Onboarding = () => {
   const { step } = useParams<{ step: string }>();
   const navigate = useNavigate();
   const { data, updateField } = useOnboarding();
-  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
 
   const currentStep = (step || "motivacao") as OnboardingStep;
@@ -71,7 +68,7 @@ const Onboarding = () => {
 
   const goNext = async () => {
     if (currentStep === "analise-ia") {
-      await saveAllData();
+      navigate("/checkout");
       return;
     }
     let nextIndex = currentIndex + 1;
@@ -95,52 +92,7 @@ const Onboarding = () => {
     }
   };
 
-  const saveAllData = async () => {
-    if (!user) return;
-    setSaving(true);
-    try {
-      // Save structural data to profiles
-      const { error: profileError } = await supabase.from("profiles").update({
-        goal: data.goal,
-        target_area: data.targetArea.join(", "),
-        training_experience: data.trainingExperience,
-        workout_days: data.workoutDays,
-        workout_duration: data.workoutDuration === "10 min" ? 10 : 30,
-        has_pain: data.hasPain || false,
-        pain_location: data.painLocation.join(", "),
-        uses_medication: data.usesMedication || false,
-        medication_feeling: data.medicationFeeling,
-        equipment: data.equipment,
-      } as any).eq("id", user.id);
-      if (profileError) throw profileError;
-
-      // Save psychological data to onboarding_responses
-      const { error: responseError } = await supabase.from("onboarding_responses" as any).upsert({
-        profile_id: user.id,
-        motivacao: data.motivacao,
-        corpo_atual: data.corpo_atual,
-        corpo_desejado: data.corpo_desejado,
-        altura: data.altura ? parseFloat(data.altura) : null,
-        peso_atual: data.peso_atual ? parseFloat(data.peso_atual) : null,
-        meta_peso: data.meta_peso ? parseFloat(data.meta_peso) : null,
-        biotipo: data.tipo_barriga,
-        idade: data.idade ? parseInt(data.idade) : null,
-        local_treino: data.local_treino,
-        dificuldade: data.dificuldade,
-        rotina: data.rotina,
-        flexibilidade: data.flexibilidade,
-        psicologico: data.psicologico,
-        celebracao: data.celebracao,
-      } as any, { onConflict: "profile_id" } as any);
-      if (responseError) throw responseError;
-
-      navigate("/onboarding/checkout");
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao salvar dados");
-    } finally {
-      setSaving(false);
-    }
-  };
+  // saveAllData is now handled in Checkout after account creation
 
   if (currentIndex === -1) return null;
 

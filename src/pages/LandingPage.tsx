@@ -6,7 +6,7 @@ import { captureUtms } from "@/lib/utm";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const goToAuth = () => navigate("/auth");
+  const goToAuth = () => navigate("/onboarding/boas-vindas");
 
   useEffect(() => { captureUtms(); }, []);
 

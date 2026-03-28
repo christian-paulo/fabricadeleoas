@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export type OnboardingData = {
   // Psychological / engagement
@@ -104,8 +104,22 @@ export const ONBOARDING_STEPS = [
 
 export type OnboardingStep = typeof ONBOARDING_STEPS[number];
 
+const STORAGE_KEY = "onboarding_data";
+
+const loadFromStorage = (): OnboardingData => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return { ...initialData, ...JSON.parse(stored) };
+  } catch {}
+  return initialData;
+};
+
 export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
-  const [data, setData] = useState<OnboardingData>(initialData);
+  const [data, setData] = useState<OnboardingData>(loadFromStorage);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [data]);
 
   const updateField = <K extends keyof OnboardingData>(key: K, value: OnboardingData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
