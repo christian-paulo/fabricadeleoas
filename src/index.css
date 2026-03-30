@@ -4,60 +4,60 @@
 
 @layer base {
   :root {
-    --background: 0 0% 10%;
-    --foreground: 43 30% 90%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%;
 
-    --card: 0 0% 13%;
-    --card-foreground: 43 30% 90%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 13%;
 
-    --popover: 0 0% 13%;
-    --popover-foreground: 43 30% 90%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
 
-    --primary: 43 76% 52%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 340 82% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 43 30% 90%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 43 76% 52%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 340 82% 52%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 18%;
-    --ring: 43 76% 52%;
+    --border: 0 0% 90%;
+    --input: 0 0% 92%;
+    --ring: 340 82% 52%;
 
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 43 30% 90%;
-    --sidebar-primary: 43 76% 52%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 43 30% 90%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 43 76% 52%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 13%;
+    --sidebar-primary: 340 82% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 340 82% 52%;
 
     /* Custom tokens */
-    --gold: 43 76% 52%;
-    --gold-soft: 43 40% 20%;
-    --gold-glow: 43 80% 60%;
-    --pink: 43 76% 52%;
-    --pink-soft: 43 40% 20%;
-    --pink-glow: 43 80% 60%;
-    --surface: 0 0% 13%;
-    --surface-raised: 0 0% 15%;
+    --gold: 340 82% 52%;
+    --gold-soft: 340 40% 92%;
+    --gold-glow: 340 90% 60%;
+    --pink: 340 82% 52%;
+    --pink-soft: 340 40% 92%;
+    --pink-glow: 340 90% 60%;
+    --surface: 0 0% 98%;
+    --surface-raised: 0 0% 96%;
 
     /* Shadows */
-    --shadow-soft: 0 2px 16px hsl(0 0% 0% / 0.3);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.25);
-    --shadow-gold: 0 4px 24px hsl(43 76% 52% / 0.25);
-    --shadow-pink: 0 4px 24px hsl(43 76% 52% / 0.25);
+    --shadow-soft: 0 2px 16px hsl(0 0% 0% / 0.06);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.05);
+    --shadow-gold: 0 4px 24px hsl(340 82% 52% / 0.15);
+    --shadow-pink: 0 4px 24px hsl(340 82% 52% / 0.15);
   }
 }
 
