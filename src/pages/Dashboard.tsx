@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AppLayout from "@/components/AppLayout";
 import { Play, Download, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import cardProtocolo from "@/assets/card-protocolo.jpg";
+import cardCoxa from "@/assets/card-coxa.jpg";
+import card10min from "@/assets/card-10min.jpg";
+import cardSeca from "@/assets/card-seca.jpg";
 
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
