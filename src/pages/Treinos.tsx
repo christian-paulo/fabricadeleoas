@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AppLayout from "@/components/AppLayout";
-import { Play, CheckCircle2, Loader2 } from "lucide-react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Clock, Dumbbell, Target, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type FeedbackType = "facil" | "ideal" | "dificil" | null;
 
 const Treinos = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [workout, setWorkout] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -56,16 +58,29 @@ const Treinos = () => {
 
   const workoutJson = workout?.workout_json;
   const triSets = workoutJson?.tri_sets || [];
-  const phaseLabel = phase === "monthly" ? `Programa Mensal • Protocolo ${workoutNumber}` : `Fase Inicial • Protocolo ${workoutNumber} de 3`;
+
+  // Compute stats
+  const stats = useMemo(() => {
+    let totalExercises = 0;
+    const focusAreas = new Set<string>();
+    triSets.forEach((ts: any) => {
+      ts.exercises?.forEach((ex: any) => {
+        totalExercises++;
+        if (ex.muscle_group) focusAreas.add(ex.muscle_group);
+      });
+    });
+    return {
+      totalExercises,
+      focusAreas: focusAreas.size > 0 ? Array.from(focusAreas).join(", ") : workoutJson?.title || "Corpo todo",
+      duration: workoutJson?.estimated_duration || "~30 min",
+      level: workoutJson?.level || "Intermediário",
+    };
+  }, [triSets, workoutJson]);
+
+  const dayLabel = `${workoutNumber}º dia`;
 
   return (
     <AppLayout>
-      <h1 className="text-3xl text-foreground mb-1 uppercase">Protocolo do Dia</h1>
-      <p className="text-sm text-primary font-heading mb-1">{phaseLabel}</p>
-      <p className="text-base text-muted-foreground mb-6">
-        {workoutJson?.title || "Carregando..."} {workoutJson?.total_series ? `• ${workoutJson.total_series} séries` : ""}
-      </p>
-
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
@@ -77,35 +92,94 @@ const Treinos = () => {
         </div>
       ) : (
         <>
-          {triSets.map((ts: any, idx: number) => (
-            <div key={idx} className="mb-6">
-              <h3 className="text-sm font-heading text-primary mb-3 uppercase tracking-widest">{ts.label}</h3>
-              <div className="space-y-3">
-                {ts.exercises?.map((ex: any, i: number) => (
-                  <div key={i} className="soft-card p-5 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full pink-gradient flex items-center justify-center text-sm font-heading text-primary-foreground font-bold shadow-md">
-                      {i + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-base text-foreground font-bold uppercase">{ex.name}</p>
-                      <p className="text-sm text-muted-foreground">{ex.reps}</p>
-                    </div>
-                    {ex.video_url && (
-                      <button onClick={() => setVideoModal({ name: ex.name, url: ex.video_url })}
-                        className="w-10 h-10 rounded-full pink-gradient flex items-center justify-center text-primary-foreground shadow-md">
-                        <Play size={16} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          {/* Header with back button */}
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+            >
+              <ArrowLeft className="w-5 h-5 text-foreground" />
+            </button>
+            <h1 className="text-2xl font-heading text-foreground">{dayLabel}</h1>
+          </div>
 
+          {/* Stats row */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <p className="text-xl font-bold text-foreground">{stats.duration}</p>
+              <p className="text-sm text-muted-foreground">Duração</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-foreground">{stats.level}</p>
+              <p className="text-sm text-muted-foreground">Nível</p>
+            </div>
+          </div>
+
+          {/* Focus area & exercise count cards */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="soft-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">Área de foco</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{stats.focusAreas}</p>
+            </div>
+            <div className="soft-card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Dumbbell className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground">Exercícios</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{stats.totalExercises}</p>
+              <p className="text-xs text-muted-foreground">{triSets.length} séries</p>
+            </div>
+          </div>
+
+          {/* Exercise list */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-heading text-foreground">
+                Exercícios <span className="text-muted-foreground font-normal">({stats.totalExercises})</span>
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {triSets.map((ts: any, idx: number) => (
+                <div key={idx}>
+                  <p className="text-xs font-heading text-primary uppercase tracking-widest mb-2">{ts.label}</p>
+                  {ts.exercises?.map((ex: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-4 py-3 border-b border-border last:border-0"
+                    >
+                      {/* Thumbnail / play area */}
+                      <button
+                        onClick={() => ex.video_url && setVideoModal({ name: ex.name, url: ex.video_url })}
+                        className="relative w-20 h-20 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Play className="w-5 h-5 text-primary ml-0.5" />
+                        </div>
+                      </button>
+
+                      {/* Exercise info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-bold text-foreground leading-tight">{ex.name}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{ex.reps}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom action */}
           {!completed ? (
-            <Button onClick={() => setShowFeedback(true)}
-              className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl mb-4 shadow-lg">
-              <CheckCircle2 size={20} className="mr-2" /> Concluir Caçada
+            <Button
+              onClick={() => setShowFeedback(true)}
+              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-4 shadow-lg"
+            >
+              Início
             </Button>
           ) : (
             <div className="soft-card p-5 text-center mb-4">
@@ -114,8 +188,10 @@ const Treinos = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
               </p>
-              <Button onClick={generateNextWorkout}
-                className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg">
+              <Button
+                onClick={generateNextWorkout}
+                className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg"
+              >
                 Gerar Próximo Protocolo
               </Button>
             </div>
@@ -123,6 +199,7 @@ const Treinos = () => {
         </>
       )}
 
+      {/* Feedback dialog */}
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
         <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl">
           <DialogHeader>
@@ -134,8 +211,11 @@ const Treinos = () => {
               { value: "ideal" as FeedbackType, label: "💪 Ideal", desc: "Na medida certa" },
               { value: "dificil" as FeedbackType, label: "🔥 Muito Difícil", desc: "Quase não consegui" },
             ].map((opt) => (
-              <button key={opt.value} onClick={() => submitFeedback(opt.value)}
-                className="soft-card p-5 text-left hover:ring-2 hover:ring-primary transition-all">
+              <button
+                key={opt.value}
+                onClick={() => submitFeedback(opt.value)}
+                className="soft-card p-5 text-left hover:ring-2 hover:ring-primary transition-all"
+              >
                 <p className="text-base font-bold text-foreground">{opt.label}</p>
                 <p className="text-sm text-muted-foreground">{opt.desc}</p>
               </button>
@@ -144,17 +224,32 @@ const Treinos = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Video modal - exercise detail */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
-        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-primary text-lg">{videoModal?.name}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-t-3xl p-0 gap-0 [&>button]:hidden">
+          {/* Video */}
           {videoModal?.url && (
-            <div className="aspect-video">
-              <iframe src={videoModal.url.replace("watch?v=", "embed/")} className="w-full h-full rounded-lg"
-                allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
+            <div className="aspect-video w-full">
+              <iframe
+                src={videoModal.url.replace("watch?v=", "embed/")}
+                className="w-full h-full rounded-t-3xl"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              />
             </div>
           )}
+
+          {/* Exercise info */}
+          <div className="p-6">
+            <h3 className="text-2xl font-heading font-bold text-foreground mb-6">{videoModal?.name}</h3>
+
+            <Button
+              onClick={() => setVideoModal(null)}
+              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+            >
+              Fechar
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </AppLayout>
