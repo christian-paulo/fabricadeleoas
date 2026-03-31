@@ -26,7 +26,7 @@ const CATEGORIES = [
 ] as const;
 
 const TreinosClassicos = () => {
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].key);
+  const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0].key);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
