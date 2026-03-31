@@ -17,6 +17,7 @@ import cardProtocolo from "@/assets/card-protocolo.jpg";
 import cardCoxa from "@/assets/card-coxa.jpg";
 import card10min from "@/assets/card-10min.jpg";
 import cardSeca from "@/assets/card-seca.jpg";
+import TreinosClassicos from "@/components/TreinosClassicos";
 
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
@@ -184,6 +185,8 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground">Treine diariamente para manter sua sequência viva</p>
         </div>
       </div>
+
+      <TreinosClassicos />
 
       <h2 className="text-lg font-heading text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
       <div className="space-y-3 mb-4">
