@@ -34,7 +34,7 @@ const CheckoutForm = () => {
   const saveOnboardingData = async (userId: string) => {
     try {
       await supabase.from("profiles").update({
-        goal: onboardingData.goal,
+        goal: onboardingData.goal.join(", "),
         target_area: onboardingData.targetArea.join(", "),
         training_experience: onboardingData.trainingExperience,
         workout_days: onboardingData.workoutDays,
