@@ -1113,8 +1113,8 @@ const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
 function validateStep(step: OnboardingStep, data: any): boolean {
   switch (step) {
     case "boas-vindas": return true;
-    case "motivacao": return data.motivacao !== "";
-    case "objetivo": return data.goal.length > 0;
+    case "motivacao": return data.motivacao.length > 0;
+    case "objetivo": return data.goal !== "";
     case "area-alvo": return data.targetArea.length > 0;
     case "corpo-atual": return data.corpo_atual !== "";
     case "corpo-desejado": return data.corpo_desejado !== "";
