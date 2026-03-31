@@ -186,6 +186,8 @@ const Dashboard = () => {
         </div>
       </div>
 
+      <TreinosClassicos />
+
       <h2 className="text-lg font-heading text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
       <div className="space-y-3 mb-4">
         {[
