@@ -54,22 +54,7 @@ const Dashboard = () => {
     }
   };
 
-  if (!loading && subscription && !subscription.subscribed) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
-        <h1 className="text-3xl font-heading text-primary mb-4">Acesso Bloqueado 🔒</h1>
-        <p className="text-base text-muted-foreground text-center mb-6">
-          Seu período de teste expirou. Assine para continuar treinando!
-        </p>
-        <Button onClick={async () => {
-          const { data } = await supabase.functions.invoke("create-checkout");
-          if (data?.url) window.location.href = data.url;
-        }} className="pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl px-8 shadow-lg">
-          Assinar R$ 49,90/mês
-        </Button>
-      </div>
-    );
-  }
+  const isExpired = !loading && subscription && !subscription.subscribed;
 
   const weekTarget = profile?.workout_days || 4;
   const name = profile?.full_name || "Leoa";
