@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 export type OnboardingData = {
   // Psychological / engagement
-  motivacao: string;
+  motivacao: string[];
   corpo_atual: string;
   corpo_desejado: string;
   altura: string;
