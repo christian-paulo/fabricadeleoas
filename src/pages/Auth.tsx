@@ -31,6 +31,23 @@ const Auth = () => {
     navigate("/dashboard", { replace: true });
   }, [user, authLoading, navigate]);
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao enviar e-mail de recuperação");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
