@@ -208,6 +208,7 @@ const Treinos = () => {
               </Button>
             </div>
           )}
+          </div>
         </>
       )}
 
@@ -239,7 +240,6 @@ const Treinos = () => {
       {/* Video modal - exercise detail */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
         <DialogContent className="bg-card border-border max-w-md mx-auto rounded-t-3xl p-0 gap-0 [&>button]:hidden">
-          {/* Video */}
           {videoModal?.url && (
             <div className="aspect-video w-full">
               <iframe
@@ -250,11 +250,8 @@ const Treinos = () => {
               />
             </div>
           )}
-
-          {/* Exercise info */}
           <div className="p-6">
             <h3 className="text-2xl font-heading font-bold text-foreground mb-6">{videoModal?.name}</h3>
-
             <Button
               onClick={() => setVideoModal(null)}
               className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
@@ -264,7 +261,9 @@ const Treinos = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+
+      <BottomNav />
+    </div>
   );
 };
 
