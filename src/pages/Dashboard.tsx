@@ -125,7 +125,7 @@ const Dashboard = () => {
             <div
               key={idx}
               onClick={() => !card.locked && card.route && navigate(card.route)}
-              className={`relative flex-shrink-0 w-[75%] snap-start rounded-3xl overflow-hidden h-[340px] ${card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
+              className={`relative flex-shrink-0 w-[70%] snap-start rounded-3xl overflow-hidden h-[340px] ${card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
             >
               {/* Full background image */}
               <img
