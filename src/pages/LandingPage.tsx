@@ -54,7 +54,7 @@ const LandingPage = () => {
             Destrua a pochete, elimine o braço merendeira e construa seu legado treinando em casa ou na academia.
             Entre na <span className="text-primary font-semibold">Fábrica de Leoas</span> e teste por 3 dias gratuitos.
           </p>
-          <Button size="lg" onClick={goToAuth}
+          <Button size="lg" onClick={goToOnboarding}
             className="pink-gradient text-primary-foreground font-heading font-bold text-lg px-10 py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
             Iniciar Meus 3 Dias Grátis
             <ArrowRight className="ml-2 w-5 h-5" />
