@@ -155,7 +155,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Heart className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_0.1s_both]">O que mais te motiva hoje?</h2>
-          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Escolha o que mais combina com o seu momento</p>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">Selecione uma ou mais opções</p>
           <div className="space-y-3">
             {[
               { label: "Entrar em forma", icon: <Flame className="w-5 h-5" /> },
@@ -163,9 +163,12 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               { label: "Cuidar da saúde", icon: <HeartPulse className="w-5 h-5" /> },
               { label: "Ter mais energia", icon: <Zap className="w-5 h-5" /> },
               { label: "Ganhar confiança", icon: <ThumbsUp className="w-5 h-5" /> },
-            ].map((m, i) => (
-              <OptionCard key={m.label} selected={data.motivacao === m.label} onClick={() => updateField("motivacao", m.label)} icon={m.icon} index={i}>{m.label}</OptionCard>
-            ))}
+            ].map((m, i) => {
+              const selected = data.motivacao.includes(m.label);
+              return (
+                <OptionCard key={m.label} selected={selected} onClick={() => updateField("motivacao", selected ? data.motivacao.filter((x: string) => x !== m.label) : [...data.motivacao, m.label])} icon={m.icon} index={i}>{m.label}</OptionCard>
+              );
+            })}
           </div>
         </div>
       );
@@ -175,30 +178,27 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Target className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual o seu principal objetivo?</h2>
-          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione uma ou mais opções</p>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Este dado é fundamental para o seu protocolo</p>
           <div className="space-y-3">
             {[
               { label: "Perder\npeso", value: "Emagrecimento", img: obj1Img },
               { label: "Ganhar massa\nmuscular", value: "Ganho de Massa", img: obj2Img },
               { label: "Melhorar\na saúde", value: "Saúde", img: obj3Img },
               { label: "Melhorar as\ndores", value: "Melhorar Dores", img: obj4Img },
-            ].map((g, i) => {
-              const selected = data.goal.includes(g.value);
-              return (
-                <button key={g.value} onClick={() => updateField("goal", selected ? data.goal.filter((x: string) => x !== g.value) : [...data.goal, g.value])}
-                  className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
-                    selected 
-                      ? "ring-2 ring-primary bg-primary/10 scale-[1.02]" 
-                      : "bg-secondary/50 hover:bg-secondary/80"
-                  }`}
-                  style={{ animationDelay: `${i * 100}ms` }}>
-                  <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
-                    selected ? "text-primary" : "text-foreground"
-                  }`}>{g.label}</span>
-                  <img src={g.img} alt={g.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
-                </button>
-              );
-            })}
+            ].map((g, i) => (
+              <button key={g.value} onClick={() => updateField("goal", g.value)}
+                className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-300 animate-[fade-in_0.4s_ease-out_both] ${
+                  data.goal === g.value 
+                    ? "ring-2 ring-primary bg-primary/10 scale-[1.02]" 
+                    : "bg-secondary/50 hover:bg-secondary/80"
+                }`}
+                style={{ animationDelay: `${i * 100}ms` }}>
+                <span className={`relative z-10 pl-5 text-xl font-bold leading-tight whitespace-pre-line text-left ${
+                  data.goal === g.value ? "text-primary" : "text-foreground"
+                }`}>{g.label}</span>
+                <img src={g.img} alt={g.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
+              </button>
+            ))}
           </div>
         </div>
       );
@@ -1113,8 +1113,8 @@ const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
 function validateStep(step: OnboardingStep, data: any): boolean {
   switch (step) {
     case "boas-vindas": return true;
-    case "motivacao": return data.motivacao !== "";
-    case "objetivo": return data.goal.length > 0;
+    case "motivacao": return data.motivacao.length > 0;
+    case "objetivo": return data.goal !== "";
     case "area-alvo": return data.targetArea.length > 0;
     case "corpo-atual": return data.corpo_atual !== "";
     case "corpo-desejado": return data.corpo_desejado !== "";

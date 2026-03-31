@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 export type OnboardingData = {
   // Psychological / engagement
-  motivacao: string;
+  motivacao: string[];
   corpo_atual: string;
   corpo_desejado: string;
   altura: string;
@@ -20,7 +20,7 @@ export type OnboardingData = {
   celebracao: string;
 
   // Structural (saved to profiles)
-  goal: string[];
+  goal: string;
   targetArea: string[];
   equipment: string;
   trainingExperience: string;
@@ -33,7 +33,7 @@ export type OnboardingData = {
 };
 
 const initialData: OnboardingData = {
-  motivacao: "",
+  motivacao: [],
   corpo_atual: "",
   corpo_desejado: "",
   altura: "",
@@ -49,7 +49,7 @@ const initialData: OnboardingData = {
   flexibilidade: "",
   psicologico: [],
   celebracao: "",
-  goal: [],
+  goal: "",
   targetArea: [],
   equipment: "",
   trainingExperience: "",
