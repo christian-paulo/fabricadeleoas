@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
-import { Play, Download, Loader2 } from "lucide-react";
+import { Play, Download, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
@@ -47,28 +54,51 @@ const Dashboard = () => {
     }
   };
 
-  if (!loading && subscription && !subscription.subscribed) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
-        <h1 className="text-3xl font-heading text-primary mb-4">Acesso Bloqueado 🔒</h1>
-        <p className="text-base text-muted-foreground text-center mb-6">
-          Seu período de teste expirou. Assine para continuar treinando!
-        </p>
-        <Button onClick={async () => {
-          const { data } = await supabase.functions.invoke("create-checkout");
-          if (data?.url) window.location.href = data.url;
-        }} className="pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl px-8 shadow-lg">
-          Assinar R$ 49,90/mês
-        </Button>
-      </div>
-    );
-  }
+  const isExpired = !loading && subscription && !subscription.subscribed;
 
   const weekTarget = profile?.workout_days || 4;
   const name = profile?.full_name || "Leoa";
 
   return (
     <AppLayout>
+      {/* Expired subscription modal — cannot be closed */}
+      <Dialog open={!!isExpired} onOpenChange={() => {}}>
+        <DialogContent
+          className="max-w-md text-center [&>button]:hidden"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="items-center">
+            <div className="mx-auto mb-2 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-heading text-primary">
+              Seu acesso expirou
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground mt-2 leading-relaxed">
+              Seu período de teste chegou ao fim, mas sua jornada não precisa parar aqui.
+              Suas alunas já estão vendo resultados — e o seu protocolo personalizado continua te esperando.
+              Reative agora e não perca o ritmo! 💪🦁
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-3">
+            <Button
+              onClick={async () => {
+                const { data } = await supabase.functions.invoke("create-checkout");
+                if (data?.url) window.location.href = data.url;
+              }}
+              className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl shadow-lg"
+            >
+              Reativar meu acesso — R$ 49,90/mês
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Cancele quando quiser, sem burocracia.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <h1 className="text-3xl text-foreground mb-1">
         Olá, <span className="text-primary">{name}</span>! 👋
       </h1>
