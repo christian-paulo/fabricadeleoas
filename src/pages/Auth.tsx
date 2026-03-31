@@ -13,6 +13,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const allowSignup = searchParams.get("mode") === "signup";
   const [isLogin, setIsLogin] = useState(!allowSignup);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -29,6 +30,23 @@ const Auth = () => {
     // If user already completed everything, go to dashboard
     navigate("/dashboard", { replace: true });
   }, [user, authLoading, navigate]);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao enviar e-mail de recuperação");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,52 +100,88 @@ const Auth = () => {
       </div>
 
       <div className="soft-card p-6 w-full">
-        <h2 className="text-lg font-heading text-foreground mb-6 text-center">
-          {isLogin ? "Entrar na Alcateia" : "Criar Conta"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <>
+        {isForgotPassword ? (
+          <>
+            <h2 className="text-lg font-heading text-foreground mb-2 text-center">Recuperar Senha</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Digite seu e-mail e enviaremos um link para redefinir sua senha.
+            </p>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <Label className="text-xs text-muted-foreground">Nome completo</Label>
-                <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                <Label className="text-xs text-muted-foreground">E-mail</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">WhatsApp</Label>
-                <Input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="(11) 99999-9999" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-              </div>
-            </>
-          )}
-          <div>
-            <Label className="text-xs text-muted-foreground">E-mail</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-          </div>
-          <div>
-            <Label className="text-xs text-muted-foreground">Senha</Label>
-            <div className="relative">
-              <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" className="bg-background border-border text-foreground h-12 mt-1 pr-12 rounded-xl" required minLength={6} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-muted-foreground hover:text-foreground transition-colors">
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              <Button type="submit" disabled={loading}
+                className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                {loading ? "Enviando..." : "Enviar link de recuperação"}
+              </Button>
+            </form>
+            <div className="mt-4 text-center">
+              <button onClick={() => setIsForgotPassword(false)} className="text-sm text-primary hover:underline">
+                Voltar ao login
               </button>
             </div>
-          </div>
-          <Button type="submit" disabled={loading}
-            className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-            {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta"}
-          </Button>
-        </form>
+          </>
+        ) : (
+          <>
+            <h2 className="text-lg font-heading text-foreground mb-6 text-center">
+              {isLogin ? "Entrar na Alcateia" : "Criar Conta"}
+            </h2>
 
-        <div className="mt-4 text-center">
-          <button onClick={() => navigate("/onboarding/boas-vindas")} className="text-sm text-primary hover:underline">
-            Não tem conta? Criar agora
-          </button>
-        </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
+                <>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Nome completo</Label>
+                    <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">WhatsApp</Label>
+                    <Input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder="(11) 99999-9999" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                  </div>
+                </>
+              )}
+              <div>
+                <Label className="text-xs text-muted-foreground">E-mail</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Senha</Label>
+                <div className="relative">
+                  <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••" className="bg-background border-border text-foreground h-12 mt-1 pr-12 rounded-xl" required minLength={6} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-0.5 text-muted-foreground hover:text-foreground transition-colors">
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              {isLogin && (
+                <div className="text-right">
+                  <button type="button" onClick={() => setIsForgotPassword(true)} className="text-xs text-primary hover:underline">
+                    Esqueci minha senha
+                  </button>
+                </div>
+              )}
+
+              <Button type="submit" disabled={loading}
+                className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta"}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <button onClick={() => navigate("/onboarding/boas-vindas")} className="text-sm text-primary hover:underline">
+                Não tem conta? Criar agora
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <p className="text-[10px] text-muted-foreground mt-8 text-center">

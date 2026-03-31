@@ -8,6 +8,7 @@ import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Treinos from "./pages/Treinos";
@@ -30,6 +31,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               <Route path="/onboarding/:step" element={<Onboarding />} />
               <Route path="/checkout" element={<Checkout />} />
