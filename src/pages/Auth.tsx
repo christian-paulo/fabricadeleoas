@@ -123,13 +123,11 @@ const Auth = () => {
           </Button>
         </form>
 
-        {allowSignup && (
-          <div className="mt-4 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
-              {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
-            </button>
-          </div>
-        )}
+        <div className="mt-4 text-center">
+          <button onClick={() => navigate("/onboarding/boas-vindas")} className="text-sm text-primary hover:underline">
+            Não tem conta? Criar agora
+          </button>
+        </div>
       </div>
 
       <p className="text-[10px] text-muted-foreground mt-8 text-center">
