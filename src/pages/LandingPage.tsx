@@ -3,10 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Check, Flame, Target, Dumbbell, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
+import { useAuth } from "@/hooks/useAuth";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const goToAuth = () => navigate("/onboarding/boas-vindas");
+  const { user, loading } = useAuth();
+
+  const goToOnboarding = () => navigate("/onboarding/boas-vindas");
+  const goToEntrar = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
+  };
 
   useEffect(() => { captureUtms(); }, []);
 
