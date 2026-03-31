@@ -108,6 +108,60 @@ const Dashboard = () => {
       </h1>
       <p className="text-base text-muted-foreground mb-6">Vamos treinar hoje?</p>
 
+      {/* Challenge Cards Carousel */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-heading text-foreground uppercase">Protocolos</h2>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {[
+            { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, bg: "from-sky-200 to-sky-100", route: "/treinos" },
+            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true, bg: "from-pink-300 to-pink-100" },
+            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true, bg: "from-purple-300 to-purple-100" },
+            { title: "Protocolo Seca Buxo", image: cardSeca, locked: true, bg: "from-orange-200 to-rose-100" },
+          ].map((card, idx) => (
+            <div
+              key={idx}
+              onClick={() => !card.locked && card.route && navigate(card.route)}
+              className={`relative flex-shrink-0 w-[75%] snap-start rounded-3xl overflow-hidden h-[340px] ${card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.bg}`} />
+              <div className="absolute inset-0 opacity-10" style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px), repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px)`
+              }} />
+              <img
+                src={card.image}
+                alt={card.title}
+                className="absolute right-0 top-0 h-full w-[60%] object-cover object-top"
+                loading={idx === 0 ? "eager" : "lazy"}
+              />
+              {card.locked && (
+                <div className="absolute inset-0 bg-black/30 z-10 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                    <Lock className="w-7 h-7 text-white" />
+                  </div>
+                </div>
+              )}
+              <div className="relative z-20 p-5 flex flex-col justify-between h-full">
+                <div>
+                  <span className="inline-block bg-white/80 backdrop-blur-sm text-xs font-semibold px-3 py-1 rounded-full mb-3 text-foreground">
+                    {card.locked ? "Em breve" : "Seu Plano"}
+                  </span>
+                  <h3 className="text-2xl font-bold text-foreground leading-tight max-w-[55%]">
+                    {card.title}
+                  </h3>
+                </div>
+                {!card.locked && (
+                  <button className="w-full bg-white/90 backdrop-blur-sm text-foreground font-semibold py-3 rounded-2xl text-base">
+                    Início
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="soft-card p-5 flex flex-col items-center">
           <div className="relative w-20 h-20 mb-3">
@@ -137,17 +191,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="soft-card p-6 mb-6 border-2 border-primary/20">
-        <h2 className="text-xl text-primary mb-1 uppercase">Protocolo do Dia</h2>
-        <p className="text-sm text-muted-foreground mb-5">Preparado pelo Personal Gilvan</p>
-        <Button onClick={handleStartWorkout} disabled={loadingWorkout}
-          className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl animate-pulse-pink shadow-lg">
-          {loadingWorkout ? <Loader2 className="animate-spin mr-2" size={20} /> : <Play size={20} className="mr-2" />}
-          {loadingWorkout ? "Preparando Protocolo..." : "Iniciar Caçada"}
-        </Button>
-      </div>
-
-      <h2 className="text-xl text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
+      <h2 className="text-lg font-heading text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
       <div className="space-y-3 mb-4">
         {[
           { title: "Ciclo dos Carboidratos", desc: "Guia completo para otimizar sua alimentação" },
