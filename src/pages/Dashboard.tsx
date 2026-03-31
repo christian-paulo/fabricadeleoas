@@ -163,32 +163,29 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="soft-card p-5 flex flex-col items-center">
-          <div className="relative w-20 h-20 mb-3">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--primary))" strokeWidth="3.5"
-                strokeDasharray={`${(weekFrequency / weekTarget) * 94} 94`} strokeLinecap="round" />
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-lg font-heading text-primary">
-              {weekFrequency}/{weekTarget}
-            </span>
-          </div>
-          <span className="text-sm text-muted-foreground font-medium">Frequência Semanal</span>
+      {/* Streak / Sequência de dias */}
+      <div className="soft-card p-6 mb-6 flex items-center gap-5">
+        <div className="relative flex-shrink-0 w-16 h-20">
+          {/* Fire emoji SVG */}
+          <svg viewBox="0 0 64 80" className="w-full h-full">
+            <defs>
+              <radialGradient id="fireGrad" cx="50%" cy="70%" r="50%">
+                <stop offset="0%" stopColor="#FF6B00" />
+                <stop offset="60%" stopColor="#FF9500" />
+                <stop offset="100%" stopColor="#FFD580" stopOpacity="0.6" />
+              </radialGradient>
+            </defs>
+            <ellipse cx="32" cy="50" rx="28" ry="30" fill="#FFD580" opacity="0.35" />
+            <path d="M32 5 C20 25, 8 40, 8 55 C8 70, 18 78, 32 78 C46 78, 56 70, 56 55 C56 40, 44 25, 32 5Z" fill="url(#fireGrad)" />
+            <ellipse cx="32" cy="58" rx="12" ry="14" fill="#FFD580" opacity="0.7" />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white" style={{ paddingTop: '12px' }}>
+            {totalDays}
+          </span>
         </div>
-        <div className="soft-card p-5 flex flex-col items-center">
-          <div className="relative w-20 h-20 mb-3">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--border))" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="hsl(var(--primary))" strokeWidth="3.5"
-                strokeDasharray={`${(totalDays / 30) * 94} 94`} strokeLinecap="round" />
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-lg font-heading text-primary">
-              {totalDays}
-            </span>
-          </div>
-          <span className="text-sm text-muted-foreground font-medium">Dias de Caçada</span>
+        <div>
+          <h3 className="text-xl font-heading text-foreground">Sequência de dias</h3>
+          <p className="text-sm text-muted-foreground">Treine diariamente para manter sua sequência viva</p>
         </div>
       </div>
 
