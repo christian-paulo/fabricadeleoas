@@ -270,6 +270,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         { value: "Saudável e Funcional", label: "Saudável e\nFuncional", img: desejadoSaudavelImg },
         { value: "Definida e com Curvas", label: "Definida e\ncom Curvas", img: desejadoDefinidaImg },
         { value: "Musculosa", label: "Musculosa", img: desejadoMusculosaImg },
+        { value: "Sem Dores", label: "Sem Dores", img: desejadoSaudavelImg },
       ];
       return (
         <div>
