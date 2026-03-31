@@ -511,8 +511,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><Activity className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Em que momento está?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Seu nível de experiência atual</p>
+          <h2 className="text-2xl text-foreground mb-2">Qual dos níveis de <span className="text-primary">experiência</span> abaixo mais combina com seu momento atual?</h2>
           <div className="space-y-3">
             {[
               { val: "Nunca treinei", desc: "Estou começando do zero", emoji: "🌱" },
