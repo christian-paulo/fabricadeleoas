@@ -399,7 +399,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tipo-quadril":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">quadril</span> combina mais com você?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">quadril</span> mais representa o seu atualmente?</h2>
           <div className="space-y-3 mt-6">
             {[
               { val: "Normal", img: quadril1Img },
