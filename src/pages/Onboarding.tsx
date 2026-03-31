@@ -377,7 +377,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tipo-barriga":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">barriga</span> combina mais com você?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">barriga</span> mais representa a sua atualmente?</h2>
           <div className="space-y-3 mt-6">
             {[
               { val: "Barriga normal", img: barr1Img },
