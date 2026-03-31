@@ -556,10 +556,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><Hourglass className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Quanto tempo por dia?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Para alcançar esses resultados</p>
+          <h2 className="text-2xl text-foreground mb-2">Quanto <span className="text-primary">tempo</span> por dia você gostaria de treinar?</h2>
           <div className="flex gap-4 justify-center mt-8">
-            {["10 min", "30 min"].map((d) => (
+            {["Até 10 min", "Até 30 min"].map((d) => (
               <button key={d} onClick={() => updateField("workoutDuration", d)}
                 className={`flex-1 max-w-[160px] h-24 rounded-2xl font-heading text-lg transition-all ${
                   data.workoutDuration === d ? "pink-gradient text-primary-foreground shadow-lg" : "soft-card text-foreground"
