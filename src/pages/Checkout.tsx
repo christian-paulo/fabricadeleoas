@@ -49,7 +49,7 @@ const CheckoutForm = () => {
 
       await supabase.from("onboarding_responses" as any).upsert({
         profile_id: userId,
-        motivacao: onboardingData.motivacao,
+        motivacao: onboardingData.motivacao.join(", "),
         corpo_atual: onboardingData.corpo_atual,
         corpo_desejado: onboardingData.corpo_desejado,
         altura: onboardingData.altura ? parseFloat(onboardingData.altura) : null,
