@@ -113,7 +113,8 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-heading text-foreground uppercase">Protocolos</h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
+          <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {[
             { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, bg: "from-sky-200 to-sky-100", route: "/treinos" },
             { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true, bg: "from-pink-300 to-pink-100" },
