@@ -114,7 +114,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-heading text-foreground uppercase">Protocolos</h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 pl-4 pr-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x', scrollPaddingLeft: '16px' }}>
           <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {[
             { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos" },
