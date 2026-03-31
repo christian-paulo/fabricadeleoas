@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
-import logoLeoa from "@/assets/logo-leoa.png";
+import logoLeoa from "@/assets/logo-leoa.webp";
 import obj1Img from "@/assets/obj1.webp";
 import obj2Img from "@/assets/obj2.webp";
 import obj3Img from "@/assets/obj3.webp";
