@@ -49,7 +49,7 @@ const initialData: OnboardingData = {
   flexibilidade: "",
   psicologico: [],
   celebracao: "",
-  goal: "",
+  goal: [],
   targetArea: [],
   equipment: "",
   trainingExperience: "",
