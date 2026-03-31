@@ -117,45 +117,46 @@ const Dashboard = () => {
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}>
           <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {[
-            { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, bg: "from-sky-200 to-sky-100", route: "/treinos" },
-            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true, bg: "from-pink-300 to-pink-100" },
-            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true, bg: "from-purple-300 to-purple-100" },
-            { title: "Protocolo Seca Buxo", image: cardSeca, locked: true, bg: "from-orange-200 to-rose-100" },
+            { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos" },
+            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true },
+            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true },
+            { title: "Protocolo Seca Buxo", image: cardSeca, locked: true },
           ].map((card, idx) => (
             <div
               key={idx}
               onClick={() => !card.locked && card.route && navigate(card.route)}
               className={`relative flex-shrink-0 w-[75%] snap-start rounded-3xl overflow-hidden h-[340px] ${card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${card.bg}`} />
-              <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px), repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 21px)`
-              }} />
+              {/* Full background image */}
               <img
                 src={card.image}
                 alt={card.title}
-                className="absolute right-0 top-0 h-full w-[60%] object-cover object-top"
+                className="absolute inset-0 w-full h-full object-cover"
                 loading={idx === 0 ? "eager" : "lazy"}
               />
+
+              {/* Gradient overlay from bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
               {card.locked && (
-                <div className="absolute inset-0 bg-black/30 z-10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
                   <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
                     <Lock className="w-7 h-7 text-white" />
                   </div>
                 </div>
               )}
-              <div className="relative z-20 p-5 flex flex-col justify-between h-full">
-                <div>
-                  <span className="inline-block bg-white/80 backdrop-blur-sm text-xs font-semibold px-3 py-1 rounded-full mb-3 text-foreground">
-                    {card.locked ? "Em breve" : "Seu Plano"}
-                  </span>
-                  <h3 className="text-2xl font-bold text-foreground leading-tight max-w-[55%]">
-                    {card.title}
-                  </h3>
-                </div>
+
+              {/* Content on top */}
+              <div className="relative z-20 p-5 flex flex-col justify-end h-full items-center text-center">
+                <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
+                  {card.locked ? "Em breve" : "Seu Plano"}
+                </span>
+                <h3 className="text-2xl font-bold text-white leading-tight mb-4">
+                  {card.title}
+                </h3>
                 {!card.locked && (
-                  <button className="w-full bg-white/90 backdrop-blur-sm text-foreground font-semibold py-3 rounded-2xl text-base">
-                    Início
+                  <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
+                    Iniciar
                   </button>
                 )}
               </div>
