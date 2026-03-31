@@ -165,7 +165,7 @@ const Dashboard = () => {
 
       {/* Streak / Sequência de dias */}
       <div className="soft-card p-6 mb-6 flex items-center gap-5">
-        <div className="relative flex-shrink-0 w-14 h-16">
+        <div className="flex-shrink-0 w-14 h-16">
           <svg viewBox="0 0 56 68" className="w-full h-full">
             <defs>
               <radialGradient id="fireGrad" cx="50%" cy="65%" r="50%">
@@ -178,12 +178,9 @@ const Dashboard = () => {
             <path d="M28 4 C18 20, 6 33, 6 46 C6 58, 15 66, 28 66 C41 66, 50 58, 50 46 C50 33, 38 20, 28 4Z" fill="url(#fireGrad)" />
             <ellipse cx="28" cy="48" rx="10" ry="12" fill="#FFD580" opacity="0.6" />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-white pt-2">
-            {totalDays}
-          </span>
         </div>
         <div>
-          <h3 className="text-xl font-heading text-foreground">Sequência de dias</h3>
+          <h3 className="text-xl font-heading text-foreground"><span className="text-2xl font-bold">{totalDays}</span> Sequência de dias</h3>
           <p className="text-sm text-muted-foreground">Treine diariamente para manter sua sequência viva</p>
         </div>
       </div>
