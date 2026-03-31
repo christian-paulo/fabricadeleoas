@@ -20,7 +20,7 @@ export type OnboardingData = {
   celebracao: string;
 
   // Structural (saved to profiles)
-  goal: string;
+  goal: string[];
   targetArea: string[];
   equipment: string;
   trainingExperience: string;
@@ -49,7 +49,7 @@ const initialData: OnboardingData = {
   flexibilidade: "",
   psicologico: [],
   celebracao: "",
-  goal: "",
+  goal: [],
   targetArea: [],
   equipment: "",
   trainingExperience: "",
