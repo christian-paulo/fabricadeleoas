@@ -86,7 +86,7 @@ const Dashboard = () => {
             <Button
               onClick={async () => {
                 const { data } = await supabase.functions.invoke("create-checkout");
-                if (data?.url) window.location.href = data.url;
+                if (data?.url) window.open(data.url, "_blank");
               }}
               className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl shadow-lg"
             >
