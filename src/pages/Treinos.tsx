@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
-import AppLayout from "@/components/AppLayout";
-import { Play, CheckCircle2, Loader2, ArrowLeft, Clock, Dumbbell, Target, X } from "lucide-react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import BottomNav from "@/components/BottomNav";
+import heroTreino from "@/assets/hero-treino.jpg";
 
 type FeedbackType = "facil" | "ideal" | "dificil" | null;
 
