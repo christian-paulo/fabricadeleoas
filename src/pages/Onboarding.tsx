@@ -207,7 +207,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Dumbbell className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Em qual área quer focar?</h2>
+          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual dos problemas abaixo você gostaria que fosse intensificado no seu treino?</h2>
           <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione uma ou mais áreas</p>
           <div className="space-y-3">
             {[
