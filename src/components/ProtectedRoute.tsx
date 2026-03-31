@@ -23,10 +23,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  // If onboarding not completed, send to quiz
-  if (!profile.onboarding_completed) {
-    return <Navigate to="/onboarding/boas-vindas" replace />;
-  }
+  // Onboarding is optional — no redirect to quiz
 
   if (subscription === null) {
     return (

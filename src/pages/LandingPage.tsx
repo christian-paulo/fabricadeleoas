@@ -143,7 +143,7 @@ const LandingPage = () => {
                 </li>
               ))}
             </ul>
-            <Button size="lg" onClick={goToAuth}
+            <Button size="lg" onClick={goToOnboarding}
               className="w-full pink-gradient text-primary-foreground font-heading font-bold text-lg py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
               Desbloquear Minha Evolução
               <ArrowRight className="ml-2 w-5 h-5" />
