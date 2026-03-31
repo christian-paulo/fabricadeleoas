@@ -535,8 +535,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><Clock className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Quantos dias na semana?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Quantos dias você pode treinar?</p>
+          <h2 className="text-2xl text-foreground mb-2">Com que <span className="text-primary">frequência</span> na semana você gostaria de treinar?</h2>
           <div className="flex gap-3 justify-center mt-8">
             {[2, 3, 4, 5].map((d) => (
               <button key={d} onClick={() => updateField("workoutDays", d)}
