@@ -3,10 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Check, Flame, Target, Dumbbell, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
+import { useAuth } from "@/hooks/useAuth";
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const goToAuth = () => navigate("/onboarding/boas-vindas");
+  const { user, loading } = useAuth();
+
+  const goToOnboarding = () => navigate("/onboarding/boas-vindas");
+  const goToEntrar = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
+  };
 
   useEffect(() => { captureUtms(); }, []);
 
@@ -16,10 +26,16 @@ const LandingPage = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <span className="font-heading text-xl font-bold text-primary tracking-tight">Fábrica de Leoas</span>
-          <Button variant="outline" size="sm" onClick={goToAuth}
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-xl">
-            Entrar
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={goToEntrar}
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-xl">
+              {user ? "Ir para o App" : "Entrar"}
+            </Button>
+            <Button size="sm" onClick={goToOnboarding}
+              className="pink-gradient text-primary-foreground rounded-xl font-semibold">
+              Adquirir Protocolo
+            </Button>
+          </div>
         </div>
       </nav>
 
@@ -38,7 +54,7 @@ const LandingPage = () => {
             Destrua a pochete, elimine o braço merendeira e construa seu legado treinando em casa ou na academia.
             Entre na <span className="text-primary font-semibold">Fábrica de Leoas</span> e teste por 3 dias gratuitos.
           </p>
-          <Button size="lg" onClick={goToAuth}
+          <Button size="lg" onClick={goToOnboarding}
             className="pink-gradient text-primary-foreground font-heading font-bold text-lg px-10 py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
             Iniciar Meus 3 Dias Grátis
             <ArrowRight className="ml-2 w-5 h-5" />
@@ -127,7 +143,7 @@ const LandingPage = () => {
                 </li>
               ))}
             </ul>
-            <Button size="lg" onClick={goToAuth}
+            <Button size="lg" onClick={goToOnboarding}
               className="w-full pink-gradient text-primary-foreground font-heading font-bold text-lg py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
               Desbloquear Minha Evolução
               <ArrowRight className="ml-2 w-5 h-5" />
