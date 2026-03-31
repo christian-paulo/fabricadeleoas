@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
-import AppLayout from "@/components/AppLayout";
-import { Play, CheckCircle2, Loader2, ArrowLeft, Clock, Dumbbell, Target, X } from "lucide-react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import BottomNav from "@/components/BottomNav";
+import heroTreino from "@/assets/hero-treino.jpg";
 
 type FeedbackType = "facil" | "ideal" | "dificil" | null;
 
@@ -80,28 +81,39 @@ const Treinos = () => {
   const dayLabel = `${workoutNumber}º dia`;
 
   return (
-    <AppLayout>
+    <div className="min-h-screen bg-background max-w-lg mx-auto relative">
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
+        <div className="flex flex-col items-center justify-center py-20 px-4">
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
           <span className="text-muted-foreground text-base">Preparando seu protocolo...</span>
         </div>
       ) : triSets.length === 0 ? (
-        <div className="soft-card p-6 text-center">
-          <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
+        <div className="px-4 pt-6">
+          <div className="soft-card p-6 text-center">
+            <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
+          </div>
         </div>
       ) : (
         <>
-          {/* Header with back button */}
-          <div className="flex items-center gap-3 mb-6">
+          {/* Hero image */}
+          <div className="relative h-72 w-full">
+            <img
+              src={heroTreino}
+              alt="Treino do dia"
+              className="w-full h-full object-cover"
+              width={1024}
+              height={640}
+            />
             <button
               onClick={() => navigate("/dashboard")}
-              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+              className="absolute top-6 left-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-10"
             >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-2xl font-heading text-foreground">{dayLabel}</h1>
           </div>
+
+          {/* Content overlapping the image */}
+          <div className="relative -mt-8 bg-background rounded-t-3xl px-4 pt-6 pb-6 bottom-nav-safe">
 
           {/* Stats row */}
           <div className="grid grid-cols-2 gap-4 mb-6">
@@ -196,6 +208,7 @@ const Treinos = () => {
               </Button>
             </div>
           )}
+          </div>
         </>
       )}
 
@@ -227,7 +240,6 @@ const Treinos = () => {
       {/* Video modal - exercise detail */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
         <DialogContent className="bg-card border-border max-w-md mx-auto rounded-t-3xl p-0 gap-0 [&>button]:hidden">
-          {/* Video */}
           {videoModal?.url && (
             <div className="aspect-video w-full">
               <iframe
@@ -238,11 +250,8 @@ const Treinos = () => {
               />
             </div>
           )}
-
-          {/* Exercise info */}
           <div className="p-6">
             <h3 className="text-2xl font-heading font-bold text-foreground mb-6">{videoModal?.name}</h3>
-
             <Button
               onClick={() => setVideoModal(null)}
               className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
@@ -252,7 +261,9 @@ const Treinos = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+
+      <BottomNav />
+    </div>
   );
 };
 
