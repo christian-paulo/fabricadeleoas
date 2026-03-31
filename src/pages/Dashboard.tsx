@@ -165,21 +165,20 @@ const Dashboard = () => {
 
       {/* Streak / Sequência de dias */}
       <div className="soft-card p-6 mb-6 flex items-center gap-5">
-        <div className="relative flex-shrink-0 w-16 h-20">
-          {/* Fire emoji SVG */}
-          <svg viewBox="0 0 64 80" className="w-full h-full">
+        <div className="relative flex-shrink-0 w-14 h-16">
+          <svg viewBox="0 0 56 68" className="w-full h-full">
             <defs>
-              <radialGradient id="fireGrad" cx="50%" cy="70%" r="50%">
+              <radialGradient id="fireGrad" cx="50%" cy="65%" r="50%">
                 <stop offset="0%" stopColor="#FF6B00" />
-                <stop offset="60%" stopColor="#FF9500" />
-                <stop offset="100%" stopColor="#FFD580" stopOpacity="0.6" />
+                <stop offset="55%" stopColor="#FF9500" />
+                <stop offset="100%" stopColor="#FFD580" stopOpacity="0.5" />
               </radialGradient>
             </defs>
-            <ellipse cx="32" cy="50" rx="28" ry="30" fill="#FFD580" opacity="0.35" />
-            <path d="M32 5 C20 25, 8 40, 8 55 C8 70, 18 78, 32 78 C46 78, 56 70, 56 55 C56 40, 44 25, 32 5Z" fill="url(#fireGrad)" />
-            <ellipse cx="32" cy="58" rx="12" ry="14" fill="#FFD580" opacity="0.7" />
+            <ellipse cx="28" cy="42" rx="26" ry="26" fill="#FFD580" opacity="0.3" />
+            <path d="M28 4 C18 20, 6 33, 6 46 C6 58, 15 66, 28 66 C41 66, 50 58, 50 46 C50 33, 38 20, 28 4Z" fill="url(#fireGrad)" />
+            <ellipse cx="28" cy="48" rx="10" ry="12" fill="#FFD580" opacity="0.6" />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white" style={{ paddingTop: '12px' }}>
+          <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-white pt-2">
             {totalDays}
           </span>
         </div>
