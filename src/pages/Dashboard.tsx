@@ -17,6 +17,7 @@ import cardProtocolo from "@/assets/card-protocolo.jpg";
 import cardCoxa from "@/assets/card-coxa.jpg";
 import card10min from "@/assets/card-10min.jpg";
 import cardSeca from "@/assets/card-seca.jpg";
+import TreinosClassicos from "@/components/TreinosClassicos";
 
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
