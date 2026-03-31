@@ -81,28 +81,39 @@ const Treinos = () => {
   const dayLabel = `${workoutNumber}º dia`;
 
   return (
-    <AppLayout>
+    <div className="min-h-screen bg-background max-w-lg mx-auto relative">
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
+        <div className="flex flex-col items-center justify-center py-20 px-4">
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
           <span className="text-muted-foreground text-base">Preparando seu protocolo...</span>
         </div>
       ) : triSets.length === 0 ? (
-        <div className="soft-card p-6 text-center">
-          <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
+        <div className="px-4 pt-6">
+          <div className="soft-card p-6 text-center">
+            <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
+          </div>
         </div>
       ) : (
         <>
-          {/* Header with back button */}
-          <div className="flex items-center gap-3 mb-6">
+          {/* Hero image */}
+          <div className="relative h-72 w-full">
+            <img
+              src={heroTreino}
+              alt="Treino do dia"
+              className="w-full h-full object-cover"
+              width={1024}
+              height={640}
+            />
             <button
               onClick={() => navigate("/dashboard")}
-              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+              className="absolute top-6 left-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-10"
             >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-2xl font-heading text-foreground">{dayLabel}</h1>
           </div>
+
+          {/* Content overlapping the image */}
+          <div className="relative -mt-8 bg-background rounded-t-3xl px-4 pt-6 pb-6 bottom-nav-safe">
 
           {/* Stats row */}
           <div className="grid grid-cols-2 gap-4 mb-6">
