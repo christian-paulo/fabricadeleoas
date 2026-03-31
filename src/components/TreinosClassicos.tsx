@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import catPochete from "@/assets/cat-pochete.jpg";
 import catBraco from "@/assets/cat-braco.jpg";
 import catBumbum from "@/assets/cat-bumbum.jpg";
@@ -12,6 +13,7 @@ type Exercise = {
   name: string;
   muscle_group: string | null;
   target_aesthetic_tag: string | null;
+  internal_level: string | null;
   exercise_type: string | null;
   equipment: string | null;
   video_url: string | null;
@@ -29,20 +31,42 @@ const TreinosClassicos = () => {
   const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0].key);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchExercises = async () => {
       const { data } = await supabase.from("exercises").select("*");
-      if (data) setExercises(data);
+      if (data) setExercises(data as Exercise[]);
       setLoading(false);
     };
     fetchExercises();
   }, []);
 
   const activeCat = CATEGORIES.find((c) => c.key === activeCategory)!;
-  const filtered = exercises.filter((e) =>
-    e.target_aesthetic_tag?.toLowerCase().includes(activeCat.searchTag.toLowerCase())
-  );
+
+  // Filter exercises by category, then group by muscle_group
+  const groups = useMemo(() => {
+    const filtered = exercises.filter((e) =>
+      e.target_aesthetic_tag?.toLowerCase().includes(activeCat.searchTag.toLowerCase())
+    );
+
+    const map = new Map<string, Exercise[]>();
+    filtered.forEach((ex) => {
+      const key = ex.muscle_group || "Outros";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(ex);
+    });
+
+    return Array.from(map.entries()).map(([muscleGroup, exs]) => ({
+      muscleGroup,
+      level: exs[0]?.internal_level || "Iniciante",
+      count: exs.length,
+    }));
+  }, [exercises, activeCat]);
+
+  const handleCardClick = (muscleGroup: string) => {
+    navigate(`/treinos-classicos/${activeCategory}/${encodeURIComponent(muscleGroup)}`);
+  };
 
   return (
     <div className="mb-6">
@@ -65,32 +89,36 @@ const TreinosClassicos = () => {
         ))}
       </div>
 
-      {/* Exercise list */}
+      {/* Grouped workout cards */}
       <div className="space-y-3">
         {loading ? (
           <div className="text-center py-8 text-muted-foreground text-sm">Carregando...</div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">Nenhum exercício encontrado</div>
+        ) : groups.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground text-sm">Nenhum treino encontrado</div>
         ) : (
-          filtered.map((exercise) => (
+          groups.map((group) => (
             <div
-              key={exercise.id}
+              key={group.muscleGroup}
+              onClick={() => handleCardClick(group.muscleGroup)}
               className="soft-card flex items-center gap-4 p-3 cursor-pointer active:scale-[0.98] transition-transform"
             >
               <div className={`w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 ${activeCat.bg}`}>
                 <img
                   src={activeCat.image}
-                  alt={exercise.name}
+                  alt={group.muscleGroup}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-heading text-foreground truncate">{exercise.name}</h3>
+                <h3 className="text-base font-heading text-foreground truncate">
+                  {group.muscleGroup} {group.level}
+                </h3>
                 <p className="text-xs text-muted-foreground">
-                  {exercise.muscle_group} • {exercise.equipment}
+                  {group.count} exercício{group.count > 1 ? "s" : ""}
                 </p>
               </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </div>
           ))
         )}
