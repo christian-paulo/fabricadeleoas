@@ -61,6 +61,44 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
+      {/* Expired subscription modal — cannot be closed */}
+      <Dialog open={!!isExpired} onOpenChange={() => {}}>
+        <DialogContent
+          className="max-w-md text-center [&>button]:hidden"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="items-center">
+            <div className="mx-auto mb-2 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-heading text-primary">
+              Seu acesso expirou
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground mt-2 leading-relaxed">
+              Seu período de teste chegou ao fim, mas sua jornada não precisa parar aqui.
+              Suas alunas já estão vendo resultados — e o seu protocolo personalizado continua te esperando.
+              Reative agora e não perca o ritmo! 💪🦁
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-3">
+            <Button
+              onClick={async () => {
+                const { data } = await supabase.functions.invoke("create-checkout");
+                if (data?.url) window.location.href = data.url;
+              }}
+              className="w-full pink-gradient text-primary-foreground font-heading text-base h-14 rounded-2xl shadow-lg"
+            >
+              Reativar meu acesso — R$ 49,90/mês
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Cancele quando quiser, sem burocracia.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <h1 className="text-3xl text-foreground mb-1">
         Olá, <span className="text-primary">{name}</span>! 👋
       </h1>
