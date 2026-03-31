@@ -13,6 +13,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const allowSignup = searchParams.get("mode") === "signup";
   const [isLogin, setIsLogin] = useState(!allowSignup);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
