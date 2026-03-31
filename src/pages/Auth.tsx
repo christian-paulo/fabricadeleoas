@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const allowSignup = searchParams.get("mode") === "signup";
+  const [isLogin, setIsLogin] = useState(!allowSignup);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -121,11 +123,13 @@ const Auth = () => {
           </Button>
         </form>
 
-        <div className="mt-4 text-center">
-          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
-            {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
-          </button>
-        </div>
+        {allowSignup && (
+          <div className="mt-4 text-center">
+            <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
+              {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
+            </button>
+          </div>
+        )}
       </div>
 
       <p className="text-[10px] text-muted-foreground mt-8 text-center">
