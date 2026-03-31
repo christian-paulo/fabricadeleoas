@@ -189,7 +189,7 @@ const Treinos = () => {
           {!completed ? (
             <Button
               onClick={() => setShowFeedback(true)}
-              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-4 shadow-lg"
+              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-24 shadow-lg"
             >
               Início
             </Button>
