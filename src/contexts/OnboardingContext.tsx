@@ -33,7 +33,7 @@ export type OnboardingData = {
 };
 
 const initialData: OnboardingData = {
-  motivacao: "",
+  motivacao: [],
   corpo_atual: "",
   corpo_desejado: "",
   altura: "",
