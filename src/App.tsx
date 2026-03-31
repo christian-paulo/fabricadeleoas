@@ -16,6 +16,7 @@ import Evolucao from "./pages/Evolucao";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
+import TreinoClassicoDetalhe from "./pages/TreinoClassicoDetalhe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
