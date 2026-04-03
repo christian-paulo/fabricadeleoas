@@ -49,11 +49,11 @@ const Treinos = () => {
     setLoading(false);
   };
 
-  const submitFeedback = async (fb: FeedbackType) => {
-    if (!workout) return;
-    const { error } = await supabase.from("workouts").update({ completed: true, feedback_effort: fb }).eq("id", workout.id);
+  const submitFeedback = async () => {
+    if (!workout || !selectedEffort) return;
+    const { error } = await supabase.from("workouts").update({ completed: true, feedback_effort: selectedEffort }).eq("id", workout.id);
     if (error) { toast.error("Erro ao salvar feedback"); }
-    else { setFeedback(fb); setCompleted(true); setShowFeedback(false); toast.success("Caçada concluída! 🎉"); }
+    else { setFeedback(selectedEffort); setCompleted(true); setFeedbackStep(null); setShowFeedback(false); toast.success("Treino finalizado! 🎉"); navigate("/treinos"); }
   };
 
   const generateNextWorkout = async () => {
