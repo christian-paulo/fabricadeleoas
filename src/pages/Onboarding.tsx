@@ -573,7 +573,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
       return (
         <div>
           <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Sente algum desconforto?</h2>
+          <h2 className="text-2xl text-foreground mb-2">Você sente dores no corpo?</h2>
           <p className="text-sm text-muted-foreground mb-6">Precisamos saber para sua segurança</p>
           <div className="flex gap-4 justify-center mb-6">
             {[{ val: true, label: "Sim" }, { val: false, label: "Não" }].map((opt) => (
