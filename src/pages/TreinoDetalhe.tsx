@@ -192,23 +192,23 @@ const Treinos = () => {
           {/* Bottom action */}
           {!completed ? (
             <Button
-              onClick={() => setShowFeedback(true)}
+              onClick={() => { setFeedbackStep("effort"); setShowFeedback(true); }}
               className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-24 shadow-lg"
             >
-              Início
+              Finalizar Treino
             </Button>
           ) : (
-            <div className="soft-card p-5 text-center mb-4">
+            <div className="soft-card p-5 text-center mb-24">
               <CheckCircle2 className="mx-auto text-primary mb-3" size={40} />
-              <p className="text-base text-foreground font-bold">Caçada concluída! 🎉</p>
+              <p className="text-base text-foreground font-bold">Treino finalizado! 🎉</p>
               <p className="text-sm text-muted-foreground mb-4">
                 Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
               </p>
               <Button
-                onClick={generateNextWorkout}
+                onClick={() => navigate("/treinos")}
                 className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg"
               >
-                Gerar Próximo Protocolo
+                Voltar ao Plano
               </Button>
             </div>
           )}
@@ -216,8 +216,8 @@ const Treinos = () => {
         </>
       )}
 
-      {/* Feedback dialog */}
-      <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+      {/* Feedback dialog - Step 1: Effort */}
+      <Dialog open={showFeedback && feedbackStep === "effort"} onOpenChange={(open) => { if (!open) { setShowFeedback(false); setFeedbackStep(null); } }}>
         <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-primary text-center text-xl">Como foi o esforço de hoje?</DialogTitle>
@@ -230,13 +230,49 @@ const Treinos = () => {
             ].map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => submitFeedback(opt.value)}
-                className="soft-card p-5 text-left hover:ring-2 hover:ring-primary transition-all"
+                onClick={() => { setSelectedEffort(opt.value); setFeedbackStep("comment"); }}
+                className={`soft-card p-5 text-left hover:ring-2 hover:ring-primary transition-all ${
+                  selectedEffort === opt.value ? "ring-2 ring-primary" : ""
+                }`}
               >
                 <p className="text-base font-bold text-foreground">{opt.label}</p>
                 <p className="text-sm text-muted-foreground">{opt.desc}</p>
               </button>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback dialog - Step 2: Comment */}
+      <Dialog open={showFeedback && feedbackStep === "comment"} onOpenChange={(open) => { if (!open) { setShowFeedback(false); setFeedbackStep(null); } }}>
+        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-primary text-center text-xl">Conte mais sobre seu treino</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground text-center">
+            Como você se sentiu? Alguma dificuldade ou observação?
+          </p>
+          <textarea
+            value={feedbackComment}
+            onChange={(e) => setFeedbackComment(e.target.value)}
+            placeholder="Ex: Senti que os exercícios de perna foram intensos, mas consegui completar tudo..."
+            className="w-full mt-3 p-4 rounded-xl bg-muted border border-border text-foreground text-sm min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/60"
+          />
+          <div className="flex gap-3 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setFeedbackStep("effort")}
+              className="flex-1 h-12 rounded-xl"
+            >
+              Voltar
+            </Button>
+            <Button
+              onClick={submitFeedback}
+              className="flex-1 pink-gradient text-primary-foreground font-heading h-12 rounded-xl shadow-lg flex items-center gap-2"
+            >
+              <Send className="w-4 h-4" />
+              Enviar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
