@@ -10,6 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import heroTreino from "@/assets/hero-treino.jpg";
 
 type FeedbackType = "facil" | "ideal" | "dificil" | null;
+type FeedbackStep = "effort" | "comment" | null;
 
 const Treinos = () => {
   const { user } = useAuth();
