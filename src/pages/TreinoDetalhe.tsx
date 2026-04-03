@@ -18,6 +18,9 @@ const Treinos = () => {
   const [workout, setWorkout] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackStep, setFeedbackStep] = useState<FeedbackStep>(null);
+  const [selectedEffort, setSelectedEffort] = useState<FeedbackType>(null);
+  const [feedbackComment, setFeedbackComment] = useState("");
   const [completed, setCompleted] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [videoModal, setVideoModal] = useState<{ name: string; url: string } | null>(null);
