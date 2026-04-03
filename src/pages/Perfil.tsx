@@ -82,8 +82,8 @@ const Perfil = () => {
         ))}
       </div>
 
-      <Button variant="ghost" onClick={handleSignOut}
-        className="w-full mt-6 text-muted-foreground hover:text-destructive h-12 text-base">
+      <Button onClick={handleSignOut}
+        className="w-full mt-6 pink-gradient text-primary-foreground font-heading h-14 text-base rounded-2xl shadow-lg">
         <LogOut size={18} className="mr-2" /> Sair da Conta
       </Button>
     </AppLayout>
