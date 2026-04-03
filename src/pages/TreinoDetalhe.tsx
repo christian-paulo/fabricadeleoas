@@ -105,7 +105,7 @@ const Treinos = () => {
               height={640}
             />
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/treinos")}
               className="absolute top-6 left-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center z-10"
             >
               <ArrowLeft className="w-5 h-5 text-white" />
