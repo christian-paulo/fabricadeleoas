@@ -34,17 +34,12 @@ const PlanoProtocolo = () => {
   useEffect(() => {
     if (!user) return;
     const fetchDay = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("trial_start_date, created_at")
-        .eq("id", user.id)
-        .single();
-      if (data) {
-        const start = new Date(data.trial_start_date || data.created_at || new Date());
-        const now = new Date();
-        const diff = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        setCurrentDay(Math.min(Math.max(diff + 1, 1), 28));
-      }
+      const { count } = await supabase
+        .from("workouts")
+        .select("id", { count: "exact", head: true })
+        .eq("profile_id", user.id)
+        .eq("completed", true);
+      setCurrentDay(Math.min((count || 0) + 1, 28));
     };
     fetchDay();
   }, [user]);
