@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AppLayout from "@/components/AppLayout";
 import { ArrowLeft, Play } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const CATEGORY_TAG_MAP: Record<string, string> = {
   pochete: "Pochete",
@@ -27,6 +29,7 @@ const TreinoClassicoDetalhe = () => {
   const navigate = useNavigate();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [videoModal, setVideoModal] = useState<{ name: string; url: string } | null>(null);
 
   const searchTag = CATEGORY_TAG_MAP[category || ""] || "";
   const decodedMuscleGroup = decodeURIComponent(muscleGroup || "");
@@ -46,6 +49,12 @@ const TreinoClassicoDetalhe = () => {
     };
     fetch();
   }, [searchTag, decodedMuscleGroup]);
+
+  const getEmbedUrl = (url: string) => {
+    const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+    if (shortsMatch) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+    return url.replace("watch?v=", "embed/");
+  };
 
   return (
     <AppLayout>
@@ -72,12 +81,7 @@ const TreinoClassicoDetalhe = () => {
             >
               {exercise.video_url ? (
                 <button
-                  onClick={() => {
-                    const url = exercise.video_url!;
-                    const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
-                    const embedUrl = shortsMatch ? `https://www.youtube.com/embed/${shortsMatch[1]}` : url.replace("watch?v=", "embed/");
-                    setVideoModal({ name: exercise.name, url: embedUrl });
-                  }}
+                  onClick={() => setVideoModal({ name: exercise.name, url: getEmbedUrl(exercise.video_url!) })}
                   className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"
                 >
                   <Play className="w-5 h-5 text-primary" />
@@ -97,6 +101,31 @@ const TreinoClassicoDetalhe = () => {
           ))}
         </div>
       )}
+
+      {/* Video modal */}
+      <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
+        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-t-3xl p-0 gap-0 [&>button]:hidden">
+          {videoModal?.url && (
+            <div className="aspect-video w-full">
+              <iframe
+                src={videoModal.url}
+                className="w-full h-full rounded-t-3xl"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              />
+            </div>
+          )}
+          <div className="p-6">
+            <h3 className="text-2xl font-heading font-bold text-foreground mb-6">{videoModal?.name}</h3>
+            <Button
+              onClick={() => setVideoModal(null)}
+              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+            >
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
