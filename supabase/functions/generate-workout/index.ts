@@ -188,7 +188,8 @@ ${JSON.stringify(exercises.map(e => ({
   id: e.id, name: e.name, muscle_group: e.muscle_group,
   equipment: e.equipment, level: e.internal_level,
   aesthetic_tag: e.target_aesthetic_tag,
-  therapeutic: e.therapeutic_focus
+  therapeutic: e.therapeutic_focus,
+  video_url: e.video_url
 })), null, 2)}
 
 Gere o treino número ${nextWorkoutNumber}.`;

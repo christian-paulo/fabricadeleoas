@@ -71,14 +71,17 @@ const TreinoClassicoDetalhe = () => {
               className="soft-card flex items-center gap-4 p-4"
             >
               {exercise.video_url ? (
-                <a
-                  href={exercise.video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => {
+                    const url = exercise.video_url!;
+                    const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+                    const embedUrl = shortsMatch ? `https://www.youtube.com/embed/${shortsMatch[1]}` : url.replace("watch?v=", "embed/");
+                    setVideoModal({ name: exercise.name, url: embedUrl });
+                  }}
                   className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"
                 >
                   <Play className="w-5 h-5 text-primary" />
-                </a>
+                </button>
               ) : (
                 <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
                   <Play className="w-5 h-5 text-muted-foreground" />

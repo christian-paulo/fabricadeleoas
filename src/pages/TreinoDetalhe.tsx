@@ -283,7 +283,12 @@ const Treinos = () => {
           {videoModal?.url && (
             <div className="aspect-video w-full">
               <iframe
-                src={videoModal.url.replace("watch?v=", "embed/")}
+                src={(() => {
+                  const url = videoModal.url;
+                  const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+                  if (shortsMatch) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+                  return url.replace("watch?v=", "embed/");
+                })()}
                 className="w-full h-full rounded-t-3xl"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
