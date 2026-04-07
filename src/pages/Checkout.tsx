@@ -570,6 +570,64 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
 const WhatYouGet = () => null;
 
+const testimonials = [testimonial1, testimonial2, testimonial3, testimonial4, testimonial5, testimonial6];
+
+const SuccessStoriesCarousel = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[index] as HTMLElement;
+    if (child) {
+      container.scrollTo({ left: child.offsetLeft - 16, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % testimonials.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [scrollToIndex]);
+
+  return (
+    <div className="soft-card p-6">
+      <h3 className="font-heading text-lg text-foreground mb-4 text-center">
+        Veja histórias de sucesso de quem confiou 💬
+      </h3>
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {testimonials.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`Depoimento ${i + 1}`}
+            className="snap-center rounded-xl shadow-sm flex-shrink-0 w-[85%] max-w-[340px] object-contain"
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-3">
+        {testimonials.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setCurrentIndex(i); scrollToIndex(i); }}
+            className={`w-2 h-2 rounded-full transition-colors ${i === currentIndex ? "bg-primary" : "bg-muted"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ─── Order Summary Component ────────────────────────────────────
 const OrderSummary = () => {
   const { data: onboardingData } = useOnboarding();
