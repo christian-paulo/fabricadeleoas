@@ -878,15 +878,15 @@ const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any
       </div>
     </div>
     <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-20 h-20 rounded-full pink-gradient flex items-center justify-center mb-6 shadow-lg">
-        <Sparkles className="w-10 h-10 text-primary-foreground" />
-      </div>
       <h2 className="text-2xl font-heading text-foreground mb-3">Resultados são possíveis!</h2>
-      <p className="text-muted-foreground mb-8 leading-relaxed">
+      <p className="text-muted-foreground mb-4 leading-relaxed">
         Milhares de mulheres já transformaram seus corpos com o método Gilvan. 
         Com consistência e o protocolo certo, você também vai chegar lá. 💪
       </p>
-      <div className="soft-card p-6 w-full mb-8">
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg mb-6">
+        <img src={transformacaoResultado} alt="Transformação real - antes e depois" className="w-full h-auto object-cover" />
+      </div>
+      <div className="soft-card p-6 w-full mb-4">
         <p className="text-sm text-muted-foreground mb-2">Média de resultados em 12 semanas</p>
         <div className="grid grid-cols-3 gap-4">
           <div>
