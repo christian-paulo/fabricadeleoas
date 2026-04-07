@@ -33,13 +33,6 @@ serve(async (req) => {
       .from("profiles").select("*").eq("id", user.id).single();
     if (profileError || !profile) throw new Error("Profile not found");
 
-    // Get onboarding responses for challenge preference
-    const { data: onboarding } = await supabase
-      .from("onboarding_responses")
-      .select("*")
-      .eq("profile_id", user.id)
-      .single();
-
     // Get ALL workouts for this user, ordered by creation
     const { data: allWorkouts } = await supabase
       .from("workouts")
@@ -51,7 +44,13 @@ serve(async (req) => {
     const completedCount = workouts.filter(w => w.completed).length;
     const lastWorkout = workouts[workouts.length - 1];
 
+    // FLOW LOGIC:
+    // 1. If there's an incomplete workout → return it (don't generate new)
+    // 2. If all workouts are completed (or none exist) → generate next one
+    // 3. Track phase: workout 1, 2, 3 = initial phase. After 3 completed = monthly phase.
+
     if (lastWorkout && !lastWorkout.completed) {
+      // There's a pending workout - return it
       return new Response(JSON.stringify({ 
         workout: lastWorkout,
         phase: completedCount < 3 ? "initial" : "monthly",
@@ -62,6 +61,7 @@ serve(async (req) => {
       });
     }
 
+    // All completed (or no workouts) → generate next
     const nextWorkoutNumber = workouts.length + 1;
     const isMonthlyPhase = completedCount >= 3;
 
@@ -94,27 +94,10 @@ serve(async (req) => {
 
     const effectiveDuration = isMedicationRisk ? 10 : (profile.workout_duration || 30);
 
-    // Determine series and reps based on level
-    // Check if user wants maximum challenge (from onboarding)
-    const wantsMaxChallenge = onboarding?.dificuldade === "Desafio máximo" || onboarding?.dificuldade === "maximo";
-
-    let seriesConfig = "";
-    let restTime = "";
-    if (effectiveLevel === "iniciante") {
-      seriesConfig = "2 séries, 15 a 20 repetições por exercício";
-      restTime = "45 segundos";
-    } else if (effectiveLevel === "intermediario") {
-      const series = wantsMaxChallenge ? 4 : 3;
-      seriesConfig = `${series} séries, 15 a 30 repetições por exercício`;
-      restTime = "45 segundos";
-    } else {
-      seriesConfig = "até 6 séries, 15 a 30 repetições por exercício";
-      restTime = "30 segundos";
-    }
-
     // Build different prompts based on phase
     let phaseInstructions = "";
     if (isMonthlyPhase) {
+      // After 3 initial workouts: interpret all feedback and generate monthly-quality workout
       const allWorkoutData = workouts.map((w, i) => ({
         number: i + 1,
         feedback: w.feedback_effort,
@@ -131,6 +114,7 @@ ${JSON.stringify(allWorkoutData, null, 2)}
 Considere a progressão geral: se ela achou fácil na maioria, aumente; se achou difícil, ajuste para baixo; se ideal, mantenha mas varie os exercícios.
 Este é o treino número ${nextWorkoutNumber} do programa mensal.`;
     } else {
+      // Initial phase (workouts 1-3): evaluate and adapt
       const lastFeedback = workouts.length > 0 
         ? workouts[workouts.length - 1]?.feedback_effort 
         : null;
@@ -169,14 +153,13 @@ REGRA MAIS IMPORTANTE:
 - Se não encontrar exercícios suficientes na lista, use menos exercícios, mas NUNCA invente.
 
 REGRAS DE MONTAGEM:
-1. Gere exercícios INDIVIDUAIS (NÃO use tri-sets). Cada exercício é independente.
-2. Configuração de séries e repetições: ${seriesConfig}.
-3. Descanso entre séries: ${restTime}.
-4. Para duração ${effectiveDuration}min: selecione de 4 a 8 exercícios.
-5. Nível efetivo da aluna: ${effectiveLevel}.
-${isMedicationRisk ? "6. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
-${profile.has_pain ? `7. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
-${profile.goal === "Melhorar Dores" ? "8. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
+1. SEMPRE agrupe exercícios em TRI-SETS (blocos de 3 exercícios consecutivos).
+2. Todas as repetições são "15 a 30 repetições".
+3. Para duração ${effectiveDuration}min: ${effectiveDuration === 10 ? "2 a 3 séries totais" : "5 a 6 séries totais"}.
+4. Nível efetivo da aluna: ${effectiveLevel}.
+${isMedicationRisk ? "5. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
+${profile.has_pain ? `6. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
+${profile.goal === "Melhorar Dores" ? "7. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
 
 ${phaseInstructions}
 
@@ -184,18 +167,17 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
 {
   "title": "Título do treino",
   "description": "Breve descrição",
-  "level": "${effectiveLevel}",
-  "rest_seconds": ${restTime === "30 segundos" ? 30 : 45},
+  "total_series": number,
   "workout_number": ${nextWorkoutNumber},
   "phase": "${isMonthlyPhase ? "monthly" : "initial"}",
-  "exercises": [
+  "tri_sets": [
     {
-      "exercise_id": "uuid_da_lista",
-      "name": "nome_exato_da_lista",
-      "sets": number,
-      "reps": "15 a 20" ou "15 a 30",
-      "video_url": "url_da_lista",
-      "muscle_group": "grupo_muscular"
+      "label": "Tri-set A",
+      "exercises": [
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" }
+      ]
     }
   ]
 }`;
@@ -264,31 +246,38 @@ Gere o treino número ${nextWorkoutNumber}.`;
     }
 
     // Post-process: validate exercises against DB, remove any that don't match
-    if (workoutJson.exercises && exercises) {
+    if (workoutJson.tri_sets && exercises) {
       const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       const exerciseIds = new Set(exercises.map(e => e.id));
 
-      workoutJson.exercises = workoutJson.exercises
-        .map((ex: any) => {
-          // First check by ID
-          if (ex.exercise_id && exerciseIds.has(ex.exercise_id)) {
-            const match = exercises.find(e => e.id === ex.exercise_id)!;
-            return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
-          }
-          // Fallback: exact name match
-          const exName = normalize(ex.name || "");
-          const match = exercises.find(e => normalize(e.name) === exName);
-          if (match) {
-            return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
-          }
-          // Contained match
-          const partial = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
-          if (partial) {
-            return { ...ex, exercise_id: partial.id, name: partial.name, video_url: partial.video_url, muscle_group: partial.muscle_group };
-          }
-          return null;
-        })
-        .filter((ex: any) => ex !== null);
+      for (const ts of workoutJson.tri_sets) {
+        if (!ts.exercises) continue;
+        // Map and validate each exercise
+        ts.exercises = ts.exercises
+          .map((ex: any) => {
+            // First check by ID
+            if (ex.exercise_id && exerciseIds.has(ex.exercise_id)) {
+              const match = exercises.find(e => e.id === ex.exercise_id)!;
+              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
+            }
+            // Fallback: exact name match
+            const exName = normalize(ex.name || "");
+            const match = exercises.find(e => normalize(e.name) === exName);
+            if (match) {
+              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
+            }
+            // Contained match
+            const partial = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
+            if (partial) {
+              return { ...ex, exercise_id: partial.id, name: partial.name, video_url: partial.video_url, muscle_group: partial.muscle_group };
+            }
+            // No match — remove this exercise
+            return null;
+          })
+          .filter((ex: any) => ex !== null);
+      }
+      // Remove empty tri-sets
+      workoutJson.tri_sets = workoutJson.tri_sets.filter((ts: any) => ts.exercises && ts.exercises.length > 0);
     }
 
     const today = new Date().toISOString().split("T")[0];
