@@ -4,6 +4,7 @@ import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Du
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
 import { useAuth } from "@/hooks/useAuth";
+import logoIcon from "@/assets/logo-leoa-icon.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
