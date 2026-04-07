@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
+import testimonial1 from "@/assets/testimonial-1.jpg";
+import testimonial2 from "@/assets/testimonial-2.jpg";
+import testimonial3 from "@/assets/testimonial-3.jpg";
+import testimonial4 from "@/assets/testimonial-4.jpg";
+import testimonial5 from "@/assets/testimonial-5.jpg";
+import testimonial6 from "@/assets/testimonial-6.jpg";
 
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
@@ -564,6 +570,64 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
 const WhatYouGet = () => null;
 
+const testimonials = [testimonial1, testimonial2, testimonial3, testimonial4, testimonial5, testimonial6];
+
+const SuccessStoriesCarousel = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[index] as HTMLElement;
+    if (child) {
+      container.scrollTo({ left: child.offsetLeft - 16, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % testimonials.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [scrollToIndex]);
+
+  return (
+    <div className="soft-card p-6">
+      <h3 className="font-heading text-lg text-foreground mb-4 text-center">
+        Veja histórias de sucesso de quem confiou 💬
+      </h3>
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {testimonials.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`Depoimento ${i + 1}`}
+            className="snap-center rounded-xl shadow-sm flex-shrink-0 w-[85%] max-w-[340px] object-contain"
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-3">
+        {testimonials.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setCurrentIndex(i); scrollToIndex(i); }}
+            className={`w-2 h-2 rounded-full transition-colors ${i === currentIndex ? "bg-primary" : "bg-muted"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ─── Order Summary Component ────────────────────────────────────
 const OrderSummary = () => {
   const { data: onboardingData } = useOnboarding();
@@ -574,6 +638,9 @@ const OrderSummary = () => {
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} />
       <WhatYouGet />
+
+      {/* Success stories carousel */}
+      <SuccessStoriesCarousel />
 
       {/* Order summary */}
       <div className="soft-card p-6 md:p-8 h-fit">
