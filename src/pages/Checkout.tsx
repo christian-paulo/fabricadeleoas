@@ -568,7 +568,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
       <div className="mt-6">
         <h4 className="font-heading text-lg text-foreground mb-3">PRÉ-VISUALIZAÇÃO DO PLANO</h4>
         <div className="space-y-2">
-          {["Semana 1: Desperte Seu Corpo 😊", "Semana 2: Acelere o Ritmo 💪", "Semana 3: Supere Limites 🔥", "Semana 4: Transformação Final 🏆"].map((week, i) => (
+          {["Semana 1: Desperte Seu Corpo 😊", "Semana 2: Acelere o Ritmo 💪", "Semana 3: Supere Limites 🔥", "Semana 4: Transformação Total 🏆"].map((week, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />
               <span className="text-sm text-foreground">{week}</span>
