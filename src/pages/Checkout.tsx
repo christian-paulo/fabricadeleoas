@@ -455,9 +455,13 @@ const Checkout = () => {
               }}>
               <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
             </Elements>
+              )}
+            </>
           )}
         </div>
       </div>
+    </div>
+  );
     </div>
   );
 };
