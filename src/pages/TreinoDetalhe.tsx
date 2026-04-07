@@ -75,26 +75,18 @@ const Treinos = () => {
   // Fuzzy match: find the best matching exercise by name similarity
   const findVideoUrl = (exerciseName: string): string | null => {
     if (!exerciseName || dbExercises.length === 0) return null;
-    const lower = exerciseName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    // Exact match first
-    const exact = dbExercises.find((e) => e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === lower);
+    const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const lower = normalize(exerciseName);
+    // Exact match only
+    const exact = dbExercises.find((e) => normalize(e.name) === lower);
     if (exact) return exact.video_url;
-    // Partial match: check if DB name contains the exercise name or vice-versa
-    const partial = dbExercises.find((e) => {
-      const dbLower = e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return dbLower.includes(lower) || lower.includes(dbLower);
+    // Contained match: DB name must fully contain the exercise name or vice-versa
+    const contained = dbExercises.find((e) => {
+      const dbLower = normalize(e.name);
+      return dbLower === lower || dbLower.includes(lower) || lower.includes(dbLower);
     });
-    if (partial) return partial.video_url;
-    // Word-based match: find exercise with most common words
-    const words = lower.split(/\s+/).filter((w) => w.length > 2);
-    let bestMatch: { name: string; video_url: string } | null = null;
-    let bestScore = 0;
-    for (const e of dbExercises) {
-      const dbWords = e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/\s+/);
-      const score = words.filter((w) => dbWords.some((dw) => dw.includes(w) || w.includes(dw))).length;
-      if (score > bestScore && score >= 2) { bestScore = score; bestMatch = e; }
-    }
-    return bestMatch?.video_url || null;
+    if (contained) return contained.video_url;
+    return null;
   };
 
   const workoutJson = workout?.workout_json;
