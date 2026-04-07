@@ -120,6 +120,7 @@ const Dashboard = () => {
             { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos" },
             { title: "Protocolo Seca Buxo", image: cardSeca, locked: true },
             { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true },
+            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true },
           ].map((card, idx) => (
             <div
               key={idx}
