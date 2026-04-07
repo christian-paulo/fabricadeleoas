@@ -461,15 +461,6 @@ const Checkout = () => {
             </>
           )}
         </div>
-        {/* Botão CTA após pagamento */}
-        <div className="col-span-full mt-4">
-          <Button
-            className="w-full bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
-            onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Liberar meus 3 dias gratuitos
-          </Button>
-        </div>
         {/* Depoimentos WhatsApp */}
         <div className="col-span-full mt-4">
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
