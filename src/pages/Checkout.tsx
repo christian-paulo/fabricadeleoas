@@ -578,8 +578,8 @@ const OrderSummary = () => {
       {/* Order summary */}
       <div className="soft-card p-6 md:p-8 h-fit">
         <div className="mb-6">
-          <h1 className="font-heading text-2xl text-primary mb-1">O seu plano está pronto! 🦁</h1>
-          <p className="text-sm text-muted-foreground">Consultoria Fitness com IA</p>
+          <h1 className="font-heading text-2xl text-primary mb-1 text-center">O seu plano está pronto! 🦁</h1>
+          <p className="text-sm text-muted-foreground text-center">Protocolo Personalizado</p>
         </div>
 
         <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
