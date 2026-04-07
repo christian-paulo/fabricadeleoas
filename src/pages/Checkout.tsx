@@ -461,12 +461,12 @@ const Checkout = () => {
             </>
           )}
         </div>
-        </div>
         {/* Depoimentos WhatsApp */}
         <div className="col-span-full mt-4">
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
         </div>
       </div>
+    </div>
   );
 };
 
