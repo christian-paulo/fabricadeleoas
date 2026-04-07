@@ -341,9 +341,9 @@ const Checkout = () => {
   if (!authLoading && !isAuthenticated && step === "email") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="w-full max-w-md flex flex-col gap-6">
           <OrderSummary />
-          <div className="soft-card p-6 md:p-8 order-1 md:order-2">
+          <div className="soft-card p-6 md:p-8">
             <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
             <p className="text-sm text-muted-foreground mb-6">
               Informe seu e-mail para iniciar o pagamento
