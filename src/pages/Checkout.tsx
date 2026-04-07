@@ -517,7 +517,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
   return (
     <div className="soft-card p-6">
       {/* O que você terá */}
-      <div className="text-center mb-6">
+      <div className="text-left mb-6">
         <p className="text-sm text-primary font-medium mb-2">— O que você terá —</p>
         <h3 className="font-heading text-xl text-foreground mb-2">PLANO PERSONALIZADO</h3>
         <p className="text-sm text-muted-foreground">
