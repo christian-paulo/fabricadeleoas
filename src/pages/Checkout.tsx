@@ -562,18 +562,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
   );
 };
 
-const WhatYouGet = () => (
-  <div className="soft-card p-6">
-    <p className="text-primary font-medium text-center mb-4">— O que você terá —</p>
-
-    <h3 className="font-heading text-2xl text-foreground mb-3">PLANO PERSONALIZADO</h3>
-    <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-      Dividimos os seus objetivos em etapas diárias práticas:{" "}
-      <span className="font-bold text-foreground">os treinos mais adequados</span> com base no seu nível de preparo físico e hábitos,{" "}
-      <span className="font-bold text-foreground">consumo de água, calorias queimadas</span> etc.
-    </p>
-  </div>
-);
+const WhatYouGet = () => null;
 
 // ─── Order Summary Component ────────────────────────────────────
 const OrderSummary = () => {
