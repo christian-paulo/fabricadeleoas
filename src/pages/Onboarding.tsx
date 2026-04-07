@@ -669,7 +669,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
                 <h3 className="text-base font-bold text-foreground">Protocolo das Leoas</h3>
               </div>
               <ul className="space-y-2 w-full">
-                {["Resultados Mais Rápidos", "Personalizado para você", "Orientação de Especialistas", "Progresso Impulsionado"].map((item) => (
+                {["Resultados Mais Rápidos", "Personalizado para você", "Orientação Especialiazada", "Progresso Impulsionado"].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-primary-foreground font-semibold">
                     <span className="mt-0.5">✅</span>
                     <span>{item}</span>
