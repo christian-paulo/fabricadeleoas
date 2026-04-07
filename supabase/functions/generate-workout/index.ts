@@ -65,10 +65,14 @@ serve(async (req) => {
     const nextWorkoutNumber = workouts.length + 1;
     const isMonthlyPhase = completedCount >= 3;
 
-    // Get exercises
-    const { data: exercises } = await supabase.from("exercises").select("*");
+    // Get ONLY exercises that have a video_url
+    const { data: exercises } = await supabase
+      .from("exercises")
+      .select("*")
+      .not("video_url", "is", null)
+      .neq("video_url", "");
     if (!exercises || exercises.length === 0) {
-      throw new Error("No exercises available in the database");
+      throw new Error("No exercises with video available in the database");
     }
 
     // Gather feedback history
