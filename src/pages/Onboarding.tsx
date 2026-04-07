@@ -160,7 +160,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             {[
               { label: "Entrar em forma", icon: <Flame className="w-5 h-5" /> },
               { label: "Melhorar aparência", icon: <Eye className="w-5 h-5" /> },
-              { label: "Cuidar da saúde", icon: <HeartPulse className="w-5 h-5" /> },
+              { label: "Ter um corpo saudável", icon: <HeartPulse className="w-5 h-5" /> },
               { label: "Ter mais energia", icon: <Zap className="w-5 h-5" /> },
               { label: "Ganhar confiança", icon: <ThumbsUp className="w-5 h-5" /> },
             ].map((m, i) => {
