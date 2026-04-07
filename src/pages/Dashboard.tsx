@@ -118,9 +118,8 @@ const Dashboard = () => {
           <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {[
             { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos" },
-            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true },
-            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true },
             { title: "Protocolo Seca Buxo", image: cardSeca, locked: true },
+            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true },
           ].map((card, idx) => (
             <div
               key={idx}
