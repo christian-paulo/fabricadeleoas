@@ -923,9 +923,11 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
   const absDiff = Math.abs(diff);
   const isGain = diff > 0;
 
+  // Dynamic weeks (5-8) based on weight difference
+  const weeksNeeded = Math.min(8, Math.max(5, Math.round(absDiff * 0.8 + 4)));
   const today = new Date();
   const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() + 12 * 7);
+  targetDate.setDate(today.getDate() + weeksNeeded * 7);
   const months = ["jan.", "fev.", "mar.", "abr.", "mai.", "jun.", "jul.", "ago.", "set.", "out.", "nov.", "dez."];
   const targetLabel = `${months[targetDate.getMonth()]} ${targetDate.getDate()}`;
 
