@@ -389,7 +389,7 @@ const Checkout = () => {
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <OrderSummary />
         {/* Payment Form */}
-        <div className="soft-card p-6 md:p-8 order-1 md:order-2">
+        <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
           {/* Email input for guest users */}
           {!isAuthenticated && !emailConfirmed && (
             <div className="mb-6">
@@ -531,6 +531,13 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
         <span className="font-bold text-foreground">90%</span> dos usuários como você {actionText}{" "}
         <span className="font-bold text-foreground">{diff}kg</span> com sucesso com o nosso plano
       </p>
+
+      <Button
+        className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
+        onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
+      >
+        Liberar meus 3 dias gratuitos
+      </Button>
     </div>
   );
 };
