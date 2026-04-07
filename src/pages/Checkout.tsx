@@ -558,7 +558,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
         </p>
       </div>
 
-      <img src={printApp} alt="Preview do app" className="rounded-xl shadow-sm w-full object-contain mb-6" />
+      <img src={printApp} alt="Preview do app" className="rounded-xl shadow-sm w-full object-contain mb-6 border-2 border-primary" />
 
       <h3 className="font-heading text-xl text-foreground mb-4">PENSADO PARA VOCÊ</h3>
 
