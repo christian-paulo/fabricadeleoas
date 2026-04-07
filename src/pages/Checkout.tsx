@@ -35,7 +35,7 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
-const CheckoutForm = ({ onPaymentSuccess }: { onPaymentSuccess: () => void }) => {
+const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => void; email: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
