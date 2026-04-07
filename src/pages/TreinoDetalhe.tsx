@@ -321,7 +321,7 @@ const Treinos = () => {
                       <p className="text-sm font-bold text-foreground leading-tight uppercase">{ex.name}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {isDone ? (
-                          <span className="flex items-center gap-1 text-green-400">
+                          <span className="flex items-center gap-1 text-primary">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             {completedSets}/{totalSets} feito(s)
                           </span>
