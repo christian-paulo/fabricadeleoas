@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { toast } from "sonner";
-import { Check, Shield, Loader2, Eye, EyeOff } from "lucide-react";
+import { Check, Shield, Loader2, Eye, EyeOff, Target, Timer, Droplets, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
