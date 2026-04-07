@@ -439,22 +439,22 @@ const Checkout = () => {
                       },
                       rules: {
                         ".Input": {
-                      backgroundColor: "#FFFFF4",
-                      border: "1px solid hsl(340 20% 90%)",
+                          backgroundColor: "#FFFFF4",
+                          border: "1px solid hsl(340 20% 90%)",
+                        },
+                        ".Input:focus": {
+                          borderColor: "#FF69B4",
+                          boxShadow: "0 0 0 1px #FF69B4",
+                        },
+                        ".Label": {
+                          color: "#808080",
+                        },
+                      },
                     },
-                    ".Input:focus": {
-                      borderColor: "#FF69B4",
-                      boxShadow: "0 0 0 1px #FF69B4",
-                    },
-                    ".Label": {
-                      color: "#808080",
-                    },
-                  },
-                },
-                locale: "pt-BR",
-              }}>
-              <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
-            </Elements>
+                    locale: "pt-BR",
+                  }}>
+                  <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
+                </Elements>
               )}
             </>
           )}
