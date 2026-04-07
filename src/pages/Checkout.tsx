@@ -461,6 +461,7 @@ const Checkout = () => {
         </div>
       </div>
     </div>
+  );
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
