@@ -386,85 +386,87 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-heading">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-        <OrderSummary />
-        {/* Payment Form */}
-        <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
-          {/* Email input for guest users */}
-          {!isAuthenticated && !emailConfirmed && (
-            <div className="mb-6">
-              <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Informe seu e-mail para iniciar o pagamento
-              </p>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (checkoutEmail) setEmailConfirmed(true);
-              }} className="space-y-4">
-                <div>
-                  <Label className="text-xs text-muted-foreground">E-mail</Label>
-                  <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
-                    placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-                </div>
-                <Button type="submit"
-                  className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-                  Continuar para o Pagamento
-                </Button>
-              </form>
-            </div>
-          )}
+    <div className="min-h-screen bg-background px-4 py-8 font-heading">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <OrderSummary />
+          {/* Payment Form */}
+          <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
+            {/* Email input for guest users */}
+            {!isAuthenticated && !emailConfirmed && (
+              <div className="mb-6">
+                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Informe seu e-mail para iniciar o pagamento
+                </p>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (checkoutEmail) setEmailConfirmed(true);
+                }} className="space-y-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">E-mail</Label>
+                    <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                  </div>
+                  <Button type="submit"
+                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                    Continuar para o Pagamento
+                  </Button>
+                </form>
+              </div>
+            )}
 
-          {/* Payment form after email confirmed */}
-          {emailConfirmed && (
-            <>
-              <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
-              {loading && (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                </div>
-              )}
-              {clientSecret && (
-                <Elements stripe={stripePromise}
-                  options={{
-                    clientSecret,
-                    appearance: {
-                      theme: "stripe",
-                      variables: {
-                        colorPrimary: "#FF69B4",
-                        colorBackground: "#FFFFF4",
-                        colorText: "#4A4A4A",
-                        colorDanger: "#ef4444",
-                        fontFamily: "system-ui, sans-serif",
-                        borderRadius: "16px",
-                        spacingUnit: "4px",
+            {/* Payment form after email confirmed */}
+            {emailConfirmed && (
+              <>
+                <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
+                {loading && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+                {clientSecret && (
+                  <Elements stripe={stripePromise}
+                    options={{
+                      clientSecret,
+                      appearance: {
+                        theme: "stripe",
+                        variables: {
+                          colorPrimary: "#FF69B4",
+                          colorBackground: "#FFFFF4",
+                          colorText: "#4A4A4A",
+                          colorDanger: "#ef4444",
+                          fontFamily: "system-ui, sans-serif",
+                          borderRadius: "16px",
+                          spacingUnit: "4px",
+                        },
+                        rules: {
+                          ".Input": {
+                            backgroundColor: "#FFFFF4",
+                            border: "1px solid hsl(340 20% 90%)",
+                          },
+                          ".Input:focus": {
+                            borderColor: "#FF69B4",
+                            boxShadow: "0 0 0 1px #FF69B4",
+                          },
+                          ".Label": {
+                            color: "#808080",
+                          },
+                        },
                       },
-                      rules: {
-                        ".Input": {
-                          backgroundColor: "#FFFFF4",
-                          border: "1px solid hsl(340 20% 90%)",
-                        },
-                        ".Input:focus": {
-                          borderColor: "#FF69B4",
-                          boxShadow: "0 0 0 1px #FF69B4",
-                        },
-                        ".Label": {
-                          color: "#808080",
-                        },
-                      },
-                    },
-                    locale: "pt-BR",
-                  }}>
-                  <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
-                </Elements>
-              )}
-            </>
-          )}
+                      locale: "pt-BR",
+                    }}>
+                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
+                  </Elements>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      {/* Depoimentos WhatsApp - última seção da página */}
-      <div className="w-full max-w-4xl mt-8">
-        <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
+        {/* Depoimentos WhatsApp - última seção da página */}
+        <div>
+          <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
+        </div>
       </div>
     </div>
   );
