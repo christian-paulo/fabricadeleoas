@@ -11,12 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
-import testimonial1 from "@/assets/testimonial-1.jpg";
-import printApp from "@/assets/print-app.webp";
-import testimonial2 from "@/assets/testimonial-2.jpg";
-import testimonial3 from "@/assets/testimonial-3.jpg";
-import testimonial4 from "@/assets/testimonial-4.jpg";
-import testimonial5 from "@/assets/testimonial-5.jpg";
 import testimonial6 from "@/assets/testimonial-6.jpg";
 import dep1 from "@/assets/dep1.webp";
 import dep2 from "@/assets/dep2.webp";
@@ -24,7 +18,7 @@ import dep3 from "@/assets/dep3.webp";
 import dep4 from "@/assets/dep4.webp";
 import dep5 from "@/assets/dep5.webp";
 import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
-
+import printApp from "@/assets/print-app.webp";
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
 const benefits = [
@@ -638,27 +632,6 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
 
 const WhatYouGet = () => null;
 
-const testimonials = [testimonial1, testimonial2, testimonial3, testimonial4, testimonial5, testimonial6];
-
-const SuccessStoriesCarousel = () => {
-  return (
-    <div className="soft-card p-6">
-      <h3 className="font-heading text-lg text-foreground mb-4 text-center">
-        O que minhas alunas dizem 💬
-      </h3>
-      <div className="flex flex-col gap-3">
-        {testimonials.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt={`Depoimento ${i + 1}`}
-            className="rounded-xl shadow-sm w-full object-contain"
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const successStories = [dep1, dep2, dep3, dep4, dep5];
 
@@ -728,9 +701,6 @@ const OrderSummary = () => {
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
-
-      {/* Success stories carousel */}
-      <SuccessStoriesCarousel />
 
       {/* Order summary */}
       <div className="soft-card p-6 md:p-8 h-fit">
