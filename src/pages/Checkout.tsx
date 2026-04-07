@@ -17,6 +17,11 @@ import testimonial3 from "@/assets/testimonial-3.jpg";
 import testimonial4 from "@/assets/testimonial-4.jpg";
 import testimonial5 from "@/assets/testimonial-5.jpg";
 import testimonial6 from "@/assets/testimonial-6.jpg";
+import dep1 from "@/assets/dep1.webp";
+import dep2 from "@/assets/dep2.webp";
+import dep3 from "@/assets/dep3.webp";
+import dep4 from "@/assets/dep4.webp";
+import dep5 from "@/assets/dep5.webp";
 
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
@@ -522,8 +527,11 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
   return (
     <div className="soft-card p-6">
+      {/* Success stories carousel */}
+      <SuccessStoriesAutoCarousel />
+
       {/* O que você terá */}
-      <div className="text-left mb-6">
+      <div className="text-left mb-6 mt-6">
         <p className="text-sm text-primary font-medium mb-2 text-center">— O que você terá —</p>
         <h3 className="font-heading text-xl text-foreground mb-2">PLANO PERSONALIZADO</h3>
         <p className="text-sm text-muted-foreground">
@@ -585,6 +593,64 @@ const SuccessStoriesCarousel = () => {
             src={src}
             alt={`Depoimento ${i + 1}`}
             className="rounded-xl shadow-sm w-full object-contain"
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const successStories = [dep1, dep2, dep3, dep4, dep5];
+
+const SuccessStoriesAutoCarousel = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[index] as HTMLElement;
+    if (child) {
+      container.scrollTo({ left: child.offsetLeft - 12, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % successStories.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [scrollToIndex]);
+
+  return (
+    <div>
+      <h3 className="font-heading text-lg text-foreground mb-4 text-center">
+        Veja histórias de sucesso de quem confiou 💪
+      </h3>
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {successStories.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`História de sucesso ${i + 1}`}
+            className="snap-center rounded-xl shadow-sm w-[85%] max-w-[340px] flex-shrink-0 object-contain"
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-3">
+        {successStories.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveIndex(i); scrollToIndex(i); }}
+            className={`w-2 h-2 rounded-full transition-colors ${i === activeIndex ? "bg-primary" : "bg-muted"}`}
           />
         ))}
       </div>
