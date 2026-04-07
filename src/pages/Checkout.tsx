@@ -389,24 +389,56 @@ const Checkout = () => {
         <OrderSummary />
         {/* Payment Form */}
         <div className="soft-card p-6 md:p-8 order-1 md:order-2">
-          <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
-          {clientSecret && (
-            <Elements stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: "stripe",
-                  variables: {
-                    colorPrimary: "#FF69B4",
-                    colorBackground: "#FFFFF4",
-                    colorText: "#4A4A4A",
-                    colorDanger: "#ef4444",
-                    fontFamily: "system-ui, sans-serif",
-                    borderRadius: "16px",
-                    spacingUnit: "4px",
-                  },
-                  rules: {
-                    ".Input": {
+          {/* Email input for guest users */}
+          {!isAuthenticated && !emailConfirmed && (
+            <div className="mb-6">
+              <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Informe seu e-mail para iniciar o pagamento
+              </p>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (checkoutEmail) setEmailConfirmed(true);
+              }} className="space-y-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">E-mail</Label>
+                  <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
+                    placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                </div>
+                <Button type="submit"
+                  className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                  Continuar para o Pagamento
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {/* Payment form after email confirmed */}
+          {emailConfirmed && (
+            <>
+              <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              )}
+              {clientSecret && (
+                <Elements stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: "stripe",
+                      variables: {
+                        colorPrimary: "#FF69B4",
+                        colorBackground: "#FFFFF4",
+                        colorText: "#4A4A4A",
+                        colorDanger: "#ef4444",
+                        fontFamily: "system-ui, sans-serif",
+                        borderRadius: "16px",
+                        spacingUnit: "4px",
+                      },
+                      rules: {
+                        ".Input": {
                       backgroundColor: "#FFFFF4",
                       border: "1px solid hsl(340 20% 90%)",
                     },
