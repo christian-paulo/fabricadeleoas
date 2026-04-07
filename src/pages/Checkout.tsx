@@ -238,8 +238,9 @@ const Checkout = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<"email" | "payment" | "registration">("email");
+  const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   const isAuthenticated = !!user;
 
@@ -247,13 +248,13 @@ const Checkout = () => {
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
-      setStep("payment");
+      setEmailConfirmed(true);
     }
   }, [isAuthenticated]);
 
   // Load checkout when we have an email and are on payment step
   useEffect(() => {
-    if (step !== "payment" || !checkoutEmail || clientSecret) return;
+    if (!emailConfirmed || !checkoutEmail || clientSecret) return;
     setLoading(true);
     const createIntent = async () => {
       try {
@@ -293,7 +294,7 @@ const Checkout = () => {
       }
     };
     createIntent();
-  }, [step, checkoutEmail]);
+  }, [emailConfirmed, checkoutEmail]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
@@ -349,36 +350,7 @@ const Checkout = () => {
     }
   };
 
-  // Email collection step
-  if (!authLoading && !isAuthenticated && step === "email") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md flex flex-col gap-6">
-          <OrderSummary />
-          <div className="soft-card p-6 md:p-8">
-            <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Informe seu e-mail para iniciar o pagamento
-            </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (checkoutEmail) setStep("payment");
-            }} className="space-y-4">
-              <div>
-                <Label className="text-xs text-muted-foreground">E-mail</Label>
-                <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
-                  placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-              </div>
-              <Button type="submit"
-                className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-                Continuar para o Pagamento
-              </Button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // No separate email step - email is collected inline in payment view
 
   // Registration step (after payment)
   if (step === "registration") {
@@ -392,7 +364,7 @@ const Checkout = () => {
     );
   }
 
-  if (loading || authLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -417,24 +389,56 @@ const Checkout = () => {
         <OrderSummary />
         {/* Payment Form */}
         <div className="soft-card p-6 md:p-8 order-1 md:order-2">
-          <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
-          {clientSecret && (
-            <Elements stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: {
-                  theme: "stripe",
-                  variables: {
-                    colorPrimary: "#FF69B4",
-                    colorBackground: "#FFFFF4",
-                    colorText: "#4A4A4A",
-                    colorDanger: "#ef4444",
-                    fontFamily: "system-ui, sans-serif",
-                    borderRadius: "16px",
-                    spacingUnit: "4px",
-                  },
-                  rules: {
-                    ".Input": {
+          {/* Email input for guest users */}
+          {!isAuthenticated && !emailConfirmed && (
+            <div className="mb-6">
+              <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Informe seu e-mail para iniciar o pagamento
+              </p>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (checkoutEmail) setEmailConfirmed(true);
+              }} className="space-y-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">E-mail</Label>
+                  <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
+                    placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                </div>
+                <Button type="submit"
+                  className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                  Continuar para o Pagamento
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {/* Payment form after email confirmed */}
+          {emailConfirmed && (
+            <>
+              <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              )}
+              {clientSecret && (
+                <Elements stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: "stripe",
+                      variables: {
+                        colorPrimary: "#FF69B4",
+                        colorBackground: "#FFFFF4",
+                        colorText: "#4A4A4A",
+                        colorDanger: "#ef4444",
+                        fontFamily: "system-ui, sans-serif",
+                        borderRadius: "16px",
+                        spacingUnit: "4px",
+                      },
+                      rules: {
+                        ".Input": {
                       backgroundColor: "#FFFFF4",
                       border: "1px solid hsl(340 20% 90%)",
                     },
@@ -451,6 +455,8 @@ const Checkout = () => {
               }}>
               <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
             </Elements>
+              )}
+            </>
           )}
         </div>
       </div>
