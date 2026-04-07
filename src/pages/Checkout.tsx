@@ -389,7 +389,7 @@ const Checkout = () => {
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <OrderSummary />
         {/* Payment Form */}
-        <div className="soft-card p-6 md:p-8 order-1 md:order-2">
+        <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
           {/* Email input for guest users */}
           {!isAuthenticated && !emailConfirmed && (
             <div className="mb-6">
