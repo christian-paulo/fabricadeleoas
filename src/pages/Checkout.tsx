@@ -248,7 +248,7 @@ const Checkout = () => {
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
-      setStep("payment");
+      setEmailConfirmed(true);
     }
   }, [isAuthenticated]);
 
