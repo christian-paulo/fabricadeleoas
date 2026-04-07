@@ -70,7 +70,7 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement options={{ layout: "tabs" }} />
+      <PaymentElement options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }} />
       <Button type="submit" disabled={!stripe || loading}
         className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
         {loading ? (
