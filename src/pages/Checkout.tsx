@@ -446,49 +446,228 @@ const Checkout = () => {
   );
 };
 
-// ─── Order Summary Component ────────────────────────────────────
-const OrderSummary = () => (
-  <div className="soft-card p-6 md:p-8 h-fit">
-    <div className="mb-6">
-      <h1 className="font-heading text-2xl text-primary mb-1">O seu plano está pronto! 🦁</h1>
-      <p className="text-sm text-muted-foreground">Consultoria Fitness com IA</p>
-    </div>
+// ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso: string }) => {
+  const current = parseFloat(pesoAtual) || 85;
+  const goal = parseFloat(metaPeso) || 75;
+  const mid = Math.round((current + goal) * 10 / 2) / 10;
+  const targetDate = new Date();
+  targetDate.setMonth(targetDate.getMonth() + 2);
+  const monthNames = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+  const dateStr = `${monthNames[targetDate.getMonth()]}. ${targetDate.getDate()}`;
 
-    <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
-      <h2 className="font-heading text-lg text-foreground mb-4">Resumo do Pedido</h2>
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <p className="font-medium text-foreground">Plano Mensal</p>
-          <p className="text-xs text-muted-foreground italic">Assinatura recorrente</p>
+  return (
+    <div className="soft-card p-6 text-center">
+      <p className="font-heading text-lg text-foreground mb-1">Com base nas suas respostas, você atingirá</p>
+      <p className="text-2xl font-heading mb-6">
+        <span className="text-primary">{goal} kg</span> em <span className="text-primary">{dateStr}</span>
+      </p>
+
+      {/* Graph */}
+      <div className="relative h-40 mb-4">
+        <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="graphGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="100%" stopColor="#60a5fa" />
+            </linearGradient>
+            <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.05" />
+            </linearGradient>
+          </defs>
+          <path d="M 20 20 Q 80 25, 150 50 Q 220 75, 280 85" fill="none" stroke="url(#graphGrad)" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 20 20 Q 80 25, 150 50 Q 220 75, 280 85 L 280 120 L 20 120 Z" fill="url(#bgGrad)" />
+          <circle cx="20" cy="20" r="6" fill="hsl(var(--primary))" />
+          <circle cx="150" cy="50" r="6" fill="hsl(var(--primary))" />
+          <circle cx="280" cy="85" r="6" fill="#60a5fa" />
+        </svg>
+        {/* Labels */}
+        <div className="absolute top-0 left-2 text-xs text-muted-foreground">{current} kg</div>
+        <div className="absolute top-[35%] left-[38%] bg-background border border-border rounded-lg px-2 py-0.5 text-xs font-medium">{mid} kg</div>
+        <div className="absolute top-[55%] right-2 bg-primary text-primary-foreground rounded-lg px-3 py-1 text-sm font-heading">{goal} kg</div>
+      </div>
+
+      <div className="flex justify-between text-xs text-muted-foreground px-2">
+        <span>Hoje</span>
+        <span>Primeira sem.</span>
+        <span>{dateStr}</span>
+      </div>
+
+      <p className="text-sm text-muted-foreground mt-4">
+        <span className="font-bold text-foreground">90%</span> dos usuários como você perderam{" "}
+        <span className="font-bold text-foreground">{Math.abs(current - goal).toFixed(1)}kg</span> com sucesso com o nosso plano
+      </p>
+    </div>
+  );
+};
+
+const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[]; workoutDuration: string }) => {
+  const areaText = targetArea.length > 0 ? targetArea.join(", ") : "Todo o corpo";
+  const duration = workoutDuration || "10-30 min";
+
+  const weekDays = [];
+  const today = new Date();
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    weekDays.push(d.getDate());
+  }
+
+  return (
+    <div className="soft-card p-6">
+      {/* Calendar preview */}
+      <div className="bg-primary/5 rounded-2xl p-4 mb-4">
+        <p className="text-xs font-medium text-center text-primary mb-1">ROTINA DE EXERCÍCIOS</p>
+        <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
+          {weekDays.slice(0, 7).map((day, i) => (
+            <div key={i} className={`flex flex-col items-center min-w-[36px] rounded-lg p-1.5 ${i === 0 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-foreground"}`}>
+              {i === 0 && <span className="text-[8px] font-bold">Início</span>}
+              <span className="text-sm font-medium">{day}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />
+            </div>
+          ))}
         </div>
-        <p className="font-heading text-lg text-foreground">R$ 49,90</p>
+        <p className="text-xs text-muted-foreground text-center mt-2">Siga seu plano para alcançar o sucesso</p>
       </div>
-      <div className="border-t border-border my-3" />
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-primary font-medium">3 dias grátis</span>
-        <span className="text-sm text-primary font-medium">- R$ 49,90</span>
-      </div>
-      <div className="border-t border-border my-3" />
-      <div className="flex items-center justify-between">
-        <span className="font-heading text-foreground">Total hoje</span>
-        <span className="font-heading text-2xl text-primary">R$ 0,00</span>
-      </div>
-    </div>
 
-    <div className="space-y-3">
-      {benefits.map((benefit, i) => (
-        <div key={i} className="flex items-start gap-3">
-          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-          <span className="text-sm text-muted-foreground">{benefit}</span>
+      <h3 className="font-heading text-xl text-foreground mb-4">PENSADO PARA VOCÊ</h3>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🎯</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Áreas de foco</p>
+            <p className="font-heading text-foreground">{areaText}</p>
+          </div>
         </div>
-      ))}
-    </div>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">⏱️</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Duração</p>
+            <p className="font-heading text-foreground">{duration}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">💧</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Consumo de água</p>
+            <p className="font-heading text-foreground">2000 ml</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🔥</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Queima diária</p>
+            <p className="font-heading text-foreground">200 cal</p>
+          </div>
+        </div>
+      </div>
 
-    <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
-      Você não será cobrada durante o período de teste. Após 3 dias, a assinatura de R$ 49,90/mês
-      será ativada automaticamente. Cancele a qualquer momento com 1 clique.
+      {/* Plan preview */}
+      <div className="mt-6">
+        <h4 className="font-heading text-lg text-foreground mb-3">PRÉ-VISUALIZAÇÃO DO PLANO</h4>
+        <div className="space-y-2">
+          {["Semana 1: Desperte Seu Corpo 😊", "Semana 2: Acelere o Ritmo 💪", "Semana 3: Supere Limites 🔥", "Semana 4: Transformação Final 🏆"].map((week, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />
+              <span className="text-sm text-foreground">{week}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const WhatYouGet = () => (
+  <div className="soft-card p-6">
+    <p className="text-primary font-medium text-center mb-4">— O que você terá —</p>
+
+    <h3 className="font-heading text-2xl text-foreground mb-3">PLANO PERSONALIZADO</h3>
+    <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+      Dividimos os seus objetivos em etapas diárias práticas:{" "}
+      <span className="font-bold text-foreground">os treinos mais adequados</span> com base no seu nível de preparo físico e hábitos,{" "}
+      <span className="font-bold text-foreground">consumo de água, calorias queimadas</span> etc.
     </p>
+
+    {/* Mockup card */}
+    <div className="bg-muted rounded-2xl p-4 border border-border">
+      <div className="flex justify-between items-center mb-3">
+        <span className="font-heading text-sm text-foreground">DIARIAMENTE</span>
+        <span className="text-xs text-muted-foreground">5/5</span>
+      </div>
+      <div className="flex gap-2 justify-center mb-3">
+        {["Seg", "Ter", "Quar", "Hoje", "Sex", "Sáb", "Dom"].map((d, i) => (
+          <div key={i} className={`text-center text-[10px] px-1.5 py-1 rounded-lg ${i === 3 ? "bg-primary/20 font-bold text-foreground" : "text-muted-foreground"}`}>
+            <span>{d}</span>
+            <div className="mt-0.5">{i === 3 ? "🔥" : i % 2 === 0 ? "💧" : "☕"}</div>
+          </div>
+        ))}
+      </div>
+      <div className="bg-primary/10 rounded-xl p-3">
+        <p className="text-xs text-muted-foreground">Programação de hoje</p>
+        <p className="font-heading text-primary text-sm">BARRIGA LISINHA</p>
+      </div>
+    </div>
   </div>
 );
+
+// ─── Order Summary Component ────────────────────────────────────
+const OrderSummary = () => {
+  const { data: onboardingData } = useOnboarding();
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Pre-checkout persuasion sections */}
+      <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
+      <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} />
+      <WhatYouGet />
+
+      {/* Order summary */}
+      <div className="soft-card p-6 md:p-8 h-fit">
+        <div className="mb-6">
+          <h1 className="font-heading text-2xl text-primary mb-1">O seu plano está pronto! 🦁</h1>
+          <p className="text-sm text-muted-foreground">Consultoria Fitness com IA</p>
+        </div>
+
+        <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
+          <h2 className="font-heading text-lg text-foreground mb-4">Resumo do Pedido</h2>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="font-medium text-foreground">Plano Mensal</p>
+              <p className="text-xs text-muted-foreground italic">Assinatura recorrente</p>
+            </div>
+            <p className="font-heading text-lg text-foreground">R$ 49,90</p>
+          </div>
+          <div className="border-t border-border my-3" />
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-primary font-medium">3 dias grátis</span>
+            <span className="text-sm text-primary font-medium">- R$ 49,90</span>
+          </div>
+          <div className="border-t border-border my-3" />
+          <div className="flex items-center justify-between">
+            <span className="font-heading text-foreground">Total hoje</span>
+            <span className="font-heading text-2xl text-primary">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {benefits.map((benefit, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-muted-foreground">{benefit}</span>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
+          Você não será cobrada durante o período de teste. Após 3 dias, a assinatura de R$ 49,90/mês
+          será ativada automaticamente. Cancele a qualquer momento com 1 clique.
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export default Checkout;
