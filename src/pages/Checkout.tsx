@@ -534,20 +534,6 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
             <p className="font-heading text-foreground">{duration}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">💧</span>
-          <div>
-            <p className="text-xs text-muted-foreground">Consumo de água</p>
-            <p className="font-heading text-foreground">2000 ml</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🔥</span>
-          <div>
-            <p className="text-xs text-muted-foreground">Queima diária</p>
-            <p className="font-heading text-foreground">200 cal</p>
-          </div>
-        </div>
       </div>
 
       {/* Plan preview */}
