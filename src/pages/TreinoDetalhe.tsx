@@ -61,33 +61,56 @@ const Treinos = () => {
     await fetchCurrentWorkout();
   };
 
-  const [exerciseVideos, setExerciseVideos] = useState<Record<string, string>>({});
+  const [dbExercises, setDbExercises] = useState<{ name: string; video_url: string }[]>([]);
 
-  // Fetch video URLs from exercises table to fill in missing video_url in workout JSON
+  // Fetch exercises from DB for video URL matching
   useEffect(() => {
     const fetchVideos = async () => {
       const { data } = await supabase.from("exercises").select("name, video_url");
-      if (data) {
-        const map: Record<string, string> = {};
-        data.forEach((ex) => { if (ex.video_url) map[ex.name.toLowerCase()] = ex.video_url; });
-        setExerciseVideos(map);
-      }
+      if (data) setDbExercises(data.filter((e) => !!e.video_url) as { name: string; video_url: string }[]);
     };
     fetchVideos();
   }, []);
 
+  // Fuzzy match: find the best matching exercise by name similarity
+  const findVideoUrl = (exerciseName: string): string | null => {
+    if (!exerciseName || dbExercises.length === 0) return null;
+    const lower = exerciseName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // Exact match first
+    const exact = dbExercises.find((e) => e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === lower);
+    if (exact) return exact.video_url;
+    // Partial match: check if DB name contains the exercise name or vice-versa
+    const partial = dbExercises.find((e) => {
+      const dbLower = e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return dbLower.includes(lower) || lower.includes(dbLower);
+    });
+    if (partial) return partial.video_url;
+    // Word-based match: find exercise with most common words
+    const words = lower.split(/\s+/).filter((w) => w.length > 2);
+    let bestMatch: { name: string; video_url: string } | null = null;
+    let bestScore = 0;
+    for (const e of dbExercises) {
+      const dbWords = e.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/\s+/);
+      const score = words.filter((w) => dbWords.some((dw) => dw.includes(w) || w.includes(dw))).length;
+      if (score > bestScore && score >= 2) { bestScore = score; bestMatch = e; }
+    }
+    return bestMatch?.video_url || null;
+  };
+
   const workoutJson = workout?.workout_json;
   const triSets = useMemo(() => {
     const sets = workoutJson?.tri_sets || [];
-    // Enrich exercises with video_url from DB if missing
     return sets.map((ts: any) => ({
       ...ts,
-      exercises: ts.exercises?.map((ex: any) => ({
-        ...ex,
-        video_url: ex.video_url || exerciseVideos[ex.name?.toLowerCase()] || null,
-      })),
+      exercises: ts.exercises?.map((ex: any) => {
+        const hasValidUrl = ex.video_url && ex.video_url.length > 10 && ex.video_url.startsWith("http");
+        return {
+          ...ex,
+          video_url: hasValidUrl ? ex.video_url : findVideoUrl(ex.name),
+        };
+      }),
     }));
-  }, [workoutJson, exerciseVideos]);
+  }, [workoutJson, dbExercises]);
 
   // Compute stats
   const stats = useMemo(() => {

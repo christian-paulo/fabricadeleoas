@@ -236,6 +236,37 @@ Gere o treino número ${nextWorkoutNumber}.`;
       throw new Error("Failed to parse AI workout response");
     }
 
+    // Post-process: map exercise names to actual DB records to ensure correct video_url
+    if (workoutJson.tri_sets && exercises) {
+      const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      for (const ts of workoutJson.tri_sets) {
+        if (!ts.exercises) continue;
+        for (const ex of ts.exercises) {
+          const exName = normalize(ex.name || "");
+          // Try exact match first
+          let match = exercises.find(e => normalize(e.name) === exName);
+          // Try partial match
+          if (!match) match = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
+          // Word-based match
+          if (!match) {
+            const words = exName.split(/\s+/).filter((w: string) => w.length > 2);
+            let bestScore = 0;
+            for (const e of exercises) {
+              const dbWords = normalize(e.name).split(/\s+/);
+              const score = words.filter((w: string) => dbWords.some((dw: string) => dw.includes(w) || w.includes(dw))).length;
+              if (score > bestScore && score >= 2) { bestScore = score; match = e; }
+            }
+          }
+          if (match) {
+            ex.exercise_id = match.id;
+            ex.name = match.name;
+            ex.video_url = match.video_url;
+            if (match.muscle_group) ex.muscle_group = match.muscle_group;
+          }
+        }
+      }
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     // Save workout
