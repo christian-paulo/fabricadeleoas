@@ -202,8 +202,8 @@ const Dashboard = () => {
           </svg>
         </div>
         <div>
-          <h3 className="text-xl font-heading text-foreground"><span className="text-2xl font-bold">{totalDays}</span> Sequência de treinos</h3>
-          <p className="text-sm text-muted-foreground">Treine diariamente para manter sua sequência viva</p>
+          <h3 className="text-lg font-heading text-foreground"><span className="text-xl font-bold">{totalDays}</span> Sequência de treinos</h3>
+          <p className="text-sm text-muted-foreground">Cada treino te deixa mais perto da sua melhor versão 🦁</p>
         </div>
       </div>
 
