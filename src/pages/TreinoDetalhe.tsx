@@ -341,11 +341,11 @@ const Treinos = () => {
 
                   {/* Expanded series */}
                   {isExpanded && (
-                    <div className="px-4 pb-4">
+                    <div className="px-4 pb-3">
                       {/* Table header */}
-                      <div className="grid grid-cols-[60px_1fr_60px] gap-2 mb-2 px-1">
-                        <span className="text-xs font-bold text-muted-foreground">Série</span>
-                        <span className="text-xs font-bold text-muted-foreground text-center">Rep.</span>
+                      <div className="grid grid-cols-[36px_1fr_36px] gap-2 mb-1 px-1">
+                        <span className="text-[10px] font-bold text-muted-foreground">Série</span>
+                        <span className="text-[10px] font-bold text-muted-foreground text-center">Rep.</span>
                         <span></span>
                       </div>
 
@@ -353,37 +353,33 @@ const Treinos = () => {
                       {(exerciseProgress[exIdx] || []).map((series, setIdx) => (
                         <div
                           key={setIdx}
-                          className={`grid grid-cols-[60px_1fr_60px] gap-2 items-center mb-2 rounded-xl px-1 py-2 ${
+                          className={`grid grid-cols-[36px_1fr_36px] gap-2 items-center rounded-lg px-1 py-1.5 ${
                             series.completed ? "bg-primary/10" : ""
                           }`}
                         >
-                          <span className={`text-lg font-bold ${series.completed ? "text-primary" : "text-foreground"}`}>
+                          <span className={`text-sm font-bold text-center ${series.completed ? "text-primary" : "text-foreground"}`}>
                             {setIdx + 1}
                           </span>
 
-                          {/* Reps input */}
                           <button
                             onClick={() => startEditReps(exIdx, setIdx)}
-                            className="bg-muted rounded-xl py-3 px-4 text-center"
+                            className="bg-muted rounded-lg py-2 px-3 text-center"
                           >
-                            <span className="text-base font-bold text-foreground">{series.reps}</span>
+                            <span className="text-sm font-bold text-foreground">{series.reps}</span>
                           </button>
 
-                          {/* Check button */}
                           <button
                             onClick={() => toggleSeriesComplete(exIdx, setIdx)}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto transition-all ${
-                              series.completed
-                                ? "bg-primary"
-                                : "bg-muted"
+                            className={`w-7 h-7 rounded-full flex items-center justify-center mx-auto transition-all ${
+                              series.completed ? "bg-primary" : "bg-muted"
                             }`}
                           >
-                            {series.completed && <Check className="w-5 h-5 text-primary-foreground" />}
+                            {series.completed && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
                           </button>
                         </div>
                       ))}
 
-                      <p className="text-xs text-muted-foreground text-center mt-2">
+                      <p className="text-[10px] text-muted-foreground text-center mt-1.5">
                         Descanso: {restSeconds}s entre séries
                       </p>
                     </div>
