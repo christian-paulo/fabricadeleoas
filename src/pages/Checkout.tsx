@@ -350,36 +350,7 @@ const Checkout = () => {
     }
   };
 
-  // Email collection step
-  if (!authLoading && !isAuthenticated && step === "email") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md flex flex-col gap-6">
-          <OrderSummary />
-          <div className="soft-card p-6 md:p-8">
-            <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Informe seu e-mail para iniciar o pagamento
-            </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (checkoutEmail) setStep("payment");
-            }} className="space-y-4">
-              <div>
-                <Label className="text-xs text-muted-foreground">E-mail</Label>
-                <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
-                  placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-              </div>
-              <Button type="submit"
-                className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-                Continuar para o Pagamento
-              </Button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // No separate email step - email is collected inline in payment view
 
   // Registration step (after payment)
   if (step === "registration") {
