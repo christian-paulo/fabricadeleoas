@@ -294,7 +294,7 @@ const Checkout = () => {
       }
     };
     createIntent();
-  }, [step, checkoutEmail]);
+  }, [emailConfirmed, checkoutEmail]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
