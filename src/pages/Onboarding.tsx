@@ -923,8 +923,8 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
   const absDiff = Math.abs(diff);
   const isGain = diff > 0;
 
-  // Dynamic weeks (5-8) based on weight difference
-  const weeksNeeded = Math.min(8, Math.max(5, Math.round(absDiff * 0.8 + 4)));
+  // Dynamic weeks (3-8) based on weight difference
+  const weeksNeeded = absDiff <= 5 ? 3 : absDiff <= 8 ? 5 : absDiff <= 12 ? 6 : absDiff <= 18 ? 7 : 8;
   const today = new Date();
   const targetDate = new Date(today);
   targetDate.setDate(today.getDate() + weeksNeeded * 7);
