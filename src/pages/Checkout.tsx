@@ -516,20 +516,6 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
   return (
     <div className="soft-card p-6">
-      {/* Calendar preview */}
-      <div className="bg-primary/5 rounded-2xl p-4 mb-4">
-        <p className="text-xs font-medium text-center text-primary mb-1">ROTINA DE EXERCÍCIOS</p>
-        <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
-          {weekDays.slice(0, 7).map((day, i) => (
-            <div key={i} className={`flex flex-col items-center min-w-[36px] rounded-lg p-1.5 ${i === 0 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-foreground"}`}>
-              {i === 0 && <span className="text-[8px] font-bold">Início</span>}
-              <span className="text-sm font-medium">{day}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />
-            </div>
-          ))}
-        </div>
-        <p className="text-xs text-muted-foreground text-center mt-2">Siga seu plano para alcançar o sucesso</p>
-      </div>
 
       <h3 className="font-heading text-xl text-foreground mb-4">PENSADO PARA VOCÊ</h3>
 
