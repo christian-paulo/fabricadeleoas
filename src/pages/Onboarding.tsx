@@ -881,8 +881,8 @@ const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any
     <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
       <h2 className="text-2xl font-heading text-foreground mb-3">Resultados são possíveis!</h2>
       <p className="text-muted-foreground mb-4 leading-relaxed">
-        Milhares de mulheres já transformaram seus corpos com o método Gilvan. 
-        Com consistência e o protocolo certo, você também vai chegar lá. 💪
+        Milhares de mulheres já transformaram seus corpos com a Fábrica de Leoas. 
+        Com consistência e o protocolo personalizado para a sua realidade, você também vai chegar lá. 💪
       </p>
       <div className="w-full rounded-2xl overflow-hidden shadow-lg mb-6">
         <img src={transformacaoResultado} alt="Transformação real - antes e depois" className="w-full h-auto object-cover" />
