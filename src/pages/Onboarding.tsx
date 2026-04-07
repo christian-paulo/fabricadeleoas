@@ -663,7 +663,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             {/* Nosso Programa */}
             <div className="flex-1 rounded-2xl border-2 border-primary pink-gradient p-4 flex flex-col items-center shadow-lg">
               <div className="w-full h-32 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-primary/20">
-                <span className="text-5xl">💪</span>
+                <img src="/images/logo-branca.webp" alt="Fábrica de Leoas" className="h-16 w-auto" />
               </div>
               <div className="bg-background/80 backdrop-blur rounded-xl px-3 py-1.5 mb-3 text-center">
                 <h3 className="text-base font-bold text-foreground">Protocolo das Leoas</h3>
