@@ -461,11 +461,25 @@ const Checkout = () => {
 const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso: string }) => {
   const current = parseFloat(pesoAtual) || 85;
   const goal = parseFloat(metaPeso) || 75;
+  const isGaining = goal > current;
   const mid = Math.round((current + goal) * 10 / 2) / 10;
   const targetDate = new Date();
   targetDate.setMonth(targetDate.getMonth() + 2);
   const monthNames = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
   const dateStr = `${monthNames[targetDate.getMonth()]}. ${targetDate.getDate()}`;
+
+  const graphPath = isGaining
+    ? "M 20 85 Q 80 75, 150 50 Q 220 25, 280 20"
+    : "M 20 20 Q 80 25, 150 50 Q 220 75, 280 85";
+  const fillPath = isGaining
+    ? "M 20 85 Q 80 75, 150 50 Q 220 25, 280 20 L 280 120 L 20 120 Z"
+    : "M 20 20 Q 80 25, 150 50 Q 220 75, 280 85 L 280 120 L 20 120 Z";
+  const startY = isGaining ? 85 : 20;
+  const midY = 50;
+  const endY = isGaining ? 20 : 85;
+
+  const actionText = isGaining ? "ganharam" : "perderam";
+  const diff = Math.abs(current - goal).toFixed(1);
 
   return (
     <div className="soft-card p-6 text-center">
@@ -487,16 +501,16 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
               <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.05" />
             </linearGradient>
           </defs>
-          <path d="M 20 20 Q 80 25, 150 50 Q 220 75, 280 85" fill="none" stroke="url(#graphGrad)" strokeWidth="3" strokeLinecap="round" />
-          <path d="M 20 20 Q 80 25, 150 50 Q 220 75, 280 85 L 280 120 L 20 120 Z" fill="url(#bgGrad)" />
-          <circle cx="20" cy="20" r="6" fill="hsl(var(--primary))" />
-          <circle cx="150" cy="50" r="6" fill="hsl(var(--primary))" />
-          <circle cx="280" cy="85" r="6" fill="#60a5fa" />
+          <path d={graphPath} fill="none" stroke="url(#graphGrad)" strokeWidth="3" strokeLinecap="round" />
+          <path d={fillPath} fill="url(#bgGrad)" />
+          <circle cx="20" cy={startY} r="6" fill="hsl(var(--primary))" />
+          <circle cx="150" cy={midY} r="6" fill="hsl(var(--primary))" />
+          <circle cx="280" cy={endY} r="6" fill="#60a5fa" />
         </svg>
         {/* Labels */}
-        <div className="absolute top-0 left-2 text-xs text-muted-foreground">{current} kg</div>
+        <div className={`absolute ${isGaining ? "bottom-[15%]" : "top-0"} left-2 text-xs text-muted-foreground`}>{current} kg</div>
         <div className="absolute top-[35%] left-[38%] bg-background border border-border rounded-lg px-2 py-0.5 text-xs font-medium">{mid} kg</div>
-        <div className="absolute top-[55%] right-2 bg-primary text-primary-foreground rounded-lg px-3 py-1 text-sm font-heading">{goal} kg</div>
+        <div className={`absolute ${isGaining ? "top-0" : "top-[55%]"} right-2 bg-primary text-primary-foreground rounded-lg px-3 py-1 text-sm font-heading`}>{goal} kg</div>
       </div>
 
       <div className="flex justify-between text-xs text-muted-foreground px-2">
@@ -506,8 +520,8 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
       </div>
 
       <p className="text-sm text-muted-foreground mt-4">
-        <span className="font-bold text-foreground">90%</span> dos usuários como você perderam{" "}
-        <span className="font-bold text-foreground">{Math.abs(current - goal).toFixed(1)}kg</span> com sucesso com o nosso plano
+        <span className="font-bold text-foreground">90%</span> dos usuários como você {actionText}{" "}
+        <span className="font-bold text-foreground">{diff}kg</span> com sucesso com o nosso plano
       </p>
     </div>
   );
