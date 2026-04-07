@@ -157,9 +157,12 @@ const Dashboard = () => {
 
                   {isUnlockable && (
                     <>
-                      <h3 className="text-2xl font-bold text-white leading-tight mb-3">
-                        {card.title}
-                      </h3>
+                      <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm mb-3">
+                        <Lock className="w-5 h-5 text-white/70" />
+                      </div>
+                      <span className="inline-block text-xs font-semibold text-white/80 mb-3">
+                        {card.unlockDays} dias 🔥
+                      </span>
                       <button
                         disabled={!canUnlock}
                         onClick={(e) => {
@@ -170,12 +173,9 @@ const Dashboard = () => {
                       >
                         Desbloquear
                       </button>
-                      <span className="inline-block text-xs font-semibold text-white/80 mb-3">
-                        {card.unlockDays} dias 🔥
-                      </span>
-                      <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm">
-                        <Lock className="w-5 h-5 text-white/70" />
-                      </div>
+                      <h3 className="text-2xl font-bold text-white leading-tight">
+                        {card.title}
+                      </h3>
                     </>
                   )}
                 </div>
