@@ -61,8 +61,33 @@ const Treinos = () => {
     await fetchCurrentWorkout();
   };
 
+  const [exerciseVideos, setExerciseVideos] = useState<Record<string, string>>({});
+
+  // Fetch video URLs from exercises table to fill in missing video_url in workout JSON
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const { data } = await supabase.from("exercises").select("name, video_url");
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((ex) => { if (ex.video_url) map[ex.name.toLowerCase()] = ex.video_url; });
+        setExerciseVideos(map);
+      }
+    };
+    fetchVideos();
+  }, []);
+
   const workoutJson = workout?.workout_json;
-  const triSets = workoutJson?.tri_sets || [];
+  const triSets = useMemo(() => {
+    const sets = workoutJson?.tri_sets || [];
+    // Enrich exercises with video_url from DB if missing
+    return sets.map((ts: any) => ({
+      ...ts,
+      exercises: ts.exercises?.map((ex: any) => ({
+        ...ex,
+        video_url: ex.video_url || exerciseVideos[ex.name?.toLowerCase()] || null,
+      })),
+    }));
+  }, [workoutJson, exerciseVideos]);
 
   // Compute stats
   const stats = useMemo(() => {
