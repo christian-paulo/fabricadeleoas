@@ -356,7 +356,7 @@ const Checkout = () => {
   // Registration step (after payment)
   if (step === "registration") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-opensans">
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-heading">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
           <OrderSummary />
           <RegistrationForm checkoutEmail={checkoutEmail} />
@@ -385,7 +385,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-opensans">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-heading">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         <OrderSummary />
         {/* Payment Form */}
