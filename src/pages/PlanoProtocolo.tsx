@@ -13,35 +13,46 @@ import thumb4 from "@/assets/workout-thumb-4.jpg";
 
 const THUMBS = [thumb1, thumb2, thumb3, thumb4];
 
-const STAGES = [
-  { id: 1, name: "Ative Seu Corpo", days: 7 },
-  { id: 2, name: "Derretimento Total", days: 7 },
-  { id: 3, name: "Impulsionador de Resultados", days: 7 },
-  { id: 4, name: "Rush Final", days: 7 },
+const WEEK_NAMES = [
+  "Ative Seu Corpo",
+  "Derretimento Total",
+  "Impulsionador de Resultados",
+  "Rush Final",
 ];
 
-const DURATIONS = [22, 15, 18, 20, 25, 17, 22, 15, 18, 21, 20, 16, 24, 18, 21, 19, 23, 17, 20, 22, 22, 26, 18, 20, 25, 17, 21, 19];
+const BASE_DURATIONS = [22, 15, 18, 20, 25, 17, 22, 15, 18, 21, 20, 16, 24, 18, 21, 19, 23, 17, 20, 22, 22, 26, 18, 20, 25, 17, 21, 19];
 
 const PlanoProtocolo = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentDay, setCurrentDay] = useState(1);
+  const [workoutDays, setWorkoutDays] = useState(3);
   const [showBackToToday, setShowBackToToday] = useState(false);
   const todayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Determine current day based on profile trial_start_date
+  // Fetch completed workouts count and workout_days preference
   useEffect(() => {
     if (!user) return;
-    const fetchDay = async () => {
-      const { count } = await supabase
-        .from("workouts")
-        .select("id", { count: "exact", head: true })
-        .eq("profile_id", user.id)
-        .eq("completed", true);
-      setCurrentDay(Math.min((count || 0) + 1, 28));
+    const fetchData = async () => {
+      const [{ count }, { data: profile }] = await Promise.all([
+        supabase
+          .from("workouts")
+          .select("id", { count: "exact", head: true })
+          .eq("profile_id", user.id)
+          .eq("completed", true),
+        supabase
+          .from("profiles")
+          .select("workout_days")
+          .eq("id", user.id)
+          .single(),
+      ]);
+      const days = profile?.workout_days || 3;
+      setWorkoutDays(Math.max(1, Math.min(7, days)));
+      const totalDays = days * 4;
+      setCurrentDay(Math.min((count || 0) + 1, totalDays));
     };
-    fetchDay();
+    fetchData();
   }, [user]);
 
   // Auto-scroll to today on mount
@@ -74,30 +85,30 @@ const PlanoProtocolo = () => {
     todayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  // Build day list with stage separators
+  // Build plan: 4 weeks, each with workoutDays training days
   const plan = useMemo(() => {
     const items: Array<
-      | { type: "stage"; stage: typeof STAGES[0]; stageIndex: number }
-      | { type: "day"; dayNumber: number; duration: number; thumb: string; stageIndex: number }
+      | { type: "week"; weekNumber: number; weekName: string }
+      | { type: "day"; dayNumber: number; duration: number; thumb: string; weekIndex: number }
     > = [];
     let dayCounter = 0;
-    STAGES.forEach((stage, si) => {
-      items.push({ type: "stage", stage, stageIndex: si });
-      for (let d = 0; d < stage.days; d++) {
+    for (let week = 0; week < 4; week++) {
+      items.push({ type: "week", weekNumber: week + 1, weekName: WEEK_NAMES[week] });
+      for (let d = 0; d < workoutDays; d++) {
         items.push({
           type: "day",
           dayNumber: dayCounter + 1,
-          duration: DURATIONS[dayCounter] || 20,
+          duration: BASE_DURATIONS[dayCounter % BASE_DURATIONS.length] || 20,
           thumb: THUMBS[dayCounter % THUMBS.length],
-          stageIndex: si,
+          weekIndex: week,
         });
         dayCounter++;
       }
-    });
+    }
     return items;
-  }, []);
+  }, [workoutDays]);
 
-  const goalText = "28 dias corpo inteiro";
+  const totalDays = workoutDays * 4;
 
   return (
     <div ref={scrollRef} className="min-h-screen bg-background max-w-lg mx-auto relative">
@@ -109,20 +120,23 @@ const PlanoProtocolo = () => {
             <span className="text-primary font-heading font-bold text-base">Plano Pessoal</span>
           </div>
         </div>
-        <h1 className="text-2xl font-heading font-bold text-foreground leading-tight mb-6">
-          {goalText}
+        <h1 className="text-2xl font-heading font-bold text-foreground leading-tight mb-1">
+          Protocolo de 4 semanas
         </h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          {workoutDays}x por semana · {totalDays} treinos no total
+        </p>
       </div>
 
       {/* Plan timeline */}
       <div className="px-4 pb-32">
         {plan.map((item, idx) => {
-          if (item.type === "stage") {
+          if (item.type === "week") {
             return (
-              <div key={`stage-${item.stage.id}`} className="flex items-center gap-4 py-4">
+              <div key={`week-${item.weekNumber}`} className="flex items-center gap-4 py-4">
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                   <img
-                    src={THUMBS[item.stageIndex]}
+                    src={THUMBS[item.weekNumber - 1]}
                     alt=""
                     className="w-full h-full object-cover rounded-full"
                     loading="lazy"
@@ -131,8 +145,8 @@ const PlanoProtocolo = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Estágio {item.stage.id}</p>
-                  <p className="text-base font-heading font-bold text-foreground">{item.stage.name}</p>
+                  <p className="text-sm text-muted-foreground">Semana {item.weekNumber}</p>
+                  <p className="text-base font-heading font-bold text-foreground">{item.weekName}</p>
                 </div>
               </div>
             );
@@ -175,7 +189,7 @@ const PlanoProtocolo = () => {
                 >
                   <img
                     src={item.thumb}
-                    alt={`Dia ${item.dayNumber}`}
+                    alt={`Treino ${item.dayNumber}`}
                     className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                     loading="lazy"
                     width={80}
