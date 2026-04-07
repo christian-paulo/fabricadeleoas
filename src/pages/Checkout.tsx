@@ -453,7 +453,7 @@ const Checkout = () => {
                     },
                     locale: "pt-BR",
                   }}>
-                  <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
+                  <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
                 </Elements>
               )}
             </>
