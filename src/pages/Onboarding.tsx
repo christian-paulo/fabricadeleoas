@@ -575,7 +575,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
         <div>
           <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
           <h2 className="text-2xl text-foreground mb-2">Você sente dores no corpo?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Precisamos saber para sua segurança</p>
+          <p className="text-sm text-muted-foreground mb-6 font-medium">Seu protocolo será adaptado, respeitando todas as suas dores e limitações.</p>
           <div className="flex gap-4 justify-center mb-6">
             {[{ val: true, label: "Sim" }, { val: false, label: "Não" }].map((opt) => (
               <button key={String(opt.val)} onClick={() => { updateField("hasPain", opt.val); if (!opt.val) updateField("painLocation", []); }}
