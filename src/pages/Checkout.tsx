@@ -527,9 +527,11 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
   );
 };
 
-const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[]; workoutDuration: string }) => {
+const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLocation }: { targetArea: string[]; workoutDuration: string; goal: string; hasPain: boolean | null; painLocation: string[] }) => {
   const areaText = targetArea.length > 0 ? targetArea.join(", ") : "Todo o corpo";
   const duration = workoutDuration || "10-30 min";
+  const goalText = goal || "Melhorar condicionamento";
+  const limitationsText = hasPain && painLocation.length > 0 ? painLocation.join(", ") : "Nenhuma informada";
 
   const weekDays = [];
   const today = new Date();
@@ -559,6 +561,13 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
       <div className="space-y-4">
         <div className="flex items-center gap-3">
+          <span className="text-2xl">💪</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Seu objetivo</p>
+            <p className="font-heading text-foreground">{goalText}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
           <span className="text-2xl">🎯</span>
           <div>
             <p className="text-xs text-muted-foreground">Áreas de foco</p>
@@ -570,6 +579,13 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
           <div>
             <p className="text-xs text-muted-foreground">Duração</p>
             <p className="font-heading text-foreground">{duration}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🩹</span>
+          <div>
+            <p className="text-xs text-muted-foreground">Limitações</p>
+            <p className="font-heading text-foreground">{limitationsText}</p>
           </div>
         </div>
       </div>
@@ -680,7 +696,7 @@ const OrderSummary = () => {
     <div className="flex flex-col gap-6">
       {/* Pre-checkout persuasion sections */}
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
-      <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} />
+      <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
 
       {/* Success stories carousel */}
