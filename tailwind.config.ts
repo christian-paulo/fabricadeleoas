@@ -94,12 +94,17 @@ export default {
           "0%, 100%": { boxShadow: "0 0 0 0 hsl(330 100% 56% / 0.4)" },
           "50%": { boxShadow: "0 0 0 12px hsl(330 100% 56% / 0)" },
         },
+        "marquee": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-pink": "pulse-pink 2s infinite",
         "pulse-gold": "pulse-pink 2s infinite",
+        "marquee": "marquee 20s linear infinite",
       },
     },
   },
