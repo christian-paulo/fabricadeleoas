@@ -65,10 +65,14 @@ serve(async (req) => {
     const nextWorkoutNumber = workouts.length + 1;
     const isMonthlyPhase = completedCount >= 3;
 
-    // Get exercises
-    const { data: exercises } = await supabase.from("exercises").select("*");
+    // Get ONLY exercises that have a video_url
+    const { data: exercises } = await supabase
+      .from("exercises")
+      .select("*")
+      .not("video_url", "is", null)
+      .neq("video_url", "");
     if (!exercises || exercises.length === 0) {
-      throw new Error("No exercises available in the database");
+      throw new Error("No exercises with video available in the database");
     }
 
     // Gather feedback history
@@ -143,7 +147,12 @@ Use este treino para confirmar o nível ideal da aluna.`;
 
     const systemPrompt = `Você é o "Guia das Leoas", a inteligência de treino da Fábrica de Leoas, uma consultoria fitness feminina premium do Personal Gilvan.
 
-REGRAS ABSOLUTAS:
+REGRA MAIS IMPORTANTE:
+- Você SÓ pode usar exercícios que estão na lista fornecida. NÃO invente nomes de exercícios.
+- Use EXATAMENTE o "name" e "id" de cada exercício da lista. Não modifique o nome.
+- Se não encontrar exercícios suficientes na lista, use menos exercícios, mas NUNCA invente.
+
+REGRAS DE MONTAGEM:
 1. SEMPRE agrupe exercícios em TRI-SETS (blocos de 3 exercícios consecutivos).
 2. Todas as repetições são "15 a 30 repetições".
 3. Para duração ${effectiveDuration}min: ${effectiveDuration === 10 ? "2 a 3 séries totais" : "5 a 6 séries totais"}.
@@ -165,9 +174,9 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
     {
       "label": "Tri-set A",
       "exercises": [
-        { "exercise_id": "uuid", "name": "nome", "reps": "15 a 30 reps", "video_url": "url" },
-        { "exercise_id": "uuid", "name": "nome", "reps": "15 a 30 reps", "video_url": "url" },
-        { "exercise_id": "uuid", "name": "nome", "reps": "15 a 30 reps", "video_url": "url" }
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
+        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" }
       ]
     }
   ]
@@ -236,35 +245,39 @@ Gere o treino número ${nextWorkoutNumber}.`;
       throw new Error("Failed to parse AI workout response");
     }
 
-    // Post-process: map exercise names to actual DB records to ensure correct video_url
+    // Post-process: validate exercises against DB, remove any that don't match
     if (workoutJson.tri_sets && exercises) {
-      const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      const exerciseIds = new Set(exercises.map(e => e.id));
+
       for (const ts of workoutJson.tri_sets) {
         if (!ts.exercises) continue;
-        for (const ex of ts.exercises) {
-          const exName = normalize(ex.name || "");
-          // Try exact match first
-          let match = exercises.find(e => normalize(e.name) === exName);
-          // Try partial match
-          if (!match) match = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
-          // Word-based match
-          if (!match) {
-            const words = exName.split(/\s+/).filter((w: string) => w.length > 2);
-            let bestScore = 0;
-            for (const e of exercises) {
-              const dbWords = normalize(e.name).split(/\s+/);
-              const score = words.filter((w: string) => dbWords.some((dw: string) => dw.includes(w) || w.includes(dw))).length;
-              if (score > bestScore && score >= 2) { bestScore = score; match = e; }
+        // Map and validate each exercise
+        ts.exercises = ts.exercises
+          .map((ex: any) => {
+            // First check by ID
+            if (ex.exercise_id && exerciseIds.has(ex.exercise_id)) {
+              const match = exercises.find(e => e.id === ex.exercise_id)!;
+              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
             }
-          }
-          if (match) {
-            ex.exercise_id = match.id;
-            ex.name = match.name;
-            ex.video_url = match.video_url;
-            if (match.muscle_group) ex.muscle_group = match.muscle_group;
-          }
-        }
+            // Fallback: exact name match
+            const exName = normalize(ex.name || "");
+            const match = exercises.find(e => normalize(e.name) === exName);
+            if (match) {
+              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
+            }
+            // Contained match
+            const partial = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
+            if (partial) {
+              return { ...ex, exercise_id: partial.id, name: partial.name, video_url: partial.video_url, muscle_group: partial.muscle_group };
+            }
+            // No match — remove this exercise
+            return null;
+          })
+          .filter((ex: any) => ex !== null);
       }
+      // Remove empty tri-sets
+      workoutJson.tri_sets = workoutJson.tri_sets.filter((ts: any) => ts.exercises && ts.exercises.length > 0);
     }
 
     const today = new Date().toISOString().split("T")[0];
