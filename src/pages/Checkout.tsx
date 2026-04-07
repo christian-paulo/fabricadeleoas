@@ -35,7 +35,7 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
-const CheckoutForm = ({ onPaymentSuccess }: { onPaymentSuccess: () => void }) => {
+const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => void; email: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -70,7 +70,7 @@ const CheckoutForm = ({ onPaymentSuccess }: { onPaymentSuccess: () => void }) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement options={{ layout: "tabs" }} />
+      <PaymentElement options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }} />
       <Button type="submit" disabled={!stripe || loading}
         className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
         {loading ? (
@@ -439,22 +439,22 @@ const Checkout = () => {
                       },
                       rules: {
                         ".Input": {
-                      backgroundColor: "#FFFFF4",
-                      border: "1px solid hsl(340 20% 90%)",
+                          backgroundColor: "#FFFFF4",
+                          border: "1px solid hsl(340 20% 90%)",
+                        },
+                        ".Input:focus": {
+                          borderColor: "#FF69B4",
+                          boxShadow: "0 0 0 1px #FF69B4",
+                        },
+                        ".Label": {
+                          color: "#808080",
+                        },
+                      },
                     },
-                    ".Input:focus": {
-                      borderColor: "#FF69B4",
-                      boxShadow: "0 0 0 1px #FF69B4",
-                    },
-                    ".Label": {
-                      color: "#808080",
-                    },
-                  },
-                },
-                locale: "pt-BR",
-              }}>
-              <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
-            </Elements>
+                    locale: "pt-BR",
+                  }}>
+                  <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
+                </Elements>
               )}
             </>
           )}
