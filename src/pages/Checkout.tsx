@@ -638,27 +638,6 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
 
 const WhatYouGet = () => null;
 
-const testimonials = [testimonial1, testimonial2, testimonial3, testimonial4, testimonial5, testimonial6];
-
-const SuccessStoriesCarousel = () => {
-  return (
-    <div className="soft-card p-6">
-      <h3 className="font-heading text-lg text-foreground mb-4 text-center">
-        O que minhas alunas dizem 💬
-      </h3>
-      <div className="flex flex-col gap-3">
-        {testimonials.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt={`Depoimento ${i + 1}`}
-            className="rounded-xl shadow-sm w-full object-contain"
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const successStories = [dep1, dep2, dep3, dep4, dep5];
 
@@ -728,9 +707,6 @@ const OrderSummary = () => {
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
-
-      {/* Success stories carousel */}
-      <SuccessStoriesCarousel />
 
       {/* Order summary */}
       <div className="soft-card p-6 md:p-8 h-fit">
