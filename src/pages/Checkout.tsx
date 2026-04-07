@@ -32,6 +32,7 @@ const benefits = [
   "Acompanhamento de medidas corporais",
   "142 exercícios do método Gilvan",
   "Tri-sets inteligentes",
+  "Grupo de Suporte no WhatsApp",
   "Cancele quando quiser",
 ];
 
