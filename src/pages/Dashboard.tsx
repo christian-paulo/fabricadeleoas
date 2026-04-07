@@ -117,51 +117,80 @@ const Dashboard = () => {
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 pl-4 pr-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x', scrollPaddingLeft: '16px' }}>
           <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {[
-            { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos" },
-            { title: "Protocolo Seca Buxo", image: cardSeca, locked: true },
-            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true },
-            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true },
-          ].map((card, idx) => (
-            <div
-              key={idx}
-              onClick={() => !card.locked && card.route && navigate(card.route)}
-              className={`relative flex-shrink-0 w-[70%] snap-start rounded-3xl overflow-hidden h-[340px] ${card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
-            >
-              {/* Full background image */}
-              <img
-                src={card.image}
-                alt={card.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading={idx === 0 ? "eager" : "lazy"}
-              />
+            { title: "Protocolo Personalizado", image: cardProtocolo, locked: false, route: "/treinos", unlockDays: 0 },
+            { title: "Protocolo Seca Buxo", image: cardSeca, locked: true, unlockDays: 7 },
+            { title: "10 Minutos Para Transformar Seu Corpo", image: card10min, locked: true, unlockDays: 14 },
+            { title: "Desafio Coxa Turbinada", image: cardCoxa, locked: true, unlockDays: 21 },
+          ].map((card, idx) => {
+            const canUnlock = totalDays >= card.unlockDays;
+            const isUnlockable = card.locked && card.unlockDays > 0;
+            const isLocked = card.locked && !canUnlock;
 
-              {/* Gradient overlay from bottom */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            return (
+              <div
+                key={idx}
+                onClick={() => !card.locked && card.route && navigate(card.route)}
+                className={`relative flex-shrink-0 w-[70%] snap-start rounded-3xl overflow-hidden h-[340px] ${isLocked ? "cursor-default" : card.locked ? "cursor-default" : "cursor-pointer active:scale-[0.98] transition-transform"}`}
+              >
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading={idx === 0 ? "eager" : "lazy"}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-              {card.locked && (
-                <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                    <Lock className="w-7 h-7 text-white" />
+                {isLocked && (
+                  <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                      <Lock className="w-7 h-7 text-white" />
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Content on top */}
-              <div className="relative z-20 p-5 flex flex-col justify-end h-full items-center text-center">
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
-                  {card.locked ? "Em breve" : "Seu Plano"}
-                </span>
-                <h3 className="text-2xl font-bold text-white leading-tight mb-4">
-                  {card.title}
-                </h3>
-                {!card.locked && (
-                  <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
-                    Iniciar
-                  </button>
                 )}
+
+                <div className="relative z-20 p-5 flex flex-col justify-end h-full items-center text-center">
+                  {!card.locked && (
+                    <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
+                      Seu Plano
+                    </span>
+                  )}
+
+                  {isUnlockable && (
+                    <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
+                      {card.unlockDays} dias 🔥
+                    </span>
+                  )}
+
+                  <h3 className="text-2xl font-bold text-white leading-tight mb-4">
+                    {card.title}
+                  </h3>
+
+                  {!card.locked && (
+                    <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
+                      Iniciar
+                    </button>
+                  )}
+
+                  {isUnlockable && (
+                    <button
+                      disabled={!canUnlock}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (canUnlock) toast.success(`${card.title} desbloqueado! 🎉🦁`);
+                      }}
+                      className={`w-full font-bold py-3 rounded-2xl text-base uppercase tracking-wide transition-all ${
+                        canUnlock
+                          ? "pink-gradient text-primary-foreground shadow-lg active:scale-[0.97]"
+                          : "bg-white/20 text-white/60 backdrop-blur-sm cursor-not-allowed"
+                      }`}
+                    >
+                      {canUnlock ? "🔓 Desbloquear" : `🔒 Desbloquear (${card.unlockDays - totalDays} dias restantes)`}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
