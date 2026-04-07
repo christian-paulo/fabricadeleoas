@@ -20,27 +20,45 @@ serve(async (req) => {
   );
 
   try {
+    let email: string | null = null;
+    let userId: string | null = null;
+
+    // Try to get user from auth header first
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("User not authenticated");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data, error } = await supabaseClient.auth.getUser(token);
+      if (!error && data.user?.email) {
+        email = data.user.email;
+        userId = data.user.id;
+      }
+    }
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data, error } = await supabaseClient.auth.getUser(token);
-    if (error) throw error;
+    // If no auth, try to get email from request body
+    if (!email) {
+      try {
+        const body = await req.json();
+        if (body.email) {
+          email = body.email;
+        }
+      } catch {
+        // no body
+      }
+    }
 
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    if (!email) throw new Error("Email is required");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email, limit: 1 });
     let customerId: string;
 
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     } else {
       const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { supabase_user_id: user.id },
+        email,
+        metadata: userId ? { supabase_user_id: userId } : {},
       });
       customerId = customer.id;
     }

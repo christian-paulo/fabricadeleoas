@@ -23,13 +23,77 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
-const CheckoutForm = () => {
+const CheckoutForm = ({ onPaymentSuccess }: { onPaymentSuccess: () => void }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setLoading(true);
+    try {
+      const { error } = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/dashboard`,
+        },
+        redirect: "if_required",
+      });
+
+      if (error) {
+        toast.error(error.message || "Erro ao processar pagamento");
+        return;
+      }
+
+      toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
+      onPaymentSuccess();
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement options={{ layout: "tabs" }} />
+      <Button type="submit" disabled={!stripe || loading}
+        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Processando...
+          </span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            Iniciar 3 Dias Grátis
+          </span>
+        )}
+      </Button>
+      <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+        <Shield className="w-3 h-3" />
+        Pagamento seguro e criptografado
+      </p>
+    </form>
+  );
+};
+
+// ─── Registration Form (shown AFTER payment) ──
+const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
   const navigate = useNavigate();
   const { checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
+  const [email, setEmail] = useState(checkoutEmail);
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => { captureUtms(); }, []);
 
   const saveOnboardingData = async (userId: string) => {
     try {
@@ -73,116 +137,36 @@ const CheckoutForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
-
     setLoading(true);
+
     try {
-      const { error } = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/dashboard`,
-        },
-        redirect: "if_required",
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName, whatsapp } },
       });
+      if (error) throw error;
 
-      if (error) {
-        toast.error(error.message || "Erro ao processar pagamento");
-        return;
+      if (data.user) {
+        const utms = getStoredUtms();
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          email,
+          full_name: fullName,
+          whatsapp,
+          onboarding_completed: false,
+          ...utms,
+        } as any, { onConflict: "id" });
+        clearStoredUtms();
+
+        await saveOnboardingData(data.user.id);
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await saveOnboardingData(user.id);
-      }
-
-      const nextSubscription = await checkSubscription();
+      await checkSubscription();
       await refreshProfile();
 
-      if (nextSubscription?.subscribed) {
-        toast.success("Bem-vinda à Fábrica de Leoas! 🦁");
-        navigate("/dashboard");
-        return;
-      }
-
-      toast.error("Cadastre um cartão válido para liberar o acesso.");
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement options={{ layout: "tabs" }} />
-      <Button type="submit" disabled={!stripe || loading}
-        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Processando...
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Iniciar 3 Dias Grátis
-          </span>
-        )}
-      </Button>
-      <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-        <Shield className="w-3 h-3" />
-        Pagamento seguro e criptografado
-      </p>
-    </form>
-  );
-};
-
-// ─── Registration Form (shown before payment if not logged in) ──
-const RegistrationForm = ({ onRegistered }: { onRegistered: () => void }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
-
-  useEffect(() => { captureUtms(); }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Bem-vinda de volta, Leoa! 🦁");
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: fullName, whatsapp } },
-        });
-        if (error) throw error;
-
-        if (data.user) {
-          const utms = getStoredUtms();
-          await supabase.from("profiles").upsert({
-            id: data.user.id,
-            email,
-            full_name: fullName,
-            whatsapp,
-            onboarding_completed: false,
-            ...utms,
-          } as any, { onConflict: "id" });
-          clearStoredUtms();
-        }
-
-        toast.success("Conta criada com sucesso! 🦁");
-      }
-
-      onRegistered();
+      toast.success("Bem-vinda à Fábrica de Leoas! 🦁");
+      navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Erro na autenticação");
     } finally {
@@ -193,27 +177,23 @@ const RegistrationForm = ({ onRegistered }: { onRegistered: () => void }) => {
   return (
     <div className="soft-card p-6 md:p-8 order-1 md:order-2">
       <h2 className="font-heading text-xl text-foreground mb-2">
-        {isLogin ? "Entrar na Alcateia" : "Crie sua conta para continuar"}
+        Crie sua conta para continuar
       </h2>
       <p className="text-sm text-muted-foreground mb-6">
-        {isLogin ? "Use seus dados de acesso" : "Falta pouco para liberar seu protocolo personalizado!"}
+        Falta pouco para liberar seu protocolo personalizado!
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
-          <>
-            <div>
-              <Label className="text-xs text-muted-foreground">Nome completo</Label>
-              <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">WhatsApp</Label>
-              <Input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="(11) 99999-9999" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
-            </div>
-          </>
-        )}
+        <div>
+          <Label className="text-xs text-muted-foreground">Nome completo</Label>
+          <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+            placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+        </div>
+        <div>
+          <Label className="text-xs text-muted-foreground">WhatsApp</Label>
+          <Input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+            placeholder="(11) 99999-9999" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+        </div>
         <div>
           <Label className="text-xs text-muted-foreground">E-mail</Label>
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -232,45 +212,67 @@ const RegistrationForm = ({ onRegistered }: { onRegistered: () => void }) => {
         </div>
         <Button type="submit" disabled={loading}
           className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-          {loading ? "Carregando..." : isLogin ? "Entrar 🦁" : "Criar Conta e Continuar"}
+          {loading ? "Carregando..." : "Criar Conta e Continuar"}
         </Button>
       </form>
-
-      <div className="mt-4 text-center">
-        <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
-          {isLogin ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
-        </button>
-      </div>
     </div>
   );
 };
 
 const Checkout = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, checkSubscription, refreshProfile } = useAuth();
+  const { data: onboardingData } = useOnboarding();
   const navigate = useNavigate();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [registered, setRegistered] = useState(false);
+  const [step, setStep] = useState<"email" | "payment" | "registration">("email");
+  const [checkoutEmail, setCheckoutEmail] = useState("");
 
   const isAuthenticated = !!user;
 
-  // When user becomes authenticated (either already was, or just registered), load checkout
+  // If already authenticated, go straight to payment
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (isAuthenticated && user?.email) {
+      setCheckoutEmail(user.email);
+      setStep("payment");
+    }
+  }, [isAuthenticated]);
+
+  // Load checkout when we have an email and are on payment step
+  useEffect(() => {
+    if (step !== "payment" || !checkoutEmail || clientSecret) return;
     setLoading(true);
     const createIntent = async () => {
       try {
-        const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent");
-        if (fnError) throw fnError;
-        if (data.already_subscribed) {
-          await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
-          toast.info("Você já possui uma assinatura ativa!");
-          navigate("/dashboard");
-          return;
+        const invokeOptions: any = {};
+        
+        if (isAuthenticated) {
+          // Authenticated user - will use auth header automatically
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent");
+          if (fnError) throw fnError;
+          if (data.already_subscribed) {
+            await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
+            toast.info("Você já possui uma assinatura ativa!");
+            navigate("/dashboard");
+            return;
+          }
+          if (data.client_secret) setClientSecret(data.client_secret);
+          else throw new Error("Não foi possível iniciar o checkout");
+        } else {
+          // Guest user - pass email in body
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", {
+            body: { email: checkoutEmail },
+          });
+          if (fnError) throw fnError;
+          if (data.already_subscribed) {
+            toast.info("Este email já possui uma assinatura ativa! Faça login.");
+            navigate("/auth");
+            return;
+          }
+          if (data.client_secret) setClientSecret(data.client_secret);
+          else throw new Error("Não foi possível iniciar o checkout");
         }
-        if (data.client_secret) setClientSecret(data.client_secret);
-        else throw new Error("Não foi possível iniciar o checkout");
       } catch (err: any) {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
@@ -279,17 +281,100 @@ const Checkout = () => {
       }
     };
     createIntent();
-  }, [isAuthenticated, registered]);
+  }, [step, checkoutEmail]);
 
-  // Show registration form if not authenticated
-  if (!authLoading && !isAuthenticated) {
+  const handlePaymentSuccess = async () => {
+    if (isAuthenticated) {
+      // Already has account, save data and go to dashboard
+      const saveOnboardingData = async (userId: string) => {
+        try {
+          await supabase.from("profiles").update({
+            goal: onboardingData.goal,
+            target_area: onboardingData.targetArea.join(", "),
+            training_experience: onboardingData.trainingExperience,
+            workout_days: onboardingData.workoutDays,
+            workout_duration: onboardingData.workoutDuration === "10 min" ? 10 : 30,
+            has_pain: onboardingData.hasPain || false,
+            pain_location: onboardingData.painLocation.join(", "),
+            uses_medication: onboardingData.usesMedication || false,
+            medication_feeling: onboardingData.medicationFeeling,
+            equipment: onboardingData.equipment,
+            onboarding_completed: true,
+          } as any).eq("id", userId);
+
+          await supabase.from("onboarding_responses" as any).upsert({
+            profile_id: userId,
+            motivacao: onboardingData.motivacao.join(", "),
+            corpo_atual: onboardingData.corpo_atual,
+            corpo_desejado: onboardingData.corpo_desejado,
+            altura: onboardingData.altura ? parseFloat(onboardingData.altura) : null,
+            peso_atual: onboardingData.peso_atual ? parseFloat(onboardingData.peso_atual) : null,
+            meta_peso: onboardingData.meta_peso ? parseFloat(onboardingData.meta_peso) : null,
+            biotipo: onboardingData.tipo_barriga,
+            idade: onboardingData.idade ? parseInt(onboardingData.idade) : null,
+            local_treino: onboardingData.local_treino,
+            dificuldade: onboardingData.dificuldade,
+            rotina: onboardingData.rotina,
+            flexibilidade: onboardingData.flexibilidade,
+            psicologico: onboardingData.psicologico,
+            celebracao: onboardingData.celebracao,
+          } as any, { onConflict: "profile_id" } as any);
+
+          localStorage.removeItem("onboarding_data");
+        } catch (err) {
+          console.error("Failed to save onboarding data:", err);
+        }
+      };
+
+      await saveOnboardingData(user!.id);
+      await checkSubscription();
+      await refreshProfile();
+      toast.success("Bem-vinda à Fábrica de Leoas! 🦁");
+      navigate("/dashboard");
+    } else {
+      // Not authenticated - show registration form
+      setStep("registration");
+    }
+  };
+
+  // Email collection step
+  if (!authLoading && !isAuthenticated && step === "email") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Order Summary */}
           <OrderSummary />
-          {/* Registration */}
-          <RegistrationForm onRegistered={() => setRegistered(true)} />
+          <div className="soft-card p-6 md:p-8 order-1 md:order-2">
+            <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Informe seu e-mail para iniciar o pagamento
+            </p>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (checkoutEmail) setStep("payment");
+            }} className="space-y-4">
+              <div>
+                <Label className="text-xs text-muted-foreground">E-mail</Label>
+                <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
+                  placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+              </div>
+              <Button type="submit"
+                className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                Continuar para o Pagamento
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Registration step (after payment)
+  if (step === "registration") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
+          <OrderSummary />
+          <RegistrationForm checkoutEmail={checkoutEmail} />
         </div>
       </div>
     );
@@ -352,7 +437,7 @@ const Checkout = () => {
                 },
                 locale: "pt-BR",
               }}>
-              <CheckoutForm />
+              <CheckoutForm onPaymentSuccess={handlePaymentSuccess} />
             </Elements>
           )}
         </div>
