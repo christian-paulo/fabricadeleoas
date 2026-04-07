@@ -618,6 +618,12 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
             </div>
           ))}
         </div>
+        <Button
+          className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
+          onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
+        >
+          Liberar meus 3 dias gratuitos
+        </Button>
       </div>
     </div>
   );
