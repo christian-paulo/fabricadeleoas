@@ -327,27 +327,29 @@ const Treinos = () => {
 
       {/* Video modal - exercise detail */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
-        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-t-3xl p-0 gap-0 [&>button]:hidden">
+        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-2xl p-0 gap-0 [&>button]:hidden overflow-hidden">
           {videoModal?.url && (
-            <div className="aspect-video w-full">
+            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
               <iframe
                 src={(() => {
                   const url = videoModal.url;
                   const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
                   if (shortsMatch) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+                  const watchMatch = url.match(/[?&]v=([^&]+)/);
+                  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
                   return url.replace("watch?v=", "embed/");
                 })()}
-                className="w-full h-full rounded-t-3xl"
+                className="absolute inset-0 w-full h-full"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
             </div>
           )}
-          <div className="p-6">
-            <h3 className="text-2xl font-heading font-bold text-foreground mb-6">{videoModal?.name}</h3>
+          <div className="p-5">
+            <h3 className="text-lg font-heading font-bold text-foreground mb-4">{videoModal?.name}</h3>
             <Button
               onClick={() => setVideoModal(null)}
-              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+              className="w-full pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl shadow-lg"
             >
               Fechar
             </Button>
