@@ -64,7 +64,7 @@ const LandingPage = () => {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto flex items-center justify-between h-14 px-4">
-          <span className="font-heading text-lg font-bold text-primary tracking-tight">Fábrica de Leoas</span>
+          <img src={logoIcon} alt="Fábrica de Leoas" className="h-10 w-auto" />
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={goToEntrar} className="text-foreground text-xs">
               {user ? "Ir para o App" : "Entrar"}
