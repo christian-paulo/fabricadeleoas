@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
 import testimonial1 from "@/assets/testimonial-1.jpg";
+import printApp from "@/assets/print-app.webp";
 import testimonial2 from "@/assets/testimonial-2.jpg";
 import testimonial3 from "@/assets/testimonial-3.jpg";
 import testimonial4 from "@/assets/testimonial-4.jpg";
@@ -556,6 +557,8 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
           <span className="font-bold text-foreground">consumo de água, calorias queimadas</span> etc.
         </p>
       </div>
+
+      <img src={printApp} alt="Preview do app" className="rounded-xl shadow-sm w-full object-contain mb-6" />
 
       <h3 className="font-heading text-xl text-foreground mb-4">PENSADO PARA VOCÊ</h3>
 
