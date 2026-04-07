@@ -516,6 +516,17 @@ const PersonalizedPlan = ({ targetArea, workoutDuration }: { targetArea: string[
 
   return (
     <div className="soft-card p-6">
+      {/* O que você terá */}
+      <div className="text-left mb-6">
+        <p className="text-sm text-primary font-medium mb-2">— O que você terá —</p>
+        <h3 className="font-heading text-xl text-foreground mb-2">PLANO PERSONALIZADO</h3>
+        <p className="text-sm text-muted-foreground">
+          Dividimos os seus objetivos em etapas diárias práticas:{" "}
+          <span className="font-bold text-foreground">os treinos mais adequados</span> com base no seu nível de preparo físico e hábitos,{" "}
+          <span className="font-bold text-foreground">consumo de água, calorias queimadas</span> etc.
+        </p>
+      </div>
+
       <h3 className="font-heading text-xl text-foreground mb-4">PENSADO PARA VOCÊ</h3>
 
       <div className="space-y-4">
