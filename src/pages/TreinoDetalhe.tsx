@@ -319,9 +319,9 @@ const Treinos = () => {
 
       {/* Video modal - exercise detail */}
       <Dialog open={!!videoModal} onOpenChange={() => setVideoModal(null)}>
-        <DialogContent className="bg-card border-border max-w-md mx-auto rounded-2xl p-0 gap-0 [&>button]:hidden overflow-hidden">
+        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-0 gap-0 [&>button]:hidden overflow-hidden">
           {videoModal?.url && (
-            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+            <div className="relative w-full" style={{ paddingBottom: "177.78%" }}>
               <iframe
                 src={(() => {
                   const url = videoModal.url;
