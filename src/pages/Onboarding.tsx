@@ -42,6 +42,7 @@ import dorPunhoImg from "@/assets/dor_punho.webp";
 import dorQuadrilImg from "@/assets/dor_quadril.webp";
 import dorJoelhoImg from "@/assets/dor_joelho.webp";
 import dorTornozeloImg from "@/assets/dor_tornozelo.webp";
+import transformacaoResultado from "@/assets/transformacao-resultado.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RulerSlider from "@/components/RulerSlider";
