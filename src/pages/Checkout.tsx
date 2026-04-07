@@ -448,7 +448,7 @@ const Checkout = () => {
 
 // ─── Order Summary Component ────────────────────────────────────
 const OrderSummary = () => (
-  <div className="soft-card p-6 md:p-8 order-2 md:order-1 h-fit">
+  <div className="soft-card p-6 md:p-8 h-fit">
     <div className="mb-6">
       <h1 className="font-heading text-2xl text-primary mb-1">O seu plano está pronto! 🦁</h1>
       <p className="text-sm text-muted-foreground">Consultoria Fitness com IA</p>
