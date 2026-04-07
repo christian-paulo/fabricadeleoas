@@ -531,6 +531,13 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
         <span className="font-bold text-foreground">90%</span> dos usuários como você {actionText}{" "}
         <span className="font-bold text-foreground">{diff}kg</span> com sucesso com o nosso plano
       </p>
+
+      <Button
+        className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
+        onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
+      >
+        Liberar meus 3 dias gratuitos
+      </Button>
     </div>
   );
 };
