@@ -1011,7 +1011,7 @@ const GraficoPrevisaoScreen = ({ onNext, onBack, currentIndex, totalSteps, data 
         </div>
 
         <p className="text-sm text-muted-foreground mt-6 leading-relaxed animate-[fade-in_0.5s_ease-out_0.5s_both]">
-          Nós previmos essa data-alvo com base no progresso de <strong className="text-foreground">60,000 usuárias</strong> como você.
+          Nós previmos essa data-alvo com base no progresso de <strong className="text-foreground">2000 usuárias</strong> como você.
         </p>
       </div>
       <div className="px-4 pb-8 flex gap-3">
