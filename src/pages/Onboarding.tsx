@@ -887,23 +887,6 @@ const ResultadoVisualScreen = ({ onNext, onBack, currentIndex, totalSteps }: any
       <div className="w-full rounded-2xl overflow-hidden shadow-lg mb-6">
         <img src={transformacaoResultado} alt="Transformação real - antes e depois" className="w-full h-auto object-cover" />
       </div>
-      <div className="soft-card p-6 w-full mb-4">
-        <p className="text-sm text-muted-foreground mb-2">Média de resultados em 12 semanas</p>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <p className="text-2xl font-heading text-primary font-bold">-5kg</p>
-            <p className="text-xs text-muted-foreground">Peso</p>
-          </div>
-          <div>
-            <p className="text-2xl font-heading text-primary font-bold">-8cm</p>
-            <p className="text-xs text-muted-foreground">Cintura</p>
-          </div>
-          <div>
-            <p className="text-2xl font-heading text-primary font-bold">+3cm</p>
-            <p className="text-xs text-muted-foreground">Glúteo</p>
-          </div>
-        </div>
-      </div>
     </div>
     <div className="px-4 pb-8 flex gap-3">
       <Button variant="outline" onClick={onBack} className="border-border text-foreground h-12 rounded-2xl px-4">
