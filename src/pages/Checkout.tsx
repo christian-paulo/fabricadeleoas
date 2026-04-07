@@ -23,6 +23,7 @@ import dep2 from "@/assets/dep2.webp";
 import dep3 from "@/assets/dep3.webp";
 import dep4 from "@/assets/dep4.webp";
 import dep5 from "@/assets/dep5.webp";
+import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
@@ -460,8 +461,12 @@ const Checkout = () => {
             </>
           )}
         </div>
+        </div>
+        {/* Depoimentos WhatsApp */}
+        <div className="col-span-full mt-4">
+          <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
+        </div>
       </div>
-    </div>
   );
 };
 
