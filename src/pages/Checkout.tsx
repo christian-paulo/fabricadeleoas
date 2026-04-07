@@ -238,8 +238,9 @@ const Checkout = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<"email" | "payment" | "registration">("email");
+  const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   const isAuthenticated = !!user;
 
