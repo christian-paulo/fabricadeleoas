@@ -254,7 +254,7 @@ const Checkout = () => {
 
   // Load checkout when we have an email and are on payment step
   useEffect(() => {
-    if (step !== "payment" || !checkoutEmail || clientSecret) return;
+    if (!emailConfirmed || !checkoutEmail || clientSecret) return;
     setLoading(true);
     const createIntent = async () => {
       try {
