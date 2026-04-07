@@ -140,40 +140,43 @@ const Dashboard = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-                {isLocked && (
-                  <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                      <Lock className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                )}
-
                 <div className="relative z-20 p-5 flex flex-col justify-end h-full items-center text-center">
-                  <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
-                    {isUnlockable ? `${card.unlockDays} dias 🔥` : "Seu Plano"}
-                  </span>
-
-                  <h3 className="text-2xl font-bold text-white leading-tight mb-4">
-                    {card.title}
-                  </h3>
-
                   {!card.locked && (
-                    <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
-                      Iniciar
-                    </button>
+                    <>
+                      <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
+                        Seu Plano
+                      </span>
+                      <h3 className="text-2xl font-bold text-white leading-tight mb-4">
+                        {card.title}
+                      </h3>
+                      <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
+                        Iniciar
+                      </button>
+                    </>
                   )}
 
                   {isUnlockable && (
-                    <button
-                      disabled={!canUnlock}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (canUnlock) toast.success(`${card.title} desbloqueado! 🎉🦁`);
-                      }}
-                      className={`inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full text-white ${!canUnlock ? "opacity-60 cursor-not-allowed" : "cursor-pointer active:scale-95 transition-transform"}`}
-                    >
-                      Desbloquear
-                    </button>
+                    <>
+                      <h3 className="text-2xl font-bold text-white leading-tight mb-3">
+                        {card.title}
+                      </h3>
+                      <button
+                        disabled={!canUnlock}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (canUnlock) toast.success(`${card.title} desbloqueado! 🎉🦁`);
+                        }}
+                        className={`inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full text-white mb-3 ${!canUnlock ? "opacity-60 cursor-not-allowed" : "cursor-pointer active:scale-95 transition-transform"}`}
+                      >
+                        Desbloquear
+                      </button>
+                      <span className="inline-block text-xs font-semibold text-white/80 mb-3">
+                        {card.unlockDays} dias 🔥
+                      </span>
+                      <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                        <Lock className="w-5 h-5 text-white/70" />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
