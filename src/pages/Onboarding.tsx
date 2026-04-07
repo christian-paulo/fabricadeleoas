@@ -1095,7 +1095,7 @@ const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
         Bem-vinda, Leoa!
       </h1>
       <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed animate-[fade-in_0.7s_ease-out_0.7s_both]">
-        Vou fazer algumas perguntas rápidas para montar o seu <span className="text-primary font-semibold">Protocolo personalizado</span> de treino em casa.
+        Responda o quiz de 1 minuto para montar o seu <span className="text-primary font-semibold">Protocolo Personalizado</span> com o Gilvan.
       </p>
     </div>
     <div className="w-full pb-8 animate-[fade-in_0.6s_ease-out_1.1s_both]">
