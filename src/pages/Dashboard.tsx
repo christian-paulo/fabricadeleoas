@@ -149,17 +149,9 @@ const Dashboard = () => {
                 )}
 
                 <div className="relative z-20 p-5 flex flex-col justify-end h-full items-center text-center">
-                  {!card.locked && (
-                    <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
-                      Seu Plano
-                    </span>
-                  )}
-
-                  {isUnlockable && (
-                    <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
-                      {card.unlockDays} dias 🔥
-                    </span>
-                  )}
+                  <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
+                    {isUnlockable ? `${card.unlockDays} dias 🔥` : "Seu Plano"}
+                  </span>
 
                   <h3 className="text-2xl font-bold text-white leading-tight mb-4">
                     {card.title}
@@ -178,13 +170,9 @@ const Dashboard = () => {
                         e.stopPropagation();
                         if (canUnlock) toast.success(`${card.title} desbloqueado! 🎉🦁`);
                       }}
-                      className={`w-full font-bold py-3 rounded-2xl text-base uppercase tracking-wide transition-all ${
-                        canUnlock
-                          ? "pink-gradient text-primary-foreground shadow-lg active:scale-[0.97]"
-                          : "bg-white/20 text-white/60 backdrop-blur-sm cursor-not-allowed"
-                      }`}
+                      className={`inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full text-white ${!canUnlock ? "opacity-60 cursor-not-allowed" : "cursor-pointer active:scale-95 transition-transform"}`}
                     >
-                      {canUnlock ? "🔓 Desbloquear" : `🔒 Desbloquear (${card.unlockDays - totalDays} dias restantes)`}
+                      Desbloquear
                     </button>
                   )}
                 </div>
