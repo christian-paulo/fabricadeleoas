@@ -572,26 +572,6 @@ const WhatYouGet = () => (
       <span className="font-bold text-foreground">os treinos mais adequados</span> com base no seu nível de preparo físico e hábitos,{" "}
       <span className="font-bold text-foreground">consumo de água, calorias queimadas</span> etc.
     </p>
-
-    {/* Mockup card */}
-    <div className="bg-muted rounded-2xl p-4 border border-border">
-      <div className="flex justify-between items-center mb-3">
-        <span className="font-heading text-sm text-foreground">DIARIAMENTE</span>
-        <span className="text-xs text-muted-foreground">5/5</span>
-      </div>
-      <div className="flex gap-2 justify-center mb-3">
-        {["Seg", "Ter", "Quar", "Hoje", "Sex", "Sáb", "Dom"].map((d, i) => (
-          <div key={i} className={`text-center text-[10px] px-1.5 py-1 rounded-lg ${i === 3 ? "bg-primary/20 font-bold text-foreground" : "text-muted-foreground"}`}>
-            <span>{d}</span>
-            <div className="mt-0.5">{i === 3 ? "🔥" : i % 2 === 0 ? "💧" : "☕"}</div>
-          </div>
-        ))}
-      </div>
-      <div className="bg-primary/10 rounded-xl p-3">
-        <p className="text-xs text-muted-foreground">Programação de hoje</p>
-        <p className="font-heading text-primary text-sm">BARRIGA LISINHA</p>
-      </div>
-    </div>
   </div>
 );
 
