@@ -666,8 +666,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
                 <span className="text-5xl">💪</span>
               </div>
               <div className="bg-background/80 backdrop-blur rounded-xl px-3 py-1.5 mb-3 text-center">
-                <h3 className="text-sm font-bold text-foreground">Protocolo das Leoas</h3>
-                <p className="text-xs text-muted-foreground">Plano personalizado</p>
+                <h3 className="text-base font-bold text-foreground">Protocolo das Leoas</h3>
               </div>
               <ul className="space-y-2 w-full">
                 {["Resultados Mais Rápidos", "Personalizado para você", "Orientação de Especialistas", "Progresso Impulsionado"].map((item) => (
