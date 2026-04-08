@@ -155,7 +155,7 @@ const Evolucao = () => {
     });
     if (error) toast.error("Erro ao salvar medidas");
     else {
-      toast.success("Medidas salvas! 🦋");
+      toast.success("Medidas salvas! 🦁");
       setForm({ weight: "", waist: "", hip: "", thigh: "", arm: "" });
       setShowMeasureForm(false);
       fetchData();
