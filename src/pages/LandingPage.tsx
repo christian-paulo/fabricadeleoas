@@ -101,18 +101,6 @@ const LandingPage = () => {
             A Fábrica de Leoas é o sistema que muda isso de vez.
           </p>
 
-          {/* Video Placeholder */}
-          <div className="max-w-sm mx-auto mb-10 rounded-2xl overflow-hidden shadow-2xl border-2 border-border/40">
-            <div className="relative bg-foreground/5" style={{ paddingBottom: "177.78%" }}>
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-foreground/80 to-foreground/95">
-                <div className="w-16 h-16 rounded-full pink-gradient flex items-center justify-center mb-3 shadow-lg">
-                  <Play className="w-7 h-7 text-primary-foreground ml-1" />
-                </div>
-                <p className="text-primary-foreground font-heading font-bold text-sm">Assista e entenda o método</p>
-                <p className="text-primary-foreground/70 text-xs mt-1">Clique para assistir</p>
-              </div>
-            </div>
-          </div>
 
           {/* CTA */}
           <Button size="lg" onClick={goToOnboarding}
