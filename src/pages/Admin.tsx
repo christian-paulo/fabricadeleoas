@@ -278,6 +278,21 @@ const Admin = () => {
 
   useEffect(() => { setStudentPage(1); }, [studentSearch, studentStatusFilter]);
   useEffect(() => { setExercisePage(1); }, [exerciseSearch, exerciseMuscleFilter, exerciseEquipFilter]);
+  useEffect(() => { setQuizPage(1); }, [quizSearch, quizGoalFilter]);
+
+  // Quiz filtered
+  const quizGoals = useMemo(() => [...new Set(quizResponses.map((r: any) => r.profile?.goal).filter(Boolean))], [quizResponses]);
+  const filteredQuiz = useMemo(() => {
+    let list = quizResponses;
+    if (quizSearch) {
+      const q = quizSearch.toLowerCase();
+      list = list.filter((r: any) => (r.profile?.full_name || "").toLowerCase().includes(q) || (r.profile?.email || "").toLowerCase().includes(q));
+    }
+    if (quizGoalFilter !== "all") list = list.filter((r: any) => r.profile?.goal === quizGoalFilter);
+    return list;
+  }, [quizResponses, quizSearch, quizGoalFilter]);
+  const quizTotalPages = Math.max(1, Math.ceil(filteredQuiz.length / ITEMS_PER_PAGE));
+  const paginatedQuiz = filteredQuiz.slice((quizPage - 1) * ITEMS_PER_PAGE, quizPage * ITEMS_PER_PAGE);
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Carregando...</p></div>;
 
