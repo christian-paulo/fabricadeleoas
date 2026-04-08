@@ -83,7 +83,7 @@ const Admin = () => {
   }, [user, isAdmin, loading]);
 
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchExercises(); }
+    if (isAdmin) { fetchProfiles(); fetchExercises(); fetchQuizResponses(); }
   }, [isAdmin]);
 
   // ─── Helpers ───
