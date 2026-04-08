@@ -494,6 +494,98 @@ const Admin = () => {
               </div>
             )}
 
+            {/* ===== QUIZ RESPONSES ===== */}
+            {activeSection === "quiz" && (
+              <div>
+                <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                    <Input placeholder="Buscar por nome ou email..." value={quizSearch}
+                      onChange={(e) => setQuizSearch(e.target.value)}
+                      className="pl-9 bg-input border-border text-foreground h-10" />
+                  </div>
+                  <Select value={quizGoalFilter} onValueChange={setQuizGoalFilter}>
+                    <SelectTrigger className="w-48 bg-input border-border text-foreground h-10">
+                      <SelectValue placeholder="Objetivo" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      <SelectItem value="all">Todos Objetivos</SelectItem>
+                      {quizGoals.map((g: string) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" className="border-border text-foreground h-10" onClick={() => {
+                    const headers = ["Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração", "Data"];
+                    const rows = filteredQuiz.map((r: any) => [
+                      r.profile?.full_name || "", r.profile?.email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
+                      r.profile?.goal || "", r.profile?.target_area || "", r.motivacao || "", r.corpo_atual || "", r.corpo_desejado || "",
+                      r.biotipo || "", r.profile?.equipment || "", r.local_treino || "", r.dificuldade || "", r.rotina || "",
+                      r.flexibilidade || "", (r.psicologico || []).join("; "), r.celebracao || "",
+                      r.created_at ? new Date(r.created_at).toLocaleDateString("pt-BR") : ""
+                    ]);
+                    const csv = [headers.join(","), ...rows.map((r: any[]) => r.map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a"); a.href = url; a.download = "quiz_responses.csv"; a.click();
+                    URL.revokeObjectURL(url);
+                  }}>
+                    <Download size={16} className="mr-2" /> Exportar CSV
+                  </Button>
+                </div>
+
+                <div className="neu-card overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-border">
+                        <TableHead className="text-muted-foreground">#</TableHead>
+                        <TableHead className="text-muted-foreground">Nome</TableHead>
+                        <TableHead className="text-muted-foreground">Idade</TableHead>
+                        <TableHead className="text-muted-foreground">Objetivo</TableHead>
+                        <TableHead className="text-muted-foreground">Motivação</TableHead>
+                        <TableHead className="text-muted-foreground">Corpo Atual</TableHead>
+                        <TableHead className="text-muted-foreground">Meta Peso</TableHead>
+                        <TableHead className="text-muted-foreground">Local</TableHead>
+                        <TableHead className="text-muted-foreground">Dificuldade</TableHead>
+                        <TableHead className="text-muted-foreground">Psicológico</TableHead>
+                        <TableHead className="text-muted-foreground">Data</TableHead>
+                        <TableHead className="text-muted-foreground">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedQuiz.map((r: any, idx: number) => (
+                        <TableRow key={r.id} className="border-border">
+                          <TableCell className="text-muted-foreground text-sm">{(quizPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
+                          <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.corpo_atual || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.meta_peso ? `${r.meta_peso} kg` : "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.local_treino || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{r.dificuldade || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{(r.psicologico || []).join(", ") || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              const prof = profiles.find((p: any) => p.id === r.profile_id);
+                              if (prof) openDrawer(prof);
+                            }}>
+                              <Eye size={16} className="text-primary" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {paginatedQuiz.length === 0 && (
+                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <Pagination current={quizPage} total={quizTotalPages} count={filteredQuiz.length}
+                  label="resposta" onPrev={() => setQuizPage(quizPage - 1)} onNext={() => setQuizPage(quizPage + 1)} />
+              </div>
+            )}
+
             {/* ===== EXERCISES ===== */}
             {activeSection === "exercises" && (
               <div>
