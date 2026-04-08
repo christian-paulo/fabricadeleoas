@@ -306,8 +306,8 @@ const Treinos = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground leading-tight uppercase">{ex.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                          {exComplete && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
-                          <span className={exComplete ? "text-green-500 font-semibold" : ""}>
+                          {exComplete && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                          <span className={exComplete ? "text-primary font-semibold" : ""}>
                             {completedCount}/{totalSeries} feito(s)
                           </span>
                         </p>
