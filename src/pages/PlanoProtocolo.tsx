@@ -27,6 +27,7 @@ const PlanoProtocolo = () => {
   const navigate = useNavigate();
   const [currentDay, setCurrentDay] = useState(1);
   const [workoutDays, setWorkoutDays] = useState(3);
+  const [workoutDurations, setWorkoutDurations] = useState<Record<number, string>>({});
   const [showBackToToday, setShowBackToToday] = useState(false);
   const todayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
