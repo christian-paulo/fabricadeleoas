@@ -116,7 +116,7 @@ const PlanoProtocolo = () => {
         items.push({
           type: "day",
           dayNumber: dayCounter + 1,
-          duration: BASE_DURATIONS[dayCounter % BASE_DURATIONS.length] || 20,
+          duration: workoutDurations[dayCounter + 1] || "—",
           thumb: THUMBS[dayCounter % THUMBS.length],
           weekIndex: week,
         });
