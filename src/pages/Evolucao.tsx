@@ -48,6 +48,22 @@ const Evolucao = () => {
 
   useEffect(() => { fetchData(); }, [user]);
 
+  // Refetch when page becomes visible (e.g. navigating back)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchData();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [user]);
+
+  // Refetch on navigation focus
+  useEffect(() => {
+    const handleFocus = () => fetchData();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user]);
+
   // --- Streak calculation ---
   const streak = useMemo(() => {
     const completedDates = workouts
