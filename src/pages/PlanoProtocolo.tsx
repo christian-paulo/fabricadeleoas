@@ -20,13 +20,14 @@ const WEEK_NAMES = [
   "Rush Final",
 ];
 
-const BASE_DURATIONS = [22, 15, 18, 20, 25, 17, 22, 15, 18, 21, 20, 16, 24, 18, 21, 19, 23, 17, 20, 22, 22, 26, 18, 20, 25, 17, 21, 19];
+
 
 const PlanoProtocolo = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentDay, setCurrentDay] = useState(1);
   const [workoutDays, setWorkoutDays] = useState(3);
+  const [workoutDurations, setWorkoutDurations] = useState<Record<number, string>>({});
   const [showBackToToday, setShowBackToToday] = useState(false);
   const todayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -35,7 +36,7 @@ const PlanoProtocolo = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ count }, { data: profile }] = await Promise.all([
+      const [{ count }, { data: profile }, { data: workouts }] = await Promise.all([
         supabase
           .from("workouts")
           .select("id", { count: "exact", head: true })
@@ -46,11 +47,28 @@ const PlanoProtocolo = () => {
           .select("workout_days")
           .eq("id", user.id)
           .single(),
+        supabase
+          .from("workouts")
+          .select("workout_json, created_at")
+          .eq("profile_id", user.id)
+          .order("created_at", { ascending: true }),
       ]);
       const days = profile?.workout_days || 3;
       setWorkoutDays(Math.max(1, Math.min(7, days)));
       const totalDays = days * 4;
       setCurrentDay(Math.min((count || 0) + 1, totalDays));
+
+      // Map workout durations by index
+      if (workouts) {
+        const durations: Record<number, string> = {};
+        workouts.forEach((w: any, idx: number) => {
+          const json = w.workout_json;
+          if (json?.estimated_duration) {
+            durations[idx + 1] = json.estimated_duration.replace("~", "").trim();
+          }
+        });
+        setWorkoutDurations(durations);
+      }
     };
     fetchData();
   }, [user]);
@@ -89,7 +107,7 @@ const PlanoProtocolo = () => {
   const plan = useMemo(() => {
     const items: Array<
       | { type: "week"; weekNumber: number; weekName: string }
-      | { type: "day"; dayNumber: number; duration: number; thumb: string; weekIndex: number }
+      | { type: "day"; dayNumber: number; duration: string; thumb: string; weekIndex: number }
     > = [];
     let dayCounter = 0;
     for (let week = 0; week < 4; week++) {
@@ -98,7 +116,7 @@ const PlanoProtocolo = () => {
         items.push({
           type: "day",
           dayNumber: dayCounter + 1,
-          duration: BASE_DURATIONS[dayCounter % BASE_DURATIONS.length] || 20,
+          duration: workoutDurations[dayCounter + 1] || "—",
           thumb: THUMBS[dayCounter % THUMBS.length],
           weekIndex: week,
         });
