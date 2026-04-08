@@ -48,6 +48,22 @@ const Evolucao = () => {
 
   useEffect(() => { fetchData(); }, [user]);
 
+  // Refetch when page becomes visible (e.g. navigating back)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchData();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [user]);
+
+  // Refetch on navigation focus
+  useEffect(() => {
+    const handleFocus = () => fetchData();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user]);
+
   // --- Streak calculation ---
   const streak = useMemo(() => {
     const completedDates = workouts
@@ -139,7 +155,7 @@ const Evolucao = () => {
     });
     if (error) toast.error("Erro ao salvar medidas");
     else {
-      toast.success("Medidas salvas! 🦋");
+      toast.success("Medidas salvas! 🦁");
       setForm({ weight: "", waist: "", hip: "", thigh: "", arm: "" });
       setShowMeasureForm(false);
       fetchData();
@@ -155,7 +171,7 @@ const Evolucao = () => {
   return (
     <AppLayout>
       <h1 className="text-2xl font-heading text-foreground mb-1">Sua Evolução</h1>
-      <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦋</p>
+      <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦁</p>
 
       {/* Streak Card */}
       <div className="soft-card p-5 mb-4">
@@ -499,7 +515,7 @@ const Evolucao = () => {
                 if (done === 1) return "Primeiro treino feito! O mais difícil já passou. Continue! 🌱";
                 if (done < 5) return `${done} treinos completos! Você está criando um hábito poderoso 🔥`;
                 if (done < 10) return "Você já está no ritmo! Sua disciplina inspira 🦁";
-                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦋";
+                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦁";
                 return `${done} treinos! Você é uma máquina de determinação! 👑`;
               })()}
             </p>
