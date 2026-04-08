@@ -151,10 +151,21 @@ const Evolucao = () => {
               {streak === 0 ? "Comece seu primeiro treino!" : streak < 3 ? "Você começou muito bem!" : streak < 7 ? "Continue assim, leoa! 🦁" : "Você está imparável! 🔥"}
             </p>
           </div>
-          <div className="relative">
-            <Flame className={`w-10 h-10 ${streak > 0 ? "text-primary" : "text-muted-foreground/30"}`} />
+          <div className="relative flex-shrink-0 w-12 h-14">
+            <svg viewBox="0 0 56 68" className="w-full h-full">
+              <defs>
+                <radialGradient id="fireGradEvo" cx="50%" cy="65%" r="50%">
+                  <stop offset="0%" stopColor="#FF6B00" />
+                  <stop offset="55%" stopColor="#FF9500" />
+                  <stop offset="100%" stopColor="#FFD580" stopOpacity="0.5" />
+                </radialGradient>
+              </defs>
+              <ellipse cx="28" cy="42" rx="26" ry="26" fill="#FFD580" opacity={streak > 0 ? 0.3 : 0.1} />
+              <path d="M28 4 C18 20, 6 33, 6 46 C6 58, 15 66, 28 66 C41 66, 50 58, 50 46 C50 33, 38 20, 28 4Z" fill={streak > 0 ? "url(#fireGradEvo)" : "hsl(0 0% 80%)"} />
+              <ellipse cx="28" cy="48" rx="10" ry="12" fill="#FFD580" opacity={streak > 0 ? 0.6 : 0.15} />
+            </svg>
             {streak > 0 && (
-              <span className="absolute -bottom-1 -right-1 text-xs font-bold bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                 {streak}
               </span>
             )}
