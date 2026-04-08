@@ -18,6 +18,7 @@ import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
 import TreinoClassicoDetalhe from "./pages/TreinoClassicoDetalhe";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
 
               <Route path="/onboarding/:step" element={<Onboarding />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
