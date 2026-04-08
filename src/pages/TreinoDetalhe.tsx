@@ -97,7 +97,25 @@ const Treinos = () => {
 
   const submitFeedback = async () => {
     if (!workout || !selectedEffort) return;
-    const { error } = await supabase.from("workouts").update({ completed: true, feedback_effort: selectedEffort }).eq("id", workout.id);
+    // Save tracking summary into workout_json
+    const completedCount = exercises.filter((_: any, idx: number) => isExerciseComplete(idx)).length;
+    const totalCount = exercises.length;
+    const durationMinutes = Math.ceil(elapsedSeconds / 60);
+    const updatedJson = {
+      ...workoutJson,
+      tracking_summary: {
+        completed_exercises: completedCount,
+        total_exercises: totalCount,
+        skipped_exercises: totalCount - completedCount,
+        duration_minutes: durationMinutes,
+        duration_seconds: elapsedSeconds,
+      },
+    };
+    const { error } = await supabase.from("workouts").update({
+      completed: true,
+      feedback_effort: selectedEffort,
+      workout_json: updatedJson,
+    }).eq("id", workout.id);
     if (error) { toast.error("Erro ao salvar feedback"); }
     else { setFeedback(selectedEffort); setCompleted(true); setFeedbackStep(null); setShowFeedback(false); toast.success("Treino finalizado! 🎉"); navigate("/treinos"); }
   };
