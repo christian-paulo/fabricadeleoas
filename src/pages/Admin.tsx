@@ -114,6 +114,18 @@ const Admin = () => {
     if (data) setProfiles(data);
   };
 
+  const fetchQuizResponses = async () => {
+    const { data } = await supabase.from("onboarding_responses").select("*");
+    if (data && data.length > 0) {
+      // Enrich with profile name/email
+      const profileIds = data.map((r: any) => r.profile_id);
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds);
+      const profMap: Record<string, any> = {};
+      (profs || []).forEach((p: any) => { profMap[p.id] = p; });
+      setQuizResponses(data.map((r: any) => ({ ...r, profile: profMap[r.profile_id] || {} })));
+    }
+  };
+
   const fetchExercises = async () => {
     const { data } = await supabase.from("exercises").select("*").order("name");
     if (data) setExercises(data);
