@@ -314,6 +314,16 @@ Gere o treino número ${nextWorkoutNumber}.`;
       delete workoutJson.tri_sets;
     }
 
+    // Force correct metadata regardless of what AI returned
+    workoutJson.level = effectiveLevel;
+    workoutJson.series_count = seriesCount;
+    workoutJson.reps_range = repsRange;
+    workoutJson.rest_seconds = restSeconds;
+    // Recalculate duration based on actual exercises
+    const actualExCount = workoutJson.exercises?.length || targetExercises;
+    const actualDuration = Math.round(actualExCount * timePerExerciseMin + warmupCooldownMin);
+    workoutJson.estimated_duration = `~${actualDuration} min`;
+
     const today = new Date().toISOString().split("T")[0];
 
     // Save workout
