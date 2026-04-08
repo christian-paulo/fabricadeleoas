@@ -181,13 +181,14 @@ REGRA MAIS IMPORTANTE:
 
 REGRAS DE MONTAGEM:
 1. NÃO use tri-sets. Os exercícios são INDIVIDUAIS, listados um a um.
-2. Cada exercício terá ${seriesCount} séries de ${repsRange} repetições.
-3. Descanso entre séries: ${restSeconds} segundos.
-4. Para duração ${effectiveDuration}min: selecione de 4 a 8 exercícios dependendo da duração.
-5. Nível efetivo da aluna: ${effectiveLevel}.
-${isMedicationRisk ? "6. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
-${profile.has_pain ? `7. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
-${profile.goal === "Melhorar Dores" ? "8. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
+2. OBRIGATÓRIO: Cada exercício terá EXATAMENTE ${seriesCount} séries de ${repsRange} repetições.
+3. Descanso entre séries: EXATAMENTE ${restSeconds} segundos.
+4. Selecione EXATAMENTE ${targetExercises} exercícios.
+5. O nível da aluna é "${effectiveLevel}" — NÃO mude o nível. Use "${effectiveLevel}" no campo "level".
+6. A duração estimada DEVE ser "~${calculatedDuration} min".
+${isMedicationRisk ? "7. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
+${profile.has_pain ? `8. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
+${profile.goal === "Melhorar Dores" ? "9. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
 
 ${phaseInstructions}
 
@@ -196,7 +197,7 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
   "title": "Título do treino",
   "description": "Breve descrição",
   "level": "${effectiveLevel}",
-  "estimated_duration": "~${effectiveDuration} min",
+  "estimated_duration": "~${calculatedDuration} min",
   "series_count": ${seriesCount},
   "reps_range": "${repsRange}",
   "rest_seconds": ${restSeconds},
