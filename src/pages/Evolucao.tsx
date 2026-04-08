@@ -1,40 +1,113 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler } from "lucide-react";
+import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+interface WorkoutRecord {
+  id: string;
+  date: string;
+  completed: boolean;
+  feedback_effort: string | null;
+  workout_json: any;
+}
 
 const Evolucao = () => {
   const { user } = useAuth();
   const [form, setForm] = useState({ weight: "", waist: "", hip: "", thigh: "", arm: "" });
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [measurements, setMeasurements] = useState<any[]>([]);
+  const [workouts, setWorkouts] = useState<WorkoutRecord[]>([]);
   const [saving, setSaving] = useState(false);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [showMeasureForm, setShowMeasureForm] = useState(false);
 
   const fields = [
-    { key: "weight", label: "Peso (kg)" },
-    { key: "waist", label: "Cintura (cm)" },
-    { key: "hip", label: "Quadril (cm)" },
-    { key: "thigh", label: "Coxa (cm)" },
-    { key: "arm", label: "Braço (cm)" },
+    { key: "weight", label: "Peso (kg)", icon: "⚖️" },
+    { key: "waist", label: "Cintura (cm)", icon: "📏" },
+    { key: "hip", label: "Quadril (cm)", icon: "📏" },
+    { key: "thigh", label: "Coxa (cm)", icon: "📏" },
+    { key: "arm", label: "Braço (cm)", icon: "💪" },
   ] as const;
 
-  const fetchMeasurements = async () => {
+  const fetchData = async () => {
     if (!user) return;
-    const { data } = await supabase.from("measurements")
-      .select("*").eq("profile_id", user.id).order("date", { ascending: true });
-    if (data) {
-      setChartData(data.map((m: any) => ({
-        date: new Date(m.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-        peso: m.weight, cintura: m.waist, quadril: m.hip,
-      })));
-    }
+    const [measRes, workRes] = await Promise.all([
+      supabase.from("measurements").select("*").eq("profile_id", user.id).order("date", { ascending: true }),
+      supabase.from("workouts").select("*").eq("profile_id", user.id).order("date", { ascending: false }),
+    ]);
+    if (measRes.data) setMeasurements(measRes.data);
+    if (workRes.data) setWorkouts(workRes.data as WorkoutRecord[]);
   };
 
-  useEffect(() => { fetchMeasurements(); }, [user]);
+  useEffect(() => { fetchData(); }, [user]);
+
+  // --- Streak calculation ---
+  const streak = useMemo(() => {
+    const completedDates = workouts
+      .filter(w => w.completed)
+      .map(w => w.date)
+      .sort((a, b) => b.localeCompare(a)); // descending
+
+    if (completedDates.length === 0) return 0;
+
+    let count = 0;
+    const today = format(new Date(), "yyyy-MM-dd");
+    let checkDate = today;
+
+    // If today isn't completed, start from yesterday
+    if (!completedDates.includes(today)) {
+      const yesterday = format(addDays(new Date(), -1), "yyyy-MM-dd");
+      if (!completedDates.includes(yesterday)) return 0;
+      checkDate = yesterday;
+    }
+
+    for (let i = 0; i < 365; i++) {
+      const d = format(addDays(new Date(checkDate), -i), "yyyy-MM-dd");
+      if (completedDates.includes(d)) count++;
+      else break;
+    }
+    return count;
+  }, [workouts]);
+
+  // --- Weekly calendar ---
+  const currentWeekStart = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 0 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
+  const weekLabel = `${format(weekDays[0], "d MMM", { locale: ptBR })} - ${format(weekDays[6], "d MMM", { locale: ptBR })}`;
+
+  const getWorkoutForDay = (day: Date) => {
+    const dateStr = format(day, "yyyy-MM-dd");
+    return workouts.find(w => w.date === dateStr);
+  };
+
+  // --- Stats ---
+  const totalCompleted = workouts.filter(w => w.completed).length;
+  const thisWeekCompleted = weekDays.filter(d => {
+    const w = getWorkoutForDay(d);
+    return w?.completed;
+  }).length;
+
+  // --- Weight trend ---
+  const chartData = useMemo(() => {
+    return measurements.map((m: any) => ({
+      date: format(new Date(m.date), "dd/MM"),
+      peso: m.weight,
+      cintura: m.waist,
+      quadril: m.hip,
+    }));
+  }, [measurements]);
+
+  const latestWeight = measurements.length > 0 ? measurements[measurements.length - 1]?.weight : null;
+  const previousWeight = measurements.length > 1 ? measurements[measurements.length - 2]?.weight : null;
+  const weightDiff = latestWeight && previousWeight ? (latestWeight - previousWeight).toFixed(1) : null;
+
+  const latestMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
 
   const handleSave = async () => {
     if (!user) return;
@@ -51,59 +124,285 @@ const Evolucao = () => {
     else {
       toast.success("Medidas salvas! 🦋");
       setForm({ weight: "", waist: "", hip: "", thigh: "", arm: "" });
-      fetchMeasurements();
+      setShowMeasureForm(false);
+      fetchData();
     }
     setSaving(false);
   };
 
+  // Streak milestones
+  const streakMilestones = [2, 5, 7, 14, 21, 30];
+  const nextMilestone = streakMilestones.find(m => m > streak) || 30;
+  const streakProgress = Math.min((streak / nextMilestone) * 100, 100);
+
   return (
     <AppLayout>
-      <h1 className="text-3xl text-foreground mb-1 uppercase">Metamorfose 🦋</h1>
-      <p className="text-base text-muted-foreground mb-6">Acompanhe sua evolução</p>
+      <h1 className="text-2xl font-heading text-foreground mb-1">Sua Evolução</h1>
+      <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦋</p>
 
-      <div className="soft-card p-6 mb-6">
-        <h3 className="text-base font-heading text-primary mb-4 uppercase">Registrar Medidas</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {fields.map((f) => (
-            <div key={f.key}>
-              <Label className="text-sm text-muted-foreground font-medium">{f.label}</Label>
-              <Input type="number" value={form[f.key]} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                className="bg-background border-border text-foreground mt-1 h-12 text-base rounded-xl" placeholder="0" />
-            </div>
+      {/* Streak Card */}
+      <div className="soft-card p-5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-lg font-heading text-foreground">
+              Sequência de <span className="text-primary font-bold">{streak}</span> {streak === 1 ? "dia" : "dias"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {streak === 0 ? "Comece seu primeiro treino!" : streak < 3 ? "Você começou muito bem!" : streak < 7 ? "Continue assim, leoa! 🦁" : "Você está imparável! 🔥"}
+            </p>
+          </div>
+          <div className="relative">
+            <Flame className={`w-10 h-10 ${streak > 0 ? "text-primary" : "text-muted-foreground/30"}`} />
+            {streak > 0 && (
+              <span className="absolute -bottom-1 -right-1 text-xs font-bold bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
+                {streak}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full pink-gradient rounded-full transition-all duration-700"
+            style={{ width: `${streakProgress}%` }}
+          />
+          {/* Milestone markers */}
+          {streakMilestones.filter(m => m <= nextMilestone).map(m => (
+            <div
+              key={m}
+              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-muted-foreground/20"
+              style={{ left: `${(m / nextMilestone) * 100}%` }}
+            />
           ))}
         </div>
-        <Button onClick={handleSave} disabled={saving}
-          className="w-full pink-gradient text-primary-foreground font-heading mt-5 h-12 rounded-2xl text-base shadow-lg">
-          {saving ? "Salvando..." : "Salvar Medidas"}
-        </Button>
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-muted-foreground">0</span>
+          <span className="text-[10px] text-primary font-semibold">{nextMilestone} dias 🔥</span>
+        </div>
       </div>
 
-      <div className="soft-card p-6">
-        <h3 className="text-base font-heading text-primary mb-4 uppercase">Evolução</h3>
-        {chartData.length > 0 ? (
-          <>
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(340 20% 90%)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: "hsl(0 0% 50%)" }} />
-                <YAxis tick={{ fontSize: 12, fill: "hsl(0 0% 50%)" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(340 100% 98%)", border: "1px solid hsl(340 20% 90%)", borderRadius: "12px", fontSize: 14 }}
-                  labelStyle={{ color: "hsl(330 100% 56%)" }} />
-                <Line type="monotone" dataKey="peso" stroke="hsl(330 100% 56%)" strokeWidth={2.5} dot={{ fill: "hsl(330 100% 56%)", r: 4 }} />
-                <Line type="monotone" dataKey="cintura" stroke="hsl(330 80% 75%)" strokeWidth={2.5} dot={{ fill: "hsl(330 80% 75%)", r: 4 }} />
-                <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 60%)" strokeWidth={2.5} dot={{ fill: "hsl(0 0% 60%)", r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="flex gap-5 mt-4 justify-center">
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-primary inline-block" /> Peso</span>
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-pink-glow inline-block" /> Cintura</span>
-              <span className="flex items-center gap-2 text-sm font-medium"><span className="w-4 h-1.5 rounded bg-muted-foreground inline-block" /> Quadril</span>
-            </div>
-          </>
+      {/* Weekly Calendar */}
+      <div className="soft-card p-5 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={() => setWeekOffset(o => o - 1)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <span className="text-sm font-semibold text-foreground capitalize">{weekLabel}</span>
+          <button
+            onClick={() => setWeekOffset(o => Math.min(o + 1, 0))}
+            disabled={weekOffset >= 0}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors disabled:opacity-30"
+          >
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((day, i) => {
+            const w = getWorkoutForDay(day);
+            const isToday = isSameDay(day, new Date());
+            const isFuture = isAfter(day, new Date());
+            const completed = w?.completed;
+
+            return (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground uppercase">
+                  {format(day, "EEE", { locale: ptBR }).slice(0, 3)}
+                </span>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                  completed
+                    ? "bg-primary text-primary-foreground"
+                    : isToday
+                    ? "ring-2 ring-primary text-foreground"
+                    : isFuture
+                    ? "text-muted-foreground/40"
+                    : w
+                    ? "bg-muted text-muted-foreground"
+                    : "text-muted-foreground/60"
+                }`}>
+                  {completed ? "✓" : format(day, "d")}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Week summary */}
+        <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-border">
+          <div className="flex items-center gap-1.5">
+            <Dumbbell className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs text-muted-foreground"><span className="font-bold text-foreground">{thisWeekCompleted}</span> esta semana</span>
+          </div>
+          <div className="w-px h-4 bg-border" />
+          <div className="flex items-center gap-1.5">
+            <CalendarDays className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs text-muted-foreground"><span className="font-bold text-foreground">{totalCompleted}</span> total</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Weight & Body Stats */}
+      <div className="soft-card p-5 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-heading text-foreground flex items-center gap-2">
+            <Ruler className="w-4 h-4 text-primary" />
+            Corpo
+          </h3>
+          <button
+            onClick={() => setShowMeasureForm(!showMeasureForm)}
+            className="text-xs font-semibold text-primary"
+          >
+            {showMeasureForm ? "Fechar" : "Atualizar"}
+          </button>
+        </div>
+
+        {/* Current stats grid */}
+        {latestMeasurement ? (
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[
+              { label: "Peso", value: latestMeasurement.weight, unit: "kg", diff: weightDiff },
+              { label: "Cintura", value: latestMeasurement.waist, unit: "cm", diff: null },
+              { label: "Quadril", value: latestMeasurement.hip, unit: "cm", diff: null },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+                <p className="text-xl font-bold text-foreground mt-1">
+                  {stat.value ?? "—"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
+                {stat.diff && (
+                  <div className={`flex items-center justify-center gap-0.5 mt-1 ${
+                    parseFloat(stat.diff) < 0 ? "text-green-500" : parseFloat(stat.diff) > 0 ? "text-orange-500" : "text-muted-foreground"
+                  }`}>
+                    {parseFloat(stat.diff) < 0 ? <TrendingDown className="w-3 h-3" /> : parseFloat(stat.diff) > 0 ? <TrendingUp className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    <span className="text-[10px] font-bold">{Math.abs(parseFloat(stat.diff))} kg</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
-          <p className="text-base text-muted-foreground text-center py-8">Adicione suas primeiras medidas acima</p>
+          <p className="text-sm text-muted-foreground text-center py-4 mb-4">Registre suas primeiras medidas abaixo</p>
+        )}
+
+        {/* Additional measurements */}
+        {latestMeasurement && (latestMeasurement.thigh || latestMeasurement.arm) && (
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {[
+              { label: "Coxa", value: latestMeasurement.thigh, unit: "cm" },
+              { label: "Braço", value: latestMeasurement.arm, unit: "cm" },
+            ].filter(s => s.value).map((stat) => (
+              <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+                <p className="text-lg font-bold text-foreground mt-1">{stat.value}</p>
+                <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Measurement form */}
+        {showMeasureForm && (
+          <div className="border-t border-border pt-4 mt-2">
+            <div className="grid grid-cols-2 gap-3">
+              {fields.map((f) => (
+                <div key={f.key}>
+                  <Label className="text-xs text-muted-foreground font-medium">{f.label}</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={form[f.key]}
+                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                    className="bg-background border-border text-foreground mt-1 h-11 text-sm rounded-xl"
+                    placeholder="0"
+                  />
+                </div>
+              ))}
+            </div>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full pink-gradient text-primary-foreground font-heading mt-4 h-12 rounded-2xl text-base shadow-lg"
+            >
+              {saving ? "Salvando..." : "Salvar Medidas"}
+            </Button>
+          </div>
         )}
       </div>
+
+      {/* Chart */}
+      {chartData.length > 1 && (
+        <div className="soft-card p-5 mb-4">
+          <h3 className="text-base font-heading text-foreground mb-4 flex items-center gap-2">
+            <TrendingDown className="w-4 h-4 text-primary" />
+            Progresso
+          </h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={chartData}>
+              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} width={35} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "12px",
+                  fontSize: 12,
+                }}
+                labelStyle={{ color: "hsl(var(--primary))" }}
+              />
+              <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} name="Peso" />
+              <Line type="monotone" dataKey="cintura" stroke="hsl(340 90% 70%)" strokeWidth={2} dot={{ r: 2 }} name="Cintura" />
+              <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 65%)" strokeWidth={2} dot={{ r: 2 }} name="Quadril" />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="flex gap-4 mt-3 justify-center">
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <span className="w-3 h-1 rounded bg-primary inline-block" /> Peso
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <span className="w-3 h-1 rounded inline-block" style={{ backgroundColor: "hsl(340 90% 70%)" }} /> Cintura
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+              <span className="w-3 h-1 rounded inline-block" style={{ backgroundColor: "hsl(0 0% 65%)" }} /> Quadril
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Recent workouts */}
+      {workouts.filter(w => w.completed).length > 0 && (
+        <div className="soft-card p-5 mb-4">
+          <h3 className="text-base font-heading text-foreground mb-3 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" />
+            Últimos Treinos
+          </h3>
+          <div className="space-y-2.5">
+            {workouts.filter(w => w.completed).slice(0, 5).map((w) => {
+              const wJson = w.workout_json as any;
+              const title = wJson?.title || "Treino";
+              const exerciseCount = wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
+              const effort = w.feedback_effort === "facil" ? "😊 Fácil" : w.feedback_effort === "ideal" ? "💪 Ideal" : w.feedback_effort === "dificil" ? "🔥 Difícil" : "";
+
+              return (
+                <div key={w.id} className="flex items-center gap-3 bg-muted/40 rounded-xl p-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Dumbbell className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{title}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {format(new Date(w.date), "d 'de' MMM", { locale: ptBR })} · {exerciseCount} exercícios
+                    </p>
+                  </div>
+                  {effort && (
+                    <span className="text-xs text-muted-foreground flex-shrink-0">{effort}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 };
