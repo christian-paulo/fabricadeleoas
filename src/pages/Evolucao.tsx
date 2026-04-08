@@ -515,7 +515,7 @@ const Evolucao = () => {
                 if (done === 1) return "Primeiro treino feito! O mais difícil já passou. Continue! 🌱";
                 if (done < 5) return `${done} treinos completos! Você está criando um hábito poderoso 🔥`;
                 if (done < 10) return "Você já está no ritmo! Sua disciplina inspira 🦁";
-                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦋";
+                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦁";
                 return `${done} treinos! Você é uma máquina de determinação! 👑`;
               })()}
             </p>
