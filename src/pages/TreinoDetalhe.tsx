@@ -388,33 +388,8 @@ const Treinos = () => {
             </div>
           </div>
 
-          {/* Bottom action */}
-          {!completed ? (
-            <Button
-              onClick={() => { setFeedbackStep("effort"); setShowFeedback(true); }}
-              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-24 shadow-lg"
-            >
-              Finalizar Treino
-            </Button>
-          ) : (
-            <div className="soft-card p-5 text-center mb-24">
-              <CheckCircle2 className="mx-auto text-primary mb-3" size={40} />
-              <p className="text-base text-foreground font-bold">Treino finalizado! 🎉</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
-              </p>
-              <Button
-                onClick={() => navigate("/treinos")}
-                className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg"
-              >
-                Voltar ao Plano
-              </Button>
-            </div>
-          )}
-          </div>
-        </>
-      )}
-
+          {/* Spacer for floating bar */}
+          <div className="h-28" />
       {/* Number input dialog */}
       <Dialog open={!!editingCell} onOpenChange={(open) => { if (!open) setEditingCell(null); }}>
         <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-4 [&>button]:hidden">
