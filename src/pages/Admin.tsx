@@ -46,7 +46,7 @@ const emptyExercise: Exercise = {
 const ITEMS_PER_PAGE = 10;
 const PRICE = 49.90;
 
-type Section = "overview" | "students" | "exercises";
+type Section = "overview" | "students" | "exercises" | "quiz";
 
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
