@@ -390,6 +390,54 @@ const Treinos = () => {
 
           {/* Spacer for floating bar */}
           <div className="h-28" />
+          </div>
+
+          {/* Floating bottom bar */}
+          {!completed ? (
+            <div className="fixed bottom-20 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+              {workoutStarted && (
+                <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-4 shadow-lg">
+                  <Timer className="w-5 h-5 text-primary" />
+                  <span className="text-lg font-bold text-foreground font-mono">{formatTime(elapsedSeconds)}</span>
+                </div>
+              )}
+              <Button
+                onClick={() => {
+                  if (!workoutStarted) {
+                    setWorkoutStarted(true);
+                  } else {
+                    setFeedbackStep("effort");
+                    setShowFeedback(true);
+                  }
+                }}
+                className="flex-1 pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+              >
+                {workoutStarted ? "Finalizar Treino" : "Iniciar Treino"}
+              </Button>
+            </div>
+          ) : (
+            <div className="fixed bottom-20 left-0 right-0 z-40 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+              <div className="bg-card border border-primary/30 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+                <CheckCircle2 className="text-primary flex-shrink-0" size={32} />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-foreground">Treino finalizado! 🎉</p>
+                  <p className="text-xs text-muted-foreground">
+                    {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate("/treinos")}
+                  size="sm"
+                  className="pink-gradient text-primary-foreground font-heading rounded-xl shadow-lg"
+                >
+                  Voltar
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Number input dialog */}
       <Dialog open={!!editingCell} onOpenChange={(open) => { if (!open) setEditingCell(null); }}>
         <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-4 [&>button]:hidden">
