@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown, Timer } from "lucide-react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown, Timer, Flame, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
