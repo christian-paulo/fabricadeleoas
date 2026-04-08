@@ -103,11 +103,28 @@ const Evolucao = () => {
     }));
   }, [measurements]);
 
-  const latestWeight = measurements.length > 0 ? measurements[measurements.length - 1]?.weight : null;
-  const previousWeight = measurements.length > 1 ? measurements[measurements.length - 2]?.weight : null;
-  const weightDiff = latestWeight && previousWeight ? (latestWeight - previousWeight).toFixed(1) : null;
-
   const latestMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+  const previousMeasurement = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+  const getDiff = (key: string) => {
+    if (!latestMeasurement || !previousMeasurement) return null;
+    const curr = (latestMeasurement as any)[key];
+    const prev = (previousMeasurement as any)[key];
+    if (curr == null || prev == null) return null;
+    return (curr - prev).toFixed(1);
+  };
+
+  const getLastUpdatedLabel = () => {
+    if (!latestMeasurement) return null;
+    const date = new Date(latestMeasurement.date);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Atualizado hoje";
+    if (diffDays === 1) return "Atualizado ontem";
+    if (diffDays < 7) return `Atualizado há ${diffDays} dias`;
+    if (diffDays < 30) return `Atualizado há ${Math.floor(diffDays / 7)} semana${Math.floor(diffDays / 7) > 1 ? "s" : ""}`;
+    return `Atualizado há ${Math.floor(diffDays / 30)} ${Math.floor(diffDays / 30) > 1 ? "meses" : "mês"}`;
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -267,53 +284,76 @@ const Evolucao = () => {
           </button>
         </div>
 
-        {/* Current stats grid */}
-        {latestMeasurement ? (
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { label: "Peso", value: latestMeasurement.weight, unit: "kg", diff: weightDiff },
-              { label: "Cintura", value: latestMeasurement.waist, unit: "cm", diff: null },
-              { label: "Quadril", value: latestMeasurement.hip, unit: "cm", diff: null },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
-                <p className="text-xl font-bold text-foreground mt-1">
-                  {stat.value ?? "—"}
-                </p>
-                <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
-                {stat.diff && (
-                  <div className={`flex items-center justify-center gap-0.5 mt-1 ${
-                    parseFloat(stat.diff) < 0 ? "text-green-500" : parseFloat(stat.diff) > 0 ? "text-orange-500" : "text-muted-foreground"
-                  }`}>
-                    {parseFloat(stat.diff) < 0 ? <TrendingDown className="w-3 h-3" /> : parseFloat(stat.diff) > 0 ? <TrendingUp className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-                    <span className="text-[10px] font-bold">{Math.abs(parseFloat(stat.diff))} kg</span>
-                  </div>
-                )}
+        {/* Weight highlight */}
+        {latestMeasurement?.weight ? (
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex-1">
+              <p className="text-4xl font-bold text-foreground">
+                {latestMeasurement.weight}<span className="text-lg font-normal text-muted-foreground ml-1">kg</span>
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{getLastUpdatedLabel()}</p>
+              {getDiff("weight") && (
+                <div className={`flex items-center gap-1 mt-1.5 ${
+                  parseFloat(getDiff("weight")!) < 0 ? "text-green-500" : parseFloat(getDiff("weight")!) > 0 ? "text-orange-500" : "text-muted-foreground"
+                }`}>
+                  {parseFloat(getDiff("weight")!) < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : parseFloat(getDiff("weight")!) > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                  <span className="text-xs font-bold">{Math.abs(parseFloat(getDiff("weight")!))} kg</span>
+                </div>
+              )}
+            </div>
+            {/* Mini weight chart */}
+            {chartData.length > 1 && (
+              <div className="w-28 h-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData.slice(-7)}>
+                    <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+            )}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground text-center py-4 mb-4">Registre suas primeiras medidas abaixo</p>
+          <p className="text-sm text-muted-foreground text-center py-3 mb-3">Registre seu peso para acompanhar</p>
         )}
 
-        {/* Additional measurements */}
-        {latestMeasurement && (latestMeasurement.thigh || latestMeasurement.arm) && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
+        {/* Measurements grid */}
+        {latestMeasurement && (
+          <div className="grid grid-cols-2 gap-2.5 mb-4">
             {[
-              { label: "Coxa", value: latestMeasurement.thigh, unit: "cm" },
-              { label: "Braço", value: latestMeasurement.arm, unit: "cm" },
-            ].filter(s => s.value).map((stat) => (
-              <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
-                <p className="text-lg font-bold text-foreground mt-1">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
-              </div>
-            ))}
+              { label: "Cintura", value: latestMeasurement.waist, unit: "cm", key: "waist" },
+              { label: "Quadril", value: latestMeasurement.hip, unit: "cm", key: "hip" },
+              { label: "Coxa", value: latestMeasurement.thigh, unit: "cm", key: "thigh" },
+              { label: "Braço", value: latestMeasurement.arm, unit: "cm", key: "arm" },
+            ].filter(s => s.value).map((stat) => {
+              const diff = getDiff(stat.key);
+              return (
+                <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+                  <p className="text-lg font-bold text-foreground mt-0.5">{stat.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
+                  {diff && (
+                    <div className={`flex items-center justify-center gap-0.5 mt-1 ${
+                      parseFloat(diff) < 0 ? "text-green-500" : parseFloat(diff) > 0 ? "text-orange-500" : "text-muted-foreground"
+                    }`}>
+                      {parseFloat(diff) < 0 ? <TrendingDown className="w-3 h-3" /> : parseFloat(diff) > 0 ? <TrendingUp className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                      <span className="text-[10px] font-bold">{Math.abs(parseFloat(diff))} {stat.unit}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Measurement form */}
-        {showMeasureForm && (
+        {/* Update button / form */}
+        {!showMeasureForm ? (
+          <button
+            onClick={() => setShowMeasureForm(true)}
+            className="w-full text-center text-sm font-semibold text-primary py-3 border-t border-border"
+          >
+            Atualizar dados de hoje
+          </button>
+        ) : (
           <div className="border-t border-border pt-4 mt-2">
             <div className="grid grid-cols-2 gap-3">
               {fields.map((f) => (
@@ -330,23 +370,28 @@ const Evolucao = () => {
                 </div>
               ))}
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full pink-gradient text-primary-foreground font-heading mt-4 h-12 rounded-2xl text-base shadow-lg"
-            >
-              {saving ? "Salvando..." : "Salvar Medidas"}
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowMeasureForm(false)} className="flex-1 h-11 rounded-xl">
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 pink-gradient text-primary-foreground font-heading h-11 rounded-xl shadow-lg"
+              >
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Chart */}
+      {/* Full chart */}
       {chartData.length > 1 && (
         <div className="soft-card p-5 mb-4">
           <h3 className="text-base font-heading text-foreground mb-4 flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-primary" />
-            Progresso
+            Histórico
           </h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
@@ -361,9 +406,9 @@ const Evolucao = () => {
                 }}
                 labelStyle={{ color: "hsl(var(--primary))" }}
               />
-              <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} name="Peso" />
-              <Line type="monotone" dataKey="cintura" stroke="hsl(340 90% 70%)" strokeWidth={2} dot={{ r: 2 }} name="Cintura" />
-              <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 65%)" strokeWidth={2} dot={{ r: 2 }} name="Quadril" />
+              <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} name="Peso (kg)" />
+              <Line type="monotone" dataKey="cintura" stroke="hsl(340 90% 70%)" strokeWidth={2} dot={{ r: 2 }} name="Cintura (cm)" />
+              <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 65%)" strokeWidth={2} dot={{ r: 2 }} name="Quadril (cm)" />
             </LineChart>
           </ResponsiveContainer>
           <div className="flex gap-4 mt-3 justify-center">
