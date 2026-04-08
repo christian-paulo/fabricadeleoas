@@ -113,6 +113,16 @@ serve(async (req) => {
       restSeconds = 30;
     }
 
+    // Calculate how many exercises fit the duration
+    // Formula: each exercise takes ~(series * (avg_rep_time_sec + rest_seconds)) / 60 minutes
+    // Avg rep time ~30sec for a set of 15-30 reps
+    const avgSetTimeSec = 35; // avg time per set including reps
+    const timePerExerciseMin = (seriesCount * (avgSetTimeSec + restSeconds)) / 60;
+    const warmupCooldownMin = 3;
+    const targetExercises = Math.max(4, Math.min(8, Math.round((effectiveDuration - warmupCooldownMin) / timePerExerciseMin)));
+
+    // Calculate realistic duration
+    const calculatedDuration = Math.round(targetExercises * timePerExerciseMin + warmupCooldownMin);
     // Build different prompts based on phase
     let phaseInstructions = "";
     if (isMonthlyPhase) {
