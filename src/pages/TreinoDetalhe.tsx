@@ -40,6 +40,9 @@ const Treinos = () => {
   const [editingCell, setEditingCell] = useState<{ exIdx: number; seriesIdx: number } | null>(null);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [streakCount, setStreakCount] = useState(0);
+  const [weekDays, setWeekDays] = useState<{ label: string; completed: boolean; isToday: boolean }[]>([]);
 
   useEffect(() => {
     if (!user) return;
