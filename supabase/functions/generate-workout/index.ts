@@ -33,6 +33,12 @@ serve(async (req) => {
       .from("profiles").select("*").eq("id", user.id).single();
     if (profileError || !profile) throw new Error("Profile not found");
 
+    // Get onboarding responses for dificuldade
+    const { data: onboarding } = await supabase
+      .from("onboarding_responses").select("dificuldade").eq("profile_id", user.id).single();
+
+    const dificuldade = onboarding?.dificuldade || "Suar um pouco";
+
     // Get ALL workouts for this user, ordered by creation
     const { data: allWorkouts } = await supabase
       .from("workouts")
@@ -44,13 +50,7 @@ serve(async (req) => {
     const completedCount = workouts.filter(w => w.completed).length;
     const lastWorkout = workouts[workouts.length - 1];
 
-    // FLOW LOGIC:
-    // 1. If there's an incomplete workout → return it (don't generate new)
-    // 2. If all workouts are completed (or none exist) → generate next one
-    // 3. Track phase: workout 1, 2, 3 = initial phase. After 3 completed = monthly phase.
-
     if (lastWorkout && !lastWorkout.completed) {
-      // There's a pending workout - return it
       return new Response(JSON.stringify({ 
         workout: lastWorkout,
         phase: completedCount < 3 ? "initial" : "monthly",
@@ -61,7 +61,6 @@ serve(async (req) => {
       });
     }
 
-    // All completed (or no workouts) → generate next
     const nextWorkoutNumber = workouts.length + 1;
     const isMonthlyPhase = completedCount >= 3;
 
@@ -94,10 +93,29 @@ serve(async (req) => {
 
     const effectiveDuration = isMedicationRisk ? 10 : (profile.workout_duration || 30);
 
+    // Level-based config
+    let seriesCount: number;
+    let repsRange: string;
+    let restSeconds: number;
+
+    if (effectiveLevel === "iniciante") {
+      seriesCount = 2;
+      repsRange = "15 a 20";
+      restSeconds = 45;
+    } else if (effectiveLevel === "intermediario") {
+      seriesCount = dificuldade === "Desafiador" ? 4 : 3;
+      repsRange = "15 a 30";
+      restSeconds = 45;
+    } else {
+      // avancado
+      seriesCount = 6;
+      repsRange = "15 a 30";
+      restSeconds = 30;
+    }
+
     // Build different prompts based on phase
     let phaseInstructions = "";
     if (isMonthlyPhase) {
-      // After 3 initial workouts: interpret all feedback and generate monthly-quality workout
       const allWorkoutData = workouts.map((w, i) => ({
         number: i + 1,
         feedback: w.feedback_effort,
@@ -114,7 +132,6 @@ ${JSON.stringify(allWorkoutData, null, 2)}
 Considere a progressão geral: se ela achou fácil na maioria, aumente; se achou difícil, ajuste para baixo; se ideal, mantenha mas varie os exercícios.
 Este é o treino número ${nextWorkoutNumber} do programa mensal.`;
     } else {
-      // Initial phase (workouts 1-3): evaluate and adapt
       const lastFeedback = workouts.length > 0 
         ? workouts[workouts.length - 1]?.feedback_effort 
         : null;
@@ -153,13 +170,14 @@ REGRA MAIS IMPORTANTE:
 - Se não encontrar exercícios suficientes na lista, use menos exercícios, mas NUNCA invente.
 
 REGRAS DE MONTAGEM:
-1. SEMPRE agrupe exercícios em TRI-SETS (blocos de 3 exercícios consecutivos).
-2. Todas as repetições são "15 a 30 repetições".
-3. Para duração ${effectiveDuration}min: ${effectiveDuration === 10 ? "2 a 3 séries totais" : "5 a 6 séries totais"}.
-4. Nível efetivo da aluna: ${effectiveLevel}.
-${isMedicationRisk ? "5. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
-${profile.has_pain ? `6. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
-${profile.goal === "Melhorar Dores" ? "7. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
+1. NÃO use tri-sets. Os exercícios são INDIVIDUAIS, listados um a um.
+2. Cada exercício terá ${seriesCount} séries de ${repsRange} repetições.
+3. Descanso entre séries: ${restSeconds} segundos.
+4. Para duração ${effectiveDuration}min: selecione de 4 a 8 exercícios dependendo da duração.
+5. Nível efetivo da aluna: ${effectiveLevel}.
+${isMedicationRisk ? "6. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
+${profile.has_pain ? `7. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
+${profile.goal === "Melhorar Dores" ? "8. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
 
 ${phaseInstructions}
 
@@ -167,18 +185,15 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
 {
   "title": "Título do treino",
   "description": "Breve descrição",
-  "total_series": number,
+  "level": "${effectiveLevel}",
+  "estimated_duration": "~${effectiveDuration} min",
+  "series_count": ${seriesCount},
+  "reps_range": "${repsRange}",
+  "rest_seconds": ${restSeconds},
   "workout_number": ${nextWorkoutNumber},
   "phase": "${isMonthlyPhase ? "monthly" : "initial"}",
-  "tri_sets": [
-    {
-      "label": "Tri-set A",
-      "exercises": [
-        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
-        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" },
-        { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "reps": "15 a 30 reps", "video_url": "url_da_lista" }
-      ]
-    }
+  "exercises": [
+    { "exercise_id": "uuid_da_lista", "name": "nome_exato_da_lista", "series": ${seriesCount}, "reps": "${repsRange}", "rest_seconds": ${restSeconds}, "video_url": "url_da_lista", "muscle_group": "grupo_muscular" }
   ]
 }`;
 
@@ -191,6 +206,7 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
 - Duração: ${effectiveDuration} min
 - Tem dor: ${profile.has_pain ? "Sim - " + profile.pain_location : "Não"}
 - Usa medicação: ${profile.uses_medication ? "Sim - " + profile.medication_feeling : "Não"}
+- Dificuldade desejada: ${dificuldade}
 
 Exercícios disponíveis no banco:
 ${JSON.stringify(exercises.map(e => ({
@@ -246,38 +262,45 @@ Gere o treino número ${nextWorkoutNumber}.`;
     }
 
     // Post-process: validate exercises against DB, remove any that don't match
-    if (workoutJson.tri_sets && exercises) {
+    if (workoutJson.exercises && exercises) {
       const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       const exerciseIds = new Set(exercises.map(e => e.id));
 
+      workoutJson.exercises = workoutJson.exercises
+        .map((ex: any) => {
+          // First check by ID
+          if (ex.exercise_id && exerciseIds.has(ex.exercise_id)) {
+            const match = exercises.find(e => e.id === ex.exercise_id)!;
+            return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group, series: seriesCount, reps: repsRange, rest_seconds: restSeconds };
+          }
+          // Fallback: exact name match
+          const exName = normalize(ex.name || "");
+          const match = exercises.find(e => normalize(e.name) === exName);
+          if (match) {
+            return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group, series: seriesCount, reps: repsRange, rest_seconds: restSeconds };
+          }
+          // Contained match
+          const partial = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
+          if (partial) {
+            return { ...ex, exercise_id: partial.id, name: partial.name, video_url: partial.video_url, muscle_group: partial.muscle_group, series: seriesCount, reps: repsRange, rest_seconds: restSeconds };
+          }
+          return null;
+        })
+        .filter((ex: any) => ex !== null);
+    }
+
+    // Migrate legacy tri_sets format if present (shouldn't happen for new workouts)
+    if (workoutJson.tri_sets && !workoutJson.exercises) {
+      const flatExercises: any[] = [];
       for (const ts of workoutJson.tri_sets) {
-        if (!ts.exercises) continue;
-        // Map and validate each exercise
-        ts.exercises = ts.exercises
-          .map((ex: any) => {
-            // First check by ID
-            if (ex.exercise_id && exerciseIds.has(ex.exercise_id)) {
-              const match = exercises.find(e => e.id === ex.exercise_id)!;
-              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
-            }
-            // Fallback: exact name match
-            const exName = normalize(ex.name || "");
-            const match = exercises.find(e => normalize(e.name) === exName);
-            if (match) {
-              return { ...ex, exercise_id: match.id, name: match.name, video_url: match.video_url, muscle_group: match.muscle_group };
-            }
-            // Contained match
-            const partial = exercises.find(e => normalize(e.name).includes(exName) || exName.includes(normalize(e.name)));
-            if (partial) {
-              return { ...ex, exercise_id: partial.id, name: partial.name, video_url: partial.video_url, muscle_group: partial.muscle_group };
-            }
-            // No match — remove this exercise
-            return null;
-          })
-          .filter((ex: any) => ex !== null);
+        if (ts.exercises) {
+          for (const ex of ts.exercises) {
+            flatExercises.push({ ...ex, series: seriesCount, reps: repsRange, rest_seconds: restSeconds });
+          }
+        }
       }
-      // Remove empty tri-sets
-      workoutJson.tri_sets = workoutJson.tri_sets.filter((ts: any) => ts.exercises && ts.exercises.length > 0);
+      workoutJson.exercises = flatExercises;
+      delete workoutJson.tri_sets;
     }
 
     const today = new Date().toISOString().split("T")[0];
