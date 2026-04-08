@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind } from "lucide-react";
+import { ChevronRight, ChevronLeft, Sparkles, Heart, Flame, Target, Dumbbell, Brain, Clock, TrendingDown, Activity, Pill, Star, PartyPopper, Zap, Eye, HeartPulse, ThumbsUp, Ruler, Scale, Hourglass, Sofa, Footprints, StretchHorizontal, Wind, User, Mail } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.webp";
 import obj1Img from "@/assets/obj1.webp";
 import obj2Img from "@/assets/obj2.webp";
@@ -151,6 +151,48 @@ const OptionCard = ({ selected, onClick, children, icon, index = 0 }: { selected
 // ─── Step Renderer ──────────────────────────────────────────────
 function renderStep(step: OnboardingStep, data: any, updateField: any) {
   switch (step) {
+    case "nome":
+      return (
+        <div className="flex flex-col items-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><User className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Como podemos te chamar?
+          </h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
+            Queremos personalizar toda a sua experiência 💖
+          </p>
+          <Input
+            type="text"
+            value={data.nome}
+            onChange={(e) => updateField("nome", e.target.value)}
+            placeholder="Seu primeiro nome"
+            className="bg-background border-border text-foreground h-14 rounded-2xl text-center text-lg font-medium"
+            autoFocus
+          />
+        </div>
+      );
+
+    case "email-onboarding":
+      return (
+        <div className="flex flex-col items-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Mail className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl font-heading text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both] text-center">
+            Qual é o seu melhor e-mail?
+          </h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both] text-center">
+            Enviaremos seu protocolo e dicas exclusivas para você, {data.nome || "Leoa"} 🦁
+          </p>
+          <Input
+            type="email"
+            value={data.email_onboarding}
+            onChange={(e) => updateField("email_onboarding", e.target.value)}
+            placeholder="seu@email.com"
+            className="bg-background border-border text-foreground h-14 rounded-2xl text-center text-lg font-medium"
+            autoFocus
+          />
+        </div>
+      );
+
     case "motivacao":
       return (
         <div>
@@ -1096,6 +1138,8 @@ const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
 function validateStep(step: OnboardingStep, data: any): boolean {
   switch (step) {
     case "boas-vindas": return true;
+    case "nome": return data.nome.trim().length >= 2;
+    case "email-onboarding": return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email_onboarding);
     case "motivacao": return data.motivacao.length > 0;
     case "objetivo": return data.goal !== "";
     case "area-alvo": return data.targetArea.length > 0;
