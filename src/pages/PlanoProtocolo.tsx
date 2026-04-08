@@ -107,7 +107,7 @@ const PlanoProtocolo = () => {
   const plan = useMemo(() => {
     const items: Array<
       | { type: "week"; weekNumber: number; weekName: string }
-      | { type: "day"; dayNumber: number; duration: number; thumb: string; weekIndex: number }
+      | { type: "day"; dayNumber: number; duration: string; thumb: string; weekIndex: number }
     > = [];
     let dayCounter = 0;
     for (let week = 0; week < 4; week++) {
