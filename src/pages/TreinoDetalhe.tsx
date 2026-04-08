@@ -438,25 +438,6 @@ const Treinos = () => {
         </>
       )}
 
-      {/* Number input dialog */}
-      <Dialog open={!!editingCell} onOpenChange={(open) => { if (!open) setEditingCell(null); }}>
-        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-4 [&>button]:hidden">
-          {editingCell && (
-            <NumberPad
-              initialValue={tracking[editingCell.exIdx]?.[editingCell.seriesIdx]?.reps}
-              onConfirm={(val) => {
-                updateReps(editingCell.exIdx, editingCell.seriesIdx, val);
-                // Also mark as complete
-                if (val !== null) {
-                  toggleSeriesComplete(editingCell.exIdx, editingCell.seriesIdx);
-                }
-                setEditingCell(null);
-              }}
-              onClose={() => setEditingCell(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Feedback dialog - Step 1: Effort */}
       <Dialog open={showFeedback && feedbackStep === "effort"} onOpenChange={(open) => { if (!open) { setShowFeedback(false); setFeedbackStep(null); } }}>
