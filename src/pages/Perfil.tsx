@@ -1,5 +1,6 @@
+import { useState, useRef, useEffect } from "react";
 import AppLayout from "@/components/AppLayout";
-import { User, CreditCard, HelpCircle, LogOut } from "lucide-react";
+import { User, CreditCard, HelpCircle, LogOut, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,59 @@ import { toast } from "sonner";
 const Perfil = () => {
   const { user, profile, subscription, signOut } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (user) loadAvatar();
+  }, [user]);
+
+  const loadAvatar = async () => {
+    if (!user) return;
+    const { data } = await supabase.storage
+      .from("avatars")
+      .list(user.id, { limit: 1, sortBy: { column: "created_at", order: "desc" } });
+
+    if (data && data.length > 0) {
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(`${user.id}/${data[0].name}`);
+      setAvatarUrl(`${urlData.publicUrl}?t=${Date.now()}`);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(`${urlData.publicUrl}?t=${Date.now()}`);
+      toast.success("Foto atualizada! 📸");
+    } catch (err: any) {
+      toast.error("Erro ao enviar foto");
+    }
+    setUploading(false);
+  };
 
   const handleCancelSubscription = async () => {
     try {
@@ -39,9 +93,38 @@ const Perfil = () => {
       <h1 className="text-3xl text-foreground mb-6 uppercase">Meu Perfil</h1>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-20 h-20 rounded-full pink-gradient flex items-center justify-center shadow-lg">
-          <User size={32} className="text-primary-foreground" />
-        </div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="relative w-20 h-20 rounded-full flex-shrink-0 group"
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Foto de perfil"
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full pink-gradient flex items-center justify-center shadow-lg">
+              <User size={32} className="text-primary-foreground" />
+            </div>
+          )}
+          <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-md border-2 border-background group-hover:scale-110 transition-transform">
+            <Camera size={14} className="text-primary-foreground" />
+          </div>
+          {uploading && (
+            <div className="absolute inset-0 rounded-full bg-background/60 flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarUpload}
+        />
         <div>
           <p className="font-heading text-xl text-foreground">{profile?.full_name || "Leoa"}</p>
           <p className="text-sm text-muted-foreground">{user?.email}</p>
