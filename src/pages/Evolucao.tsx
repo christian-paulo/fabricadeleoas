@@ -103,11 +103,28 @@ const Evolucao = () => {
     }));
   }, [measurements]);
 
-  const latestWeight = measurements.length > 0 ? measurements[measurements.length - 1]?.weight : null;
-  const previousWeight = measurements.length > 1 ? measurements[measurements.length - 2]?.weight : null;
-  const weightDiff = latestWeight && previousWeight ? (latestWeight - previousWeight).toFixed(1) : null;
-
   const latestMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
+  const previousMeasurement = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+  const getDiff = (key: string) => {
+    if (!latestMeasurement || !previousMeasurement) return null;
+    const curr = (latestMeasurement as any)[key];
+    const prev = (previousMeasurement as any)[key];
+    if (curr == null || prev == null) return null;
+    return (curr - prev).toFixed(1);
+  };
+
+  const getLastUpdatedLabel = () => {
+    if (!latestMeasurement) return null;
+    const date = new Date(latestMeasurement.date);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Atualizado hoje";
+    if (diffDays === 1) return "Atualizado ontem";
+    if (diffDays < 7) return `Atualizado há ${diffDays} dias`;
+    if (diffDays < 30) return `Atualizado há ${Math.floor(diffDays / 7)} semana${Math.floor(diffDays / 7) > 1 ? "s" : ""}`;
+    return `Atualizado há ${Math.floor(diffDays / 30)} ${Math.floor(diffDays / 30) > 1 ? "meses" : "mês"}`;
+  };
 
   const handleSave = async () => {
     if (!user) return;
