@@ -7,7 +7,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler } from "lucide-react";
+import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -387,30 +387,79 @@ const Evolucao = () => {
             <Clock className="w-4 h-4 text-primary" />
             Últimos Treinos
           </h3>
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {workouts.filter(w => w.completed).slice(0, 5).map((w) => {
               const wJson = w.workout_json as any;
               const title = wJson?.title || "Treino";
-              const exerciseCount = wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
+              const allExercises = wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
+              const completedExercises = allExercises; // completed workout = all done
+              const duration = wJson?.estimated_duration || "~30 min";
               const effort = w.feedback_effort === "facil" ? "😊 Fácil" : w.feedback_effort === "ideal" ? "💪 Ideal" : w.feedback_effort === "dificil" ? "🔥 Difícil" : "";
+              const effortColor = w.feedback_effort === "facil" ? "text-green-500" : w.feedback_effort === "ideal" ? "text-primary" : w.feedback_effort === "dificil" ? "text-orange-500" : "text-muted-foreground";
 
               return (
-                <div key={w.id} className="flex items-center gap-3 bg-muted/40 rounded-xl p-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Dumbbell className="w-5 h-5 text-primary" />
+                <div key={w.id} className="bg-muted/40 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Dumbbell className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{title}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {format(new Date(w.date), "d 'de' MMM", { locale: ptBR })}
+                      </p>
+                    </div>
+                    {effort && (
+                      <span className={`text-xs font-semibold ${effortColor}`}>{effort}</span>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{title}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {format(new Date(w.date), "d 'de' MMM", { locale: ptBR })} · {exerciseCount} exercícios
-                    </p>
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-foreground">{completedExercises}</p>
+                        <p className="text-[9px] text-muted-foreground">Feitos</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
+                      <XCircle className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-foreground">0</p>
+                        <p className="text-[9px] text-muted-foreground">Restam</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
+                      <Timer className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-foreground">{duration}</p>
+                        <p className="text-[9px] text-muted-foreground">Duração</p>
+                      </div>
+                    </div>
                   </div>
-                  {effort && (
-                    <span className="text-xs text-muted-foreground flex-shrink-0">{effort}</span>
-                  )}
                 </div>
               );
             })}
+          </div>
+
+          {/* Motivational message */}
+          <div className="mt-4 pt-4 border-t border-border text-center">
+            <p className="text-sm text-foreground font-medium">
+              {(() => {
+                const done = totalCompleted;
+                if (done === 0) return "Seu corpo está esperando por você. Comece hoje! 💪";
+                if (done === 1) return "Primeiro treino feito! O mais difícil já passou. Continue! 🌱";
+                if (done < 5) return `${done} treinos completos! Você está criando um hábito poderoso 🔥`;
+                if (done < 10) return "Você já está no ritmo! Sua disciplina inspira 🦁";
+                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦋";
+                return `${done} treinos! Você é uma máquina de determinação! 👑`;
+              })()}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {streak > 0
+                ? `${streak} ${streak === 1 ? "dia" : "dias"} seguido${streak === 1 ? "" : "s"} treinando — não pare agora!`
+                : "Cada treino é um passo rumo à sua melhor versão"}
+            </p>
           </div>
         </div>
       )}
