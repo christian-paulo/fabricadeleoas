@@ -577,7 +577,7 @@ const Admin = () => {
                         </TableRow>
                       ))}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
