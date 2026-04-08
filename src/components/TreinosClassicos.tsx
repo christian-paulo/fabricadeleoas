@@ -51,7 +51,8 @@ const TreinosClassicos = () => {
 
     const map = new Map<string, Exercise[]>();
     filtered.forEach((ex) => {
-      const key = ex.muscle_group || "Outros";
+      const raw = ex.muscle_group || "Outros";
+      const key = raw.split(/([/\s])/).map(part => /^[a-záàâãéêíóôõúç]/i.test(part) ? part.charAt(0).toUpperCase() + part.slice(1) : part).join("");
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(ex);
     });
