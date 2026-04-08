@@ -391,9 +391,12 @@ const Evolucao = () => {
             {workouts.filter(w => w.completed).slice(0, 5).map((w) => {
               const wJson = w.workout_json as any;
               const title = wJson?.title || "Treino";
-              const allExercises = wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
-              const completedExercises = allExercises; // completed workout = all done
-              const duration = wJson?.estimated_duration || "~30 min";
+              const summary = wJson?.tracking_summary;
+              const allExercises = summary?.total_exercises || wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
+              const completedExercises = summary?.completed_exercises ?? allExercises;
+              const skipped = summary?.skipped_exercises ?? 0;
+              const durationMins = summary?.duration_minutes;
+              const duration = durationMins ? `${durationMins} min` : (wJson?.estimated_duration || "~30 min");
               const effort = w.feedback_effort === "facil" ? "😊 Fácil" : w.feedback_effort === "ideal" ? "💪 Ideal" : w.feedback_effort === "dificil" ? "🔥 Difícil" : "";
               const effortColor = w.feedback_effort === "facil" ? "text-green-500" : w.feedback_effort === "ideal" ? "text-primary" : w.feedback_effort === "dificil" ? "text-orange-500" : "text-muted-foreground";
 
