@@ -79,7 +79,7 @@ const Admin = () => {
   const [quizPage, setQuizPage] = useState(1);
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) navigate("/auth");
+    if (!loading && (!user || !isAdmin)) navigate("/admin/login");
   }, [user, isAdmin, loading]);
 
   useEffect(() => {
