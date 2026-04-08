@@ -72,6 +72,12 @@ const Admin = () => {
   const [exerciseEquipFilter, setExerciseEquipFilter] = useState("all");
   const [exercisePage, setExercisePage] = useState(1);
 
+  // Quiz responses
+  const [quizResponses, setQuizResponses] = useState<any[]>([]);
+  const [quizSearch, setQuizSearch] = useState("");
+  const [quizGoalFilter, setQuizGoalFilter] = useState("all");
+  const [quizPage, setQuizPage] = useState(1);
+
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate("/auth");
   }, [user, isAdmin, loading]);
