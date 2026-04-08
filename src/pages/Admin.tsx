@@ -538,6 +538,7 @@ const Admin = () => {
                       <TableRow className="border-border">
                         <TableHead className="text-muted-foreground">#</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
+                        <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
                         <TableHead className="text-muted-foreground">Objetivo</TableHead>
                         <TableHead className="text-muted-foreground">Motivação</TableHead>
@@ -555,6 +556,7 @@ const Admin = () => {
                         <TableRow key={r.id} className="border-border">
                           <TableCell className="text-muted-foreground text-sm">{(quizPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
                           <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.profile?.email || "—"}</TableCell>
                           <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
                           <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
                           <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
