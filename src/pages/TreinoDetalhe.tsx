@@ -192,6 +192,21 @@ const Treinos = () => {
     });
   };
 
+  // Timer effect
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (workoutStarted && !completed) {
+      interval = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [workoutStarted, completed]);
+
+  const formatTime = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
   const dayLabel = `${workoutNumber}º dia`;
 
   return (
