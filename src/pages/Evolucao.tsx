@@ -171,7 +171,7 @@ const Evolucao = () => {
   return (
     <AppLayout>
       <h1 className="text-2xl font-heading text-foreground mb-1">Sua Evolução</h1>
-      <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦋</p>
+      <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦁</p>
 
       {/* Streak Card */}
       <div className="soft-card p-5 mb-4">
