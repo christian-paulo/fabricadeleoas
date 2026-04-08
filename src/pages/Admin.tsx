@@ -363,6 +363,7 @@ const Admin = () => {
             <h1 className="text-lg font-heading text-primary">
               {activeSection === "overview" && "Visão Geral"}
               {activeSection === "students" && "Gestão de Alunas"}
+              {activeSection === "quiz" && "Respostas do Quiz"}
               {activeSection === "exercises" && "Biblioteca de Exercícios"}
             </h1>
           </header>
