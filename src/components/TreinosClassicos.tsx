@@ -69,7 +69,7 @@ const TreinosClassicos = () => {
 
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-heading text-foreground uppercase mb-3">Treinos Clássicos</h2>
+      <h2 className="text-lg font-heading text-foreground uppercase mb-3">Treinos POR DIVISÕES</h2>
 
       {/* Category tabs */}
       <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
