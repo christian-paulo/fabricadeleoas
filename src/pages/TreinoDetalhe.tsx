@@ -343,38 +343,59 @@ const Treinos = () => {
 
                         {/* Series rows */}
                         {(tracking[idx] || []).map((series, sIdx) => (
-                          <div
-                            key={sIdx}
-                            className={`grid grid-cols-[50px_1fr_50px] gap-2 items-center mb-2 px-1 py-2 rounded-xl transition-all ${
-                              series.completed ? "bg-primary/15" : ""
-                            }`}
-                          >
-                            {/* Series number */}
-                            <span className={`text-lg font-bold ${series.completed ? "text-primary" : "text-foreground"}`}>
-                              {sIdx + 1}
-                            </span>
-
-                            {/* Reps input */}
-                            <button
-                              onClick={() => setEditingCell({ exIdx: idx, seriesIdx: sIdx })}
-                              className="bg-muted rounded-xl py-3 px-4 text-center text-base font-medium text-foreground"
-                            >
-                              {series.reps !== null ? series.reps : ex.reps || "—"}
-                            </button>
-
-                            {/* Check button */}
-                            <button
-                              onClick={() => toggleSeriesComplete(idx, sIdx)}
-                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                series.completed
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-muted text-muted-foreground"
+                          <div key={sIdx}>
+                            <div
+                              className={`grid grid-cols-[50px_1fr_50px] gap-2 items-center mb-2 px-1 py-2 rounded-xl transition-all ${
+                                series.completed ? "bg-primary/15" : ""
                               }`}
                             >
-                              {series.completed && <CheckCircle2 className="w-5 h-5" />}
-                            </button>
+                              <span className={`text-lg font-bold ${series.completed ? "text-primary" : "text-foreground"}`}>
+                                {sIdx + 1}
+                              </span>
+                              <button
+                                onClick={() => setEditingCell(
+                                  editingCell?.exIdx === idx && editingCell?.seriesIdx === sIdx
+                                    ? null
+                                    : { exIdx: idx, seriesIdx: sIdx }
+                                )}
+                                className={`rounded-xl py-3 px-4 text-center text-base font-medium ${
+                                  editingCell?.exIdx === idx && editingCell?.seriesIdx === sIdx
+                                    ? "bg-primary/20 ring-2 ring-primary text-foreground"
+                                    : "bg-muted text-foreground"
+                                }`}
+                              >
+                                {series.reps !== null ? series.reps : ex.reps || "—"}
+                              </button>
+                              <button
+                                onClick={() => toggleSeriesComplete(idx, sIdx)}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                  series.completed
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {series.completed && <CheckCircle2 className="w-5 h-5" />}
+                              </button>
+                            </div>
                           </div>
                         ))}
+
+                        {/* Inline NumberPad */}
+                        {editingCell?.exIdx === idx && (
+                          <div className="mt-2 mb-2">
+                            <NumberPad
+                              initialValue={tracking[editingCell.exIdx]?.[editingCell.seriesIdx]?.reps}
+                              onConfirm={(val) => {
+                                updateReps(editingCell.exIdx, editingCell.seriesIdx, val);
+                                if (val !== null) {
+                                  toggleSeriesComplete(editingCell.exIdx, editingCell.seriesIdx);
+                                }
+                                setEditingCell(null);
+                              }}
+                              onClose={() => setEditingCell(null)}
+                            />
+                          </div>
+                        )}
 
                         {/* Rest info */}
                         <p className="text-xs text-muted-foreground text-center mt-2">
@@ -438,25 +459,6 @@ const Treinos = () => {
         </>
       )}
 
-      {/* Number input dialog */}
-      <Dialog open={!!editingCell} onOpenChange={(open) => { if (!open) setEditingCell(null); }}>
-        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-4 [&>button]:hidden">
-          {editingCell && (
-            <NumberPad
-              initialValue={tracking[editingCell.exIdx]?.[editingCell.seriesIdx]?.reps}
-              onConfirm={(val) => {
-                updateReps(editingCell.exIdx, editingCell.seriesIdx, val);
-                // Also mark as complete
-                if (val !== null) {
-                  toggleSeriesComplete(editingCell.exIdx, editingCell.seriesIdx);
-                }
-                setEditingCell(null);
-              }}
-              onClose={() => setEditingCell(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Feedback dialog - Step 1: Effort */}
       <Dialog open={showFeedback && feedbackStep === "effort"} onOpenChange={(open) => { if (!open) { setShowFeedback(false); setFeedbackStep(null); } }}>
