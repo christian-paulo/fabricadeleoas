@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +38,8 @@ const Treinos = () => {
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
   const [tracking, setTracking] = useState<ExerciseTracking>({});
   const [editingCell, setEditingCell] = useState<{ exIdx: number; seriesIdx: number } | null>(null);
+  const [workoutStarted, setWorkoutStarted] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -188,6 +190,21 @@ const Treinos = () => {
       updated[exIdx] = series;
       return updated;
     });
+  };
+
+  // Timer effect
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (workoutStarted && !completed) {
+      interval = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [workoutStarted, completed]);
+
+  const formatTime = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const dayLabel = `${workoutNumber}º dia`;
@@ -371,30 +388,53 @@ const Treinos = () => {
             </div>
           </div>
 
-          {/* Bottom action */}
+          {/* Spacer for floating bar */}
+          <div className="h-28" />
+          </div>
+
+          {/* Floating bottom bar */}
           {!completed ? (
-            <Button
-              onClick={() => { setFeedbackStep("effort"); setShowFeedback(true); }}
-              className="w-full pink-gradient text-primary-foreground font-heading text-lg h-16 rounded-2xl mb-24 shadow-lg"
-            >
-              Finalizar Treino
-            </Button>
-          ) : (
-            <div className="soft-card p-5 text-center mb-24">
-              <CheckCircle2 className="mx-auto text-primary mb-3" size={40} />
-              <p className="text-base text-foreground font-bold">Treino finalizado! 🎉</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Feedback: {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
-              </p>
+            <div className="fixed bottom-20 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+              {workoutStarted && (
+                <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-4 shadow-lg">
+                  <Timer className="w-5 h-5 text-primary" />
+                  <span className="text-lg font-bold text-foreground font-mono">{formatTime(elapsedSeconds)}</span>
+                </div>
+              )}
               <Button
-                onClick={() => navigate("/treinos")}
-                className="pink-gradient text-primary-foreground font-heading text-base h-12 rounded-2xl px-8 shadow-lg"
+                onClick={() => {
+                  if (!workoutStarted) {
+                    setWorkoutStarted(true);
+                  } else {
+                    setFeedbackStep("effort");
+                    setShowFeedback(true);
+                  }
+                }}
+                className="flex-1 pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
               >
-                Voltar ao Plano
+                {workoutStarted ? "Finalizar Treino" : "Iniciar Treino"}
               </Button>
             </div>
+          ) : (
+            <div className="fixed bottom-20 left-0 right-0 z-40 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+              <div className="bg-card border border-primary/30 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+                <CheckCircle2 className="text-primary flex-shrink-0" size={32} />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-foreground">Treino finalizado! 🎉</p>
+                  <p className="text-xs text-muted-foreground">
+                    {feedback === "facil" ? "Fácil" : feedback === "ideal" ? "Ideal" : "Muito Difícil"}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate("/treinos")}
+                  size="sm"
+                  className="pink-gradient text-primary-foreground font-heading rounded-xl shadow-lg"
+                >
+                  Voltar
+                </Button>
+              </div>
+            </div>
           )}
-          </div>
         </>
       )}
 
