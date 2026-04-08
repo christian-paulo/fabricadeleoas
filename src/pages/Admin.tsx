@@ -299,6 +299,7 @@ const Admin = () => {
   const sidebarItems = [
     { title: "Visão Geral", section: "overview" as Section, icon: LayoutDashboard },
     { title: "Alunas", section: "students" as Section, icon: Users },
+    { title: "Respostas Quiz", section: "quiz" as Section, icon: ClipboardList },
     { title: "Exercícios", section: "exercises" as Section, icon: Dumbbell },
   ];
 
