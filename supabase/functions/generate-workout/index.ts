@@ -113,6 +113,16 @@ serve(async (req) => {
       restSeconds = 30;
     }
 
+    // Calculate how many exercises fit the duration
+    // Formula: each exercise takes ~(series * (avg_rep_time_sec + rest_seconds)) / 60 minutes
+    // Avg rep time ~30sec for a set of 15-30 reps
+    const avgSetTimeSec = 35; // avg time per set including reps
+    const timePerExerciseMin = (seriesCount * (avgSetTimeSec + restSeconds)) / 60;
+    const warmupCooldownMin = 3;
+    const targetExercises = Math.max(4, Math.min(8, Math.round((effectiveDuration - warmupCooldownMin) / timePerExerciseMin)));
+
+    // Calculate realistic duration
+    const calculatedDuration = Math.round(targetExercises * timePerExerciseMin + warmupCooldownMin);
     // Build different prompts based on phase
     let phaseInstructions = "";
     if (isMonthlyPhase) {
@@ -171,13 +181,14 @@ REGRA MAIS IMPORTANTE:
 
 REGRAS DE MONTAGEM:
 1. NÃO use tri-sets. Os exercícios são INDIVIDUAIS, listados um a um.
-2. Cada exercício terá ${seriesCount} séries de ${repsRange} repetições.
-3. Descanso entre séries: ${restSeconds} segundos.
-4. Para duração ${effectiveDuration}min: selecione de 4 a 8 exercícios dependendo da duração.
-5. Nível efetivo da aluna: ${effectiveLevel}.
-${isMedicationRisk ? "6. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
-${profile.has_pain ? `7. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
-${profile.goal === "Melhorar Dores" ? "8. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
+2. OBRIGATÓRIO: Cada exercício terá EXATAMENTE ${seriesCount} séries de ${repsRange} repetições.
+3. Descanso entre séries: EXATAMENTE ${restSeconds} segundos.
+4. Selecione EXATAMENTE ${targetExercises} exercícios.
+5. O nível da aluna é "${effectiveLevel}" — NÃO mude o nível. Use "${effectiveLevel}" no campo "level".
+6. A duração estimada DEVE ser "~${calculatedDuration} min".
+${isMedicationRisk ? "7. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
+${profile.has_pain ? `8. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
+${profile.goal === "Melhorar Dores" ? "9. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
 
 ${phaseInstructions}
 
@@ -186,7 +197,7 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
   "title": "Título do treino",
   "description": "Breve descrição",
   "level": "${effectiveLevel}",
-  "estimated_duration": "~${effectiveDuration} min",
+  "estimated_duration": "~${calculatedDuration} min",
   "series_count": ${seriesCount},
   "reps_range": "${repsRange}",
   "rest_seconds": ${restSeconds},
@@ -302,6 +313,16 @@ Gere o treino número ${nextWorkoutNumber}.`;
       workoutJson.exercises = flatExercises;
       delete workoutJson.tri_sets;
     }
+
+    // Force correct metadata regardless of what AI returned
+    workoutJson.level = effectiveLevel;
+    workoutJson.series_count = seriesCount;
+    workoutJson.reps_range = repsRange;
+    workoutJson.rest_seconds = restSeconds;
+    // Recalculate duration based on actual exercises
+    const actualExCount = workoutJson.exercises?.length || targetExercises;
+    const actualDuration = Math.round(actualExCount * timePerExerciseMin + warmupCooldownMin);
+    workoutJson.estimated_duration = `~${actualDuration} min`;
 
     const today = new Date().toISOString().split("T")[0];
 
