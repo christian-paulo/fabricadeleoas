@@ -94,9 +94,9 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
   const navigate = useNavigate();
   const { checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
-  const [email, setEmail] = useState(checkoutEmail);
+  const [email, setEmail] = useState(checkoutEmail || onboardingData.email_onboarding || "");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(onboardingData.nome || "");
   const [whatsapp, setWhatsapp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -235,8 +235,8 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
-  const [checkoutEmail, setCheckoutEmail] = useState("");
-  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
+  const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
 
   const isAuthenticated = !!user;
 
