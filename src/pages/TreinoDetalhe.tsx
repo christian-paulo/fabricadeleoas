@@ -98,9 +98,58 @@ const Treinos = () => {
     return [];
   };
 
+  const computeStreakAndWeek = async () => {
+    if (!user) return;
+    // Fetch completed workouts
+    const { data: allWorkouts } = await supabase
+      .from("workouts")
+      .select("date, completed")
+      .eq("profile_id", user.id)
+      .eq("completed", true)
+      .order("date", { ascending: false });
+
+    // Compute streak
+    let streak = 0;
+    if (allWorkouts && allWorkouts.length > 0) {
+      const uniqueDates = [...new Set(allWorkouts.map(w => w.date))].sort().reverse();
+      const today = new Date().toISOString().split("T")[0];
+      
+      for (let i = 0; i < uniqueDates.length; i++) {
+        const expected = new Date();
+        expected.setDate(expected.getDate() - i);
+        const expectedStr = expected.toISOString().split("T")[0];
+        if (uniqueDates[i] === expectedStr) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+    }
+    setStreakCount(streak);
+
+    // Compute week days
+    const completedDates = new Set(allWorkouts?.map(w => w.date) || []);
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sun
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+
+    const labels = ["Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb.", "Dom."];
+    const days = labels.map((label, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dateStr = d.toISOString().split("T")[0];
+      return {
+        label,
+        completed: completedDates.has(dateStr),
+        isToday: dateStr === today.toISOString().split("T")[0],
+      };
+    });
+    setWeekDays(days);
+  };
+
   const submitFeedback = async () => {
     if (!workout || !selectedEffort) return;
-    // Save tracking summary into workout_json
     const completedCount = exercises.filter((_: any, idx: number) => isExerciseComplete(idx)).length;
     const totalCount = exercises.length;
     const durationMinutes = Math.ceil(elapsedSeconds / 60);
@@ -119,8 +168,14 @@ const Treinos = () => {
       feedback_effort: selectedEffort,
       workout_json: updatedJson,
     }).eq("id", workout.id);
-    if (error) { toast.error("Erro ao salvar feedback"); }
-    else { setFeedback(selectedEffort); setCompleted(true); setFeedbackStep(null); setShowFeedback(false); toast.success("Treino finalizado! 🎉"); navigate("/treinos"); }
+    if (error) { toast.error("Erro ao salvar feedback"); return; }
+    
+    setFeedback(selectedEffort);
+    setCompleted(true);
+    setFeedbackStep(null);
+    setShowFeedback(false);
+    await computeStreakAndWeek();
+    setShowSuccess(true);
   };
 
   const [dbExercises, setDbExercises] = useState<{ name: string; video_url: string }[]>([]);
