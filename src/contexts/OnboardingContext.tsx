@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export type OnboardingData = {
+  // Identity
+  nome: string;
+  email_onboarding: string;
   // Psychological / engagement
   motivacao: string[];
   corpo_atual: string;
@@ -33,6 +36,8 @@ export type OnboardingData = {
 };
 
 const initialData: OnboardingData = {
+  nome: "",
+  email_onboarding: "",
   motivacao: [],
   corpo_atual: "",
   corpo_desejado: "",
@@ -71,6 +76,7 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 
 export const ONBOARDING_STEPS = [
   "boas-vindas",
+  "nome",
   "motivacao",
   "objetivo",
   "area-alvo",
