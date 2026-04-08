@@ -629,6 +629,105 @@ const Treinos = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Success celebration screen */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+          {/* Fire icon with streak */}
+          <div className="relative mb-6">
+            <div className="w-32 h-32 flex items-center justify-center">
+              <svg viewBox="0 0 120 140" className="w-32 h-36">
+                <defs>
+                  <radialGradient id="fireGrad" cx="50%" cy="60%" r="50%">
+                    <stop offset="0%" stopColor="#FFA726" />
+                    <stop offset="100%" stopColor="#E65100" />
+                  </radialGradient>
+                </defs>
+                <path
+                  d="M60 5 C60 5 95 45 95 85 C95 108 80 130 60 135 C40 130 25 108 25 85 C25 45 60 5 60 5Z"
+                  fill="url(#fireGrad)"
+                />
+                <path
+                  d="M60 50 C60 50 78 70 78 90 C78 105 70 115 60 118 C50 115 42 105 42 90 C42 70 60 50 60 50Z"
+                  fill="#FFD54F"
+                  opacity="0.7"
+                />
+              </svg>
+              <span className="absolute text-4xl font-black text-white" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
+                {streakCount}
+              </span>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-3xl font-black text-foreground text-center uppercase leading-tight mb-1">
+            {streakCount === 1 ? "Você começou sua sequência!" : "Você está em uma sequência de"}
+          </h1>
+          <p className="text-3xl font-black text-primary text-center mb-8">
+            {streakCount} {streakCount === 1 ? "dia" : "dias"}!
+          </p>
+
+          {/* Week card */}
+          <div className="w-full bg-card border border-border rounded-2xl p-5 mb-8">
+            <p className="text-center text-muted-foreground mb-4">
+              O primeiro marco: <span className="font-bold text-foreground">7 Dias</span>
+            </p>
+            
+            <div className="flex justify-between mb-3">
+              {weekDays.map((day, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <span className={`text-xs font-medium ${day.isToday ? "text-primary" : "text-muted-foreground"}`}>
+                    {day.label}
+                  </span>
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                    day.completed
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}>
+                    {day.completed && <Check className="w-4 h-4" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-dashed border-border my-3" />
+            
+            <p className="text-sm text-muted-foreground text-center leading-relaxed">
+              {streakCount >= 7
+                ? "Incrível! Você atingiu seu primeiro marco! 🎉 Continue assim!"
+                : `Você foi muito bem hoje! Faltam apenas ${7 - streakCount} ${7 - streakCount === 1 ? "dia" : "dias"} para atingir o seu objetivo. Continue assim!`}
+            </p>
+          </div>
+
+          {/* Workout summary mini */}
+          <div className="w-full flex gap-3 mb-8">
+            <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
+              <p className="text-lg font-bold text-foreground">{formatTime(elapsedSeconds)}</p>
+              <p className="text-xs text-muted-foreground">Duração</p>
+            </div>
+            <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
+              <p className="text-lg font-bold text-foreground">{exercises.filter((_: any, idx: number) => isExerciseComplete(idx)).length}/{exercises.length}</p>
+              <p className="text-xs text-muted-foreground">Exercícios</p>
+            </div>
+            <div className="flex-1 bg-card border border-border rounded-xl p-3 text-center">
+              <p className="text-lg font-bold text-foreground">
+                {selectedEffort === "facil" ? "😊" : selectedEffort === "ideal" ? "💪" : "🔥"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {selectedEffort === "facil" ? "Fácil" : selectedEffort === "ideal" ? "Ideal" : "Difícil"}
+              </p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <Button
+            onClick={() => navigate("/treinos")}
+            className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+          >
+            Pronto
+          </Button>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );
