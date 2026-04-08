@@ -428,7 +428,7 @@ const Evolucao = () => {
                     <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
                       <XCircle className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-bold text-foreground">0</p>
+                        <p className="text-xs font-bold text-foreground">{skipped}</p>
                         <p className="text-[9px] text-muted-foreground">Restam</p>
                       </div>
                     </div>
