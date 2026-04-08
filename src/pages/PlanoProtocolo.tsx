@@ -36,7 +36,7 @@ const PlanoProtocolo = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [{ count }, { data: profile }] = await Promise.all([
+      const [{ count }, { data: profile }, { data: workouts }] = await Promise.all([
         supabase
           .from("workouts")
           .select("id", { count: "exact", head: true })
@@ -47,11 +47,28 @@ const PlanoProtocolo = () => {
           .select("workout_days")
           .eq("id", user.id)
           .single(),
+        supabase
+          .from("workouts")
+          .select("workout_json, created_at")
+          .eq("profile_id", user.id)
+          .order("created_at", { ascending: true }),
       ]);
       const days = profile?.workout_days || 3;
       setWorkoutDays(Math.max(1, Math.min(7, days)));
       const totalDays = days * 4;
       setCurrentDay(Math.min((count || 0) + 1, totalDays));
+
+      // Map workout durations by index
+      if (workouts) {
+        const durations: Record<number, string> = {};
+        workouts.forEach((w: any, idx: number) => {
+          const json = w.workout_json;
+          if (json?.estimated_duration) {
+            durations[idx + 1] = json.estimated_duration.replace("~", "").trim();
+          }
+        });
+        setWorkoutDurations(durations);
+      }
     };
     fetchData();
   }, [user]);
