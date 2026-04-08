@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
-import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +11,15 @@ import heroTreino from "@/assets/hero-treino.jpg";
 
 type FeedbackType = "facil" | "ideal" | "dificil" | null;
 type FeedbackStep = "effort" | "comment" | null;
+
+interface SeriesLog {
+  reps: number | null;
+  completed: boolean;
+}
+
+interface ExerciseTracking {
+  [exerciseIndex: number]: SeriesLog[];
+}
 
 const Treinos = () => {
   const { user } = useAuth();
@@ -26,6 +35,9 @@ const Treinos = () => {
   const [videoModal, setVideoModal] = useState<{ name: string; url: string } | null>(null);
   const [phase, setPhase] = useState<string>("initial");
   const [workoutNumber, setWorkoutNumber] = useState<number>(1);
+  const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
+  const [tracking, setTracking] = useState<ExerciseTracking>({});
+  const [editingCell, setEditingCell] = useState<{ exIdx: number; seriesIdx: number } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -44,9 +56,41 @@ const Treinos = () => {
         setFeedback(data.workout.feedback_effort as FeedbackType);
         setPhase(data.phase || "initial");
         setWorkoutNumber(data.workoutNumber || 1);
+        // Initialize tracking from workout exercises
+        initializeTracking(data.workout.workout_json);
       } else { toast.error("Protocolo não encontrado"); }
     } catch { toast.error("Erro ao carregar protocolo"); }
     setLoading(false);
+  };
+
+  const initializeTracking = (wJson: any) => {
+    if (!wJson) return;
+    const exercises = getExercisesList(wJson);
+    const initial: ExerciseTracking = {};
+    exercises.forEach((ex: any, idx: number) => {
+      const seriesCount = ex.series || 3;
+      initial[idx] = Array.from({ length: seriesCount }, () => ({
+        reps: null,
+        completed: false,
+      }));
+    });
+    setTracking(initial);
+  };
+
+  // Helper to get flat exercises list from either new or legacy format
+  const getExercisesList = (wJson: any): any[] => {
+    if (wJson?.exercises && Array.isArray(wJson.exercises)) {
+      return wJson.exercises;
+    }
+    // Legacy tri-set format
+    if (wJson?.tri_sets) {
+      const flat: any[] = [];
+      for (const ts of wJson.tri_sets) {
+        if (ts.exercises) flat.push(...ts.exercises);
+      }
+      return flat;
+    }
+    return [];
   };
 
   const submitFeedback = async () => {
@@ -56,14 +100,8 @@ const Treinos = () => {
     else { setFeedback(selectedEffort); setCompleted(true); setFeedbackStep(null); setShowFeedback(false); toast.success("Treino finalizado! 🎉"); navigate("/treinos"); }
   };
 
-  const generateNextWorkout = async () => {
-    setCompleted(false); setFeedback(null); setWorkout(null);
-    await fetchCurrentWorkout();
-  };
-
   const [dbExercises, setDbExercises] = useState<{ name: string; video_url: string }[]>([]);
 
-  // Fetch exercises from DB for video URL matching
   useEffect(() => {
     const fetchVideos = async () => {
       const { data } = await supabase.from("exercises").select("name, video_url");
@@ -72,15 +110,12 @@ const Treinos = () => {
     fetchVideos();
   }, []);
 
-  // Fuzzy match: find the best matching exercise by name similarity
   const findVideoUrl = (exerciseName: string): string | null => {
     if (!exerciseName || dbExercises.length === 0) return null;
     const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     const lower = normalize(exerciseName);
-    // Exact match only
     const exact = dbExercises.find((e) => normalize(e.name) === lower);
     if (exact) return exact.video_url;
-    // Contained match: DB name must fully contain the exercise name or vice-versa
     const contained = dbExercises.find((e) => {
       const dbLower = normalize(e.name);
       return dbLower === lower || dbLower.includes(lower) || lower.includes(dbLower);
@@ -90,37 +125,70 @@ const Treinos = () => {
   };
 
   const workoutJson = workout?.workout_json;
-  const triSets = useMemo(() => {
-    const sets = workoutJson?.tri_sets || [];
-    return sets.map((ts: any) => ({
-      ...ts,
-      exercises: ts.exercises?.map((ex: any) => {
-        const hasValidUrl = ex.video_url && ex.video_url.length > 10 && ex.video_url.startsWith("http");
-        return {
-          ...ex,
-          video_url: hasValidUrl ? ex.video_url : findVideoUrl(ex.name),
-        };
-      }),
-    }));
+
+  const exercises = useMemo(() => {
+    const list = getExercisesList(workoutJson);
+    return list.map((ex: any) => {
+      const hasValidUrl = ex.video_url && ex.video_url.length > 10 && ex.video_url.startsWith("http");
+      return {
+        ...ex,
+        video_url: hasValidUrl ? ex.video_url : findVideoUrl(ex.name),
+        series: ex.series || workoutJson?.series_count || 3,
+        reps: ex.reps || workoutJson?.reps_range || "15 a 30",
+        rest_seconds: ex.rest_seconds || workoutJson?.rest_seconds || 45,
+      };
+    });
   }, [workoutJson, dbExercises]);
 
   // Compute stats
   const stats = useMemo(() => {
-    let totalExercises = 0;
     const focusAreas = new Set<string>();
-    triSets.forEach((ts: any) => {
-      ts.exercises?.forEach((ex: any) => {
-        totalExercises++;
-        if (ex.muscle_group) focusAreas.add(ex.muscle_group);
-      });
+    exercises.forEach((ex: any) => {
+      if (ex.muscle_group) focusAreas.add(ex.muscle_group);
     });
     return {
-      totalExercises,
+      totalExercises: exercises.length,
       focusAreas: focusAreas.size > 0 ? Array.from(focusAreas).join(", ") : workoutJson?.title || "Corpo todo",
       duration: workoutJson?.estimated_duration || "~30 min",
-      level: workoutJson?.level || "Intermediário",
+      level: workoutJson?.level === "iniciante" ? "Iniciante" : workoutJson?.level === "avancado" ? "Avançado" : "Intermediário",
+      seriesCount: exercises[0]?.series || 3,
     };
-  }, [triSets, workoutJson]);
+  }, [exercises, workoutJson]);
+
+  // Check if all series of an exercise are completed
+  const isExerciseComplete = useCallback((exIdx: number) => {
+    const series = tracking[exIdx];
+    if (!series) return false;
+    return series.every(s => s.completed);
+  }, [tracking]);
+
+  const completedSeriesCount = useCallback((exIdx: number) => {
+    const series = tracking[exIdx];
+    if (!series) return 0;
+    return series.filter(s => s.completed).length;
+  }, [tracking]);
+
+  // Toggle series completion
+  const toggleSeriesComplete = (exIdx: number, seriesIdx: number) => {
+    setTracking(prev => {
+      const updated = { ...prev };
+      const series = [...(updated[exIdx] || [])];
+      series[seriesIdx] = { ...series[seriesIdx], completed: !series[seriesIdx].completed };
+      updated[exIdx] = series;
+      return updated;
+    });
+  };
+
+  // Update reps for a series
+  const updateReps = (exIdx: number, seriesIdx: number, reps: number | null) => {
+    setTracking(prev => {
+      const updated = { ...prev };
+      const series = [...(updated[exIdx] || [])];
+      series[seriesIdx] = { ...series[seriesIdx], reps };
+      updated[exIdx] = series;
+      return updated;
+    });
+  };
 
   const dayLabel = `${workoutNumber}º dia`;
 
@@ -131,7 +199,7 @@ const Treinos = () => {
           <Loader2 className="animate-spin text-primary mb-3" size={40} />
           <span className="text-muted-foreground text-base">Carregando seu protocolo...</span>
         </div>
-      ) : triSets.length === 0 ? (
+      ) : exercises.length === 0 ? (
         <div className="px-4 pt-6">
           <div className="soft-card p-6 text-center">
             <p className="text-muted-foreground text-base">Nenhum protocolo disponível.</p>
@@ -186,7 +254,7 @@ const Treinos = () => {
                 <span className="text-sm font-semibold text-foreground">Exercícios</span>
               </div>
               <p className="text-2xl font-bold text-foreground">{stats.totalExercises}</p>
-              <p className="text-xs text-muted-foreground">{triSets.length} séries</p>
+              <p className="text-xs text-muted-foreground">{stats.seriesCount} séries</p>
             </div>
           </div>
 
@@ -199,33 +267,107 @@ const Treinos = () => {
             </div>
 
             <div className="space-y-3">
-              {triSets.map((ts: any, idx: number) => (
-                <div key={idx}>
-                  <p className="text-xs font-heading text-primary uppercase tracking-widest mb-2">{ts.label}</p>
-                  {ts.exercises?.map((ex: any, i: number) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 py-3 border-b border-border last:border-0"
+              {exercises.map((ex: any, idx: number) => {
+                const isExpanded = expandedExercise === idx;
+                const exComplete = isExerciseComplete(idx);
+                const completedCount = completedSeriesCount(idx);
+                const totalSeries = ex.series || 3;
+
+                return (
+                  <div key={idx} className={`rounded-2xl overflow-hidden transition-all ${exComplete ? "bg-primary/10 border border-primary/30" : "bg-card border border-border"}`}>
+                    {/* Exercise header */}
+                    <button
+                      onClick={() => setExpandedExercise(isExpanded ? null : idx)}
+                      className="flex items-center gap-3 p-4 w-full text-left"
                     >
+                      {/* Collapse/Expand icon */}
+                      <div className="flex-shrink-0">
+                        {isExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </div>
+
                       {/* Thumbnail / play area */}
-                      <button
-                        onClick={() => ex.video_url && setVideoModal({ name: ex.name, url: ex.video_url })}
-                        className="relative w-20 h-20 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden"
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (ex.video_url) setVideoModal({ name: ex.name, url: ex.video_url });
+                        }}
+                        className="relative w-16 h-16 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden"
                       >
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                          <Play className="w-5 h-5 text-primary ml-0.5" />
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Play className="w-4 h-4 text-primary ml-0.5" />
                         </div>
-                      </button>
+                      </div>
 
                       {/* Exercise info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-bold text-foreground leading-tight">{ex.name}</p>
-                        <p className="text-sm text-muted-foreground mt-0.5">{ex.reps}</p>
+                        <p className="text-sm font-bold text-foreground leading-tight uppercase">{ex.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                          {exComplete && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                          <span className={exComplete ? "text-primary font-semibold" : ""}>
+                            {completedCount}/{totalSeries} feito(s)
+                          </span>
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
+                    </button>
+
+                    {/* Expanded: Series tracking */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4">
+                        {/* Header row */}
+                        <div className="grid grid-cols-[50px_1fr_50px] gap-2 mb-2 px-1">
+                          <span className="text-xs font-semibold text-muted-foreground">Série</span>
+                          <span className="text-xs font-semibold text-muted-foreground text-center">Rep.</span>
+                          <span></span>
+                        </div>
+
+                        {/* Series rows */}
+                        {(tracking[idx] || []).map((series, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className={`grid grid-cols-[50px_1fr_50px] gap-2 items-center mb-2 px-1 py-2 rounded-xl transition-all ${
+                              series.completed ? "bg-primary/15" : ""
+                            }`}
+                          >
+                            {/* Series number */}
+                            <span className={`text-lg font-bold ${series.completed ? "text-primary" : "text-foreground"}`}>
+                              {sIdx + 1}
+                            </span>
+
+                            {/* Reps input */}
+                            <button
+                              onClick={() => setEditingCell({ exIdx: idx, seriesIdx: sIdx })}
+                              className="bg-muted rounded-xl py-3 px-4 text-center text-base font-medium text-foreground"
+                            >
+                              {series.reps !== null ? series.reps : ex.reps || "—"}
+                            </button>
+
+                            {/* Check button */}
+                            <button
+                              onClick={() => toggleSeriesComplete(idx, sIdx)}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                series.completed
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {series.completed && <CheckCircle2 className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        ))}
+
+                        {/* Rest info */}
+                        <p className="text-xs text-muted-foreground text-center mt-2">
+                          Descanso: {ex.rest_seconds || 45}s entre séries
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -255,6 +397,26 @@ const Treinos = () => {
           </div>
         </>
       )}
+
+      {/* Number input dialog */}
+      <Dialog open={!!editingCell} onOpenChange={(open) => { if (!open) setEditingCell(null); }}>
+        <DialogContent className="bg-card border-border max-w-sm mx-auto rounded-2xl p-4 [&>button]:hidden">
+          {editingCell && (
+            <NumberPad
+              initialValue={tracking[editingCell.exIdx]?.[editingCell.seriesIdx]?.reps}
+              onConfirm={(val) => {
+                updateReps(editingCell.exIdx, editingCell.seriesIdx, val);
+                // Also mark as complete
+                if (val !== null) {
+                  toggleSeriesComplete(editingCell.exIdx, editingCell.seriesIdx);
+                }
+                setEditingCell(null);
+              }}
+              onClose={() => setEditingCell(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Feedback dialog - Step 1: Effort */}
       <Dialog open={showFeedback && feedbackStep === "effort"} onOpenChange={(open) => { if (!open) { setShowFeedback(false); setFeedbackStep(null); } }}>
@@ -350,6 +512,62 @@ const Treinos = () => {
       </Dialog>
 
       <BottomNav />
+    </div>
+  );
+};
+
+// Number pad component for rep input
+const NumberPad = ({ initialValue, onConfirm, onClose }: { initialValue: number | null; onConfirm: (val: number | null) => void; onClose: () => void }) => {
+  const [value, setValue] = useState(initialValue?.toString() || "");
+
+  const handleKey = (key: string) => {
+    if (key === "backspace") {
+      setValue(prev => prev.slice(0, -1));
+    } else if (key === "00") {
+      setValue(prev => prev + "00");
+    } else {
+      setValue(prev => prev + key);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Display */}
+      <div className="text-center py-3">
+        <span className="text-3xl font-bold text-foreground">{value || "0"}</span>
+        <span className="text-lg text-muted-foreground ml-1">reps</span>
+      </div>
+
+      {/* Number grid */}
+      <div className="grid grid-cols-4 gap-2">
+        {["1", "2", "3", "backspace", "4", "5", "6", "", "7", "8", "9", "confirm", "00", "0"].map((key, i) => {
+          if (key === "") return <div key={i} />;
+          if (key === "backspace") {
+            return (
+              <button key={i} onClick={() => handleKey("backspace")} className="bg-muted rounded-xl py-4 text-lg font-bold text-foreground flex items-center justify-center">
+                ⌫
+              </button>
+            );
+          }
+          if (key === "confirm") {
+            return (
+              <button
+                key={i}
+                onClick={() => onConfirm(value ? parseInt(value) : null)}
+                className="bg-primary text-primary-foreground rounded-xl py-4 text-sm font-bold row-span-2 flex items-center justify-center"
+                style={{ gridRow: "span 2" }}
+              >
+                OK
+              </button>
+            );
+          }
+          return (
+            <button key={i} onClick={() => handleKey(key)} className="bg-muted rounded-xl py-4 text-lg font-bold text-foreground">
+              {key}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
