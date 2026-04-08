@@ -22,7 +22,7 @@ import {
   Users, Dumbbell, Plus, Pencil, Trash2, Eye, LogOut,
   ChevronLeft, ChevronRight, Search, LayoutDashboard, ArrowLeft,
   DollarSign, TrendingDown, TrendingUp, UserPlus, AlertTriangle,
-  Activity, Target, Globe,
+  Activity, Target, Globe, ClipboardList, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
