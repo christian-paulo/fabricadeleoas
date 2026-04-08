@@ -99,6 +99,7 @@ export const ONBOARDING_STEPS = [
   "medicacao",
   "psicologico",
   "celebracao",
+  "email-onboarding",
   "analise-ia",
 ] as const;
 
