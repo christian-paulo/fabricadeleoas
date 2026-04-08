@@ -215,7 +215,7 @@ const PlanoProtocolo = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xl font-heading font-bold text-foreground">{item.dayNumber}°Dia</p>
-                    <p className="text-sm text-muted-foreground">{item.duration} min</p>
+                    <p className="text-sm text-muted-foreground">{item.duration?.toString().replace(/\s*min\s*/, '')} min</p>
                   </div>
                   {!isFuture && (
                     <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
