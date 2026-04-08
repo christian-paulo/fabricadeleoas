@@ -20,7 +20,7 @@ const WEEK_NAMES = [
   "Rush Final",
 ];
 
-const BASE_DURATIONS = [22, 15, 18, 20, 25, 17, 22, 15, 18, 21, 20, 16, 24, 18, 21, 19, 23, 17, 20, 22, 22, 26, 18, 20, 25, 17, 21, 19];
+
 
 const PlanoProtocolo = () => {
   const { user } = useAuth();
