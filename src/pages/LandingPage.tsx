@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Play, Users, Star, Shield } from "lucide-react";
+import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Play, Users, Star, Shield, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
 import { useAuth } from "@/hooks/useAuth";
 import logoIcon from "@/assets/logo-leoa-icon.png";
+import dep1 from "@/assets/dep1.webp";
+import dep2 from "@/assets/dep2.webp";
+import dep3 from "@/assets/dep3.webp";
+import dep4 from "@/assets/dep4.webp";
+import dep5 from "@/assets/dep5.webp";
+import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -262,6 +268,85 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Resultados - Before/After Photos */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Star className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs text-primary font-semibold">RESULTADOS REAIS</span>
+            </div>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground mb-3">
+              Mulheres que <em className="text-primary not-italic">transformaram seus corpos.</em>
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Resultados reais de alunas que seguiram o método.
+            </p>
+          </div>
+          <ResultsCarousel />
+          <div className="text-center mt-8">
+            <Button size="lg" onClick={goToOnboarding}
+              className="pink-gradient text-primary-foreground font-heading font-bold text-base py-6 px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
+              QUERO MEU RESULTADO TAMBÉM
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Depoimentos em Texto */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Quote className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs text-primary font-semibold">DEPOIMENTOS</span>
+            </div>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground mb-3">
+              O que nossas <em className="text-primary not-italic">Leoas dizem.</em>
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Feedbacks reais das alunas no WhatsApp.
+            </p>
+          </div>
+
+          <div className="mb-8">
+            <img
+              src={depoimentosWhatsapp}
+              alt="Depoimentos de alunas no WhatsApp"
+              className="w-full rounded-2xl shadow-sm"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { name: "Camila S.", text: "Em 2 semanas já senti diferença no corpo e na disposição. O método é incrível!", rating: 5 },
+              { name: "Juliana M.", text: "Nunca consegui manter uma rotina de treino até conhecer a Fábrica de Leoas. Agora treino todo dia!", rating: 5 },
+              { name: "Fernanda R.", text: "Tenho problema no joelho e o treino foi todo adaptado pra mim. Sem dor e com resultado!", rating: 5 },
+              { name: "Patrícia L.", text: "Os tri-sets são desafiadores mas funcionam demais. Meu corpo mudou em 1 mês!", rating: 5 },
+            ].map((dep, i) => (
+              <div key={i} className="soft-card p-5">
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: dep.rating }).map((_, j) => (
+                    <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
+                  ))}
+                </div>
+                <p className="text-sm text-foreground leading-relaxed mb-3">"{dep.text}"</p>
+                <p className="text-xs text-muted-foreground font-medium">— {dep.name}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button size="lg" onClick={goToOnboarding}
+              className="pink-gradient text-primary-foreground font-heading font-bold text-base py-6 px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
+              COMEÇAR MINHA TRANSFORMAÇÃO
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Founder Section */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-2xl">
@@ -422,6 +507,61 @@ const LandingPage = () => {
           </p>
         </div>
       </footer>
+    </div>
+  );
+};
+
+const resultPhotos = [dep1, dep2, dep3, dep4, dep5];
+
+const ResultsCarousel = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[index] as HTMLElement;
+    if (child) {
+      container.scrollTo({ left: child.offsetLeft - 12, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % resultPhotos.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [scrollToIndex]);
+
+  return (
+    <div>
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {resultPhotos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`Resultado de aluna ${i + 1}`}
+            className="snap-center rounded-2xl shadow-md w-[80%] max-w-[320px] flex-shrink-0 object-contain"
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-4">
+        {resultPhotos.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveIndex(i); scrollToIndex(i); }}
+            className={`w-2.5 h-2.5 rounded-full transition-colors ${i === activeIndex ? "bg-primary" : "bg-muted"}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };
