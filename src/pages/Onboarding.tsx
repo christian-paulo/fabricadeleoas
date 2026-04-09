@@ -325,8 +325,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               <button
                 key={cd.value}
                 onClick={() => updateField("corpo_desejado", cd.value)}
-                className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-200 ${data.corpo_desejado === cd.value ? "bg-primary/10 ring-2 ring-primary" : "bg-secondary/50"}`}
-                style={{ animationDelay: `${i * 0.07}s` }}
+                className={`w-full rounded-2xl overflow-hidden relative h-24 flex items-center transition-all duration-200 animate-[fade-in_0.4s_ease-out_both] ${data.corpo_desejado === cd.value ? "bg-primary/10 ring-2 ring-primary" : "bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}
               >
                 <span className="relative z-10 pl-5 text-xl font-bold text-foreground whitespace-pre-line text-left">{cd.label}</span>
                 <img src={cd.img} alt={cd.value} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
@@ -420,7 +420,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tipo-barriga":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">barriga</span> mais representa a sua atualmente?</h2>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual tipo de <span className="text-primary">barriga</span> mais representa a sua atualmente?</h2>
           <div className="space-y-3 mt-6">
             {[
               { val: "Barriga normal", img: barr1Img },
@@ -428,9 +428,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               { val: "Barriga hormonal", img: barr3Img },
               { val: "Barriga de álcool", img: barr4Img },
               { val: "Barriga estressada", img: barr5Img },
-            ].map((opt) => (
+            ].map((opt, i) => (
               <button key={opt.val} onClick={() => updateField("tipo_barriga", opt.val)}
-                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_barriga === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all animate-[fade-in_0.4s_ease-out_both] ${data.tipo_barriga === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
                 <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
                 <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
               </button>
@@ -442,7 +443,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tipo-quadril":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">quadril</span> mais representa o seu atualmente?</h2>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual tipo de <span className="text-primary">quadril</span> mais representa o seu atualmente?</h2>
           <div className="space-y-3 mt-6">
             {[
               { val: "Normal", img: quadril1Img },
@@ -450,9 +451,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               { val: "Caído", img: quadril3Img },
               { val: "Duplo", img: quadril4Img },
               { val: "Redondo", img: quadril5Img },
-            ].map((opt) => (
+            ].map((opt, i) => (
               <button key={opt.val} onClick={() => updateField("tipo_quadril", opt.val)}
-                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_quadril === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all animate-[fade-in_0.4s_ease-out_both] ${data.tipo_quadril === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
                 <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
                 <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
               </button>
@@ -464,16 +466,17 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tipo-perna":
       return (
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Qual tipo de <span className="text-primary">perna</span> mais representa a sua atualmente?</h2>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual tipo de <span className="text-primary">perna</span> mais representa a sua atualmente?</h2>
           <div className="space-y-3 mt-6">
             {[
               { val: "Pernas normais", img: perna1Img },
               { val: "Pernas em forma de X", img: perna2Img },
               { val: "Pernas em forma de O", img: perna3Img },
               { val: "Pernas em forma de XO", img: perna4Img },
-            ].map((opt) => (
+            ].map((opt, i) => (
               <button key={opt.val} onClick={() => updateField("tipo_perna", opt.val)}
-                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all ${data.tipo_perna === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}>
+                className={`soft-card w-full h-24 rounded-2xl overflow-hidden flex items-center relative transition-all animate-[fade-in_0.4s_ease-out_both] ${data.tipo_perna === opt.val ? "ring-2 ring-primary bg-primary/10" : "bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
                 <span className="pl-5 text-xl font-bold text-foreground relative z-10">{opt.val}</span>
                 <img src={opt.img} alt={opt.val} className="absolute right-0 top-1/2 -translate-y-1/2 h-[110%] w-auto object-cover" />
               </button>
@@ -485,10 +488,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "idade":
       return (
         <div>
-          <div className="mb-1"><Star className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual é a sua <span className="text-primary">idade</span>?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Importante para ajustar a intensidade</p>
-          <div className="soft-card p-6 text-center">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Star className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual é a sua <span className="text-primary">idade</span>?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Importante para ajustar a intensidade</p>
+          <div className="soft-card p-6 text-center animate-[fade-in_0.4s_ease-out_0.2s_both]">
             <Input type="number" value={data.idade} onChange={(e) => updateField("idade", e.target.value)}
               placeholder="40" className="bg-background border-border text-foreground h-14 text-2xl text-center font-heading max-w-[120px] mx-auto" />
             <p className="text-xs text-muted-foreground mt-3">anos</p>
@@ -499,17 +502,18 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "equipamentos":
       return (
         <div>
-          <div className="mb-1"><Dumbbell className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Como você prefere fazer os exercícios?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Defina os equipamentos disponíveis</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Dumbbell className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Como você prefere fazer os exercícios?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Defina os equipamentos disponíveis</p>
           <div className="space-y-3">
             {[
               { val: "Sem equipamento", icon: "🙌", desc: "Apenas peso corporal e materiais simples" },
               { val: "Halteres e elásticos", icon: "💪", desc: "Equipamento básico em casa" },
               { val: "Equipamentos completos", icon: "🏋️", desc: "Acesso a máquinas e aparelhos em casa" },
-            ].map((e) => (
+            ].map((e, i) => (
               <button key={e.val} onClick={() => updateField("equipment", e.val)}
-                className={`soft-card w-full p-4 text-left transition-all ${data.equipment === e.val ? "ring-2 ring-primary bg-primary/5" : "hover:bg-secondary/50"}`}>
+                className={`soft-card w-full p-4 text-left transition-all animate-[fade-in_0.4s_ease-out_both] ${data.equipment === e.val ? "ring-2 ring-primary bg-primary/5" : "hover:bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{e.icon}</span>
                   <div>
@@ -526,17 +530,18 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "dificuldade":
       return (
         <div>
-          <div className="mb-1"><Flame className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Nível de dificuldade esperado?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Qual intensidade te parece ideal?</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Flame className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Nível de dificuldade esperado?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Qual intensidade te parece ideal?</p>
           <div className="space-y-3">
             {[
               { val: "Fácil", icon: "😊", desc: "Quero começar devagar" },
               { val: "Suar um pouco", icon: "💧", desc: "Moderado, mas sentir o protocolo" },
               { val: "Desafiador", icon: "🔥", desc: "Quero ser desafiada!" },
-            ].map((d) => (
+            ].map((d, i) => (
               <button key={d.val} onClick={() => updateField("dificuldade", d.val)}
-                className={`soft-card w-full p-4 text-left transition-all ${data.dificuldade === d.val ? "ring-2 ring-primary bg-primary/5" : "hover:bg-secondary/50"}`}>
+                className={`soft-card w-full p-4 text-left transition-all animate-[fade-in_0.4s_ease-out_both] ${data.dificuldade === d.val ? "ring-2 ring-primary bg-primary/5" : "hover:bg-secondary/50"}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{d.icon}</span>
                   <div>
@@ -553,8 +558,8 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "momento":
       return (
         <div>
-          <div className="mb-1"><Activity className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Qual dos níveis de <span className="text-primary">experiência</span> abaixo mais combina com seu momento atual?</h2>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Activity className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Qual dos níveis de <span className="text-primary">experiência</span> abaixo mais combina com seu momento atual?</h2>
           <div className="space-y-3">
             {[
               { val: "Nunca treinei", desc: "Estou começando do zero", emoji: "🌱" },
@@ -576,9 +581,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "frequencia":
       return (
         <div>
-          <div className="mb-1"><Clock className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Com que <span className="text-primary">frequência</span> na semana você gostaria de treinar?</h2>
-          <div className="flex gap-3 justify-center mt-8">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Clock className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Com que <span className="text-primary">frequência</span> na semana você gostaria de treinar?</h2>
+          <div className="flex gap-3 justify-center mt-8 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {[2, 3, 4, 5].map((d) => (
               <button key={d} onClick={() => updateField("workoutDays", d)}
                 className={`w-16 h-16 rounded-2xl font-heading text-xl transition-all ${
@@ -588,7 +593,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
               </button>
             ))}
           </div>
-          <p className="text-center text-xs text-muted-foreground mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-4 animate-[fade-in_0.4s_ease-out_0.3s_both]">
             {data.workoutDays} dias por semana
           </p>
         </div>
@@ -597,9 +602,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "tempo":
       return (
         <div>
-          <div className="mb-1"><Hourglass className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Quanto <span className="text-primary">tempo</span> por dia você gostaria de treinar?</h2>
-          <div className="flex gap-4 justify-center mt-8">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Hourglass className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Quanto <span className="text-primary">tempo</span> por dia você gostaria de treinar?</h2>
+          <div className="flex gap-4 justify-center mt-8 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {["Até 10 min", "Até 30 min"].map((d) => (
               <button key={d} onClick={() => updateField("workoutDuration", d)}
                 className={`flex-1 max-w-[160px] h-24 rounded-2xl font-heading text-lg transition-all ${
@@ -615,10 +620,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "dores":
       return (
         <div>
-          <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Você sente dores no corpo?</h2>
-          <p className="text-sm text-muted-foreground mb-6 font-medium">Seu protocolo será adaptado, respeitando todas as suas dores e limitações.</p>
-          <div className="flex gap-4 justify-center mb-6">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><HeartPulse className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Você sente dores no corpo?</h2>
+          <p className="text-sm text-muted-foreground mb-6 font-medium animate-[fade-in_0.4s_ease-out_0.1s_both]">Seu protocolo será adaptado, respeitando todas as suas dores e limitações.</p>
+          <div className="flex gap-4 justify-center mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {[{ val: true, label: "Sim" }, { val: false, label: "Não" }].map((opt) => (
               <button key={String(opt.val)} onClick={() => { updateField("hasPain", opt.val); if (!opt.val) updateField("painLocation", []); }}
                 className={`flex-1 max-w-[140px] h-16 rounded-2xl font-heading transition-all ${
@@ -634,10 +639,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "local-dor":
       return (
         <div>
-          <div className="mb-1"><HeartPulse className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Onde você sente dor?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Selecione todas as regiões com desconforto</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><HeartPulse className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Onde você sente dor?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione todas as regiões com desconforto</p>
+          <div className="grid grid-cols-2 gap-3 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {[
               { label: "Cervical", img: dorCervicalImg },
               { label: "Torácica", img: dorToracicaImg },
@@ -684,9 +689,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "beneficios":
       return (
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Descubra os benefícios do Protocolo das Leoas</h2>
-          <p className="text-sm text-muted-foreground mb-6 text-center">Veja por que nosso método é diferente</p>
-          <div className="flex gap-3 w-full">
+          <h2 className="text-2xl font-bold text-foreground mb-2 text-center animate-[fade-in_0.4s_ease-out_both]">Descubra os benefícios do Protocolo das Leoas</h2>
+          <p className="text-sm text-muted-foreground mb-6 text-center animate-[fade-in_0.4s_ease-out_0.1s_both]">Veja por que nosso método é diferente</p>
+          <div className="flex gap-3 w-full animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {/* Outros */}
             <div className="flex-1 rounded-2xl border border-border bg-card p-4 flex flex-col items-center">
               <div className="w-full h-32 rounded-xl mb-3 bg-muted flex items-center justify-center overflow-hidden">
@@ -745,9 +750,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "flexibilidade":
       return (
         <div>
-          <div className="mb-1"><StretchHorizontal className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Nível aeróbico e flexibilidade</h2>
-          <p className="text-sm text-muted-foreground mb-6">Ajuda a calibrar a intensidade</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><StretchHorizontal className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Nível aeróbico e flexibilidade</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Ajuda a calibrar a intensidade</p>
           <div className="space-y-3">
             {[
               { label: "Fico ofegante subindo escadas", icon: <Wind className="w-5 h-5" /> },
@@ -764,10 +769,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "medicacao":
       return (
         <div>
-          <div className="mb-1"><Pill className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Usa alguma medicação?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Ozempic, Mounjaro, Antidepressivos...</p>
-          <div className="flex gap-4 justify-center mb-6">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Pill className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Usa alguma medicação?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Ozempic, Mounjaro, Antidepressivos...</p>
+          <div className="flex gap-4 justify-center mb-6 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             {[{ val: true, label: "Sim" }, { val: false, label: "Não" }].map((opt) => (
               <button key={String(opt.val)} onClick={() => updateField("usesMedication", opt.val)}
                 className={`flex-1 max-w-[140px] h-16 rounded-2xl font-heading transition-all ${
@@ -778,7 +783,7 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
             ))}
           </div>
           {data.usesMedication && (
-            <div className="soft-card p-4 mt-4">
+            <div className="soft-card p-4 mt-4 animate-[fade-in_0.4s_ease-out_both]">
               <label className="text-sm text-muted-foreground font-medium mb-2 block">Como se sente fisicamente?</label>
               <textarea value={data.medicationFeeling} onChange={(e) => updateField("medicationFeeling", e.target.value)}
                 placeholder="Ex: Sinto enjoo pela manhã, mas à tarde me sinto bem..."
@@ -791,9 +796,9 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "psicologico":
       return (
         <div>
-          <div className="mb-1"><Brain className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Identifica-se com alguma frase?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Selecione as que mais combinam</p>
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><Brain className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Identifica-se com alguma frase?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Selecione as que mais combinam</p>
           <div className="space-y-3">
             {[
               { label: "Me sinto insatisfeita no espelho", emoji: "🪞" },
@@ -818,10 +823,10 @@ function renderStep(step: OnboardingStep, data: any, updateField: any) {
     case "celebracao":
       return (
         <div>
-          <div className="mb-1"><PartyPopper className="w-8 h-8 text-primary" /></div>
-          <h2 className="text-2xl text-foreground mb-2">Como vai celebrar ao atingir a meta?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Visualize sua conquista!</p>
-          <div className="soft-card p-4">
+          <div className="mb-1 animate-[scale-in_0.4s_ease-out_both]"><PartyPopper className="w-8 h-8 text-primary" /></div>
+          <h2 className="text-2xl text-foreground mb-2 animate-[fade-in_0.4s_ease-out_both]">Como vai celebrar ao atingir a meta?</h2>
+          <p className="text-sm text-muted-foreground mb-6 animate-[fade-in_0.4s_ease-out_0.1s_both]">Visualize sua conquista!</p>
+          <div className="soft-card p-4 animate-[fade-in_0.4s_ease-out_0.2s_both]">
             <textarea value={data.celebracao} onChange={(e) => updateField("celebracao", e.target.value)}
               placeholder="Ex: Vou comprar um biquíni novo e ir à praia com confiança! 🏖️"
               className="w-full h-32 bg-background border border-border rounded-xl p-4 text-sm text-foreground resize-none focus:ring-2 focus:ring-primary outline-none" />
