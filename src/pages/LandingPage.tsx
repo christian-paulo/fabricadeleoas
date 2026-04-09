@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Play, Users, Star, Shield } from "lucide-react";
+import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Play, Users, Star, Shield, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
 import { useAuth } from "@/hooks/useAuth";
