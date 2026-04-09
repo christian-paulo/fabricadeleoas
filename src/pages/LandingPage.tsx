@@ -511,4 +511,59 @@ const LandingPage = () => {
   );
 };
 
+const resultPhotos = [dep1, dep2, dep3, dep4, dep5];
+
+const ResultsCarousel = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const child = container.children[index] as HTMLElement;
+    if (child) {
+      container.scrollTo({ left: child.offsetLeft - 12, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % resultPhotos.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [scrollToIndex]);
+
+  return (
+    <div>
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {resultPhotos.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`Resultado de aluna ${i + 1}`}
+            className="snap-center rounded-2xl shadow-md w-[80%] max-w-[320px] flex-shrink-0 object-contain"
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-4">
+        {resultPhotos.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setActiveIndex(i); scrollToIndex(i); }}
+            className={`w-2.5 h-2.5 rounded-full transition-colors ${i === activeIndex ? "bg-primary" : "bg-muted"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default LandingPage;
