@@ -541,7 +541,7 @@ const ResultsCarousel = () => {
   }, [scrollToIndex]);
 
   return (
-    <div>
+    <div className="overflow-hidden">
       <div
         ref={scrollRef}
         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
