@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
 import { useAuth } from "@/hooks/useAuth";
 import logoIcon from "@/assets/logo-leoa-icon.png";
+import dep1 from "@/assets/dep1.webp";
+import dep2 from "@/assets/dep2.webp";
+import dep3 from "@/assets/dep3.webp";
+import dep4 from "@/assets/dep4.webp";
+import dep5 from "@/assets/dep5.webp";
+import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
