@@ -35,7 +35,7 @@ const LandingPage = () => {
     "Tri-sets com vídeo demonstrativo",
     "Acompanhamento de evolução",
     "Método exclusivo do Gilvan",
-    "3 dias grátis para testar",
+    "7 dias grátis para testar",
   ];
 
   const faqs = [
@@ -53,7 +53,7 @@ const LandingPage = () => {
     },
     {
       q: "Como funciona o período de teste?",
-      a: "Você tem 3 dias de acesso total e gratuito. Se não amar o método, cancele com 1 clique no app antes da cobrança. Zero burocracia, zero risco."
+      a: "Você tem 7 dias de acesso total e gratuito. Se não amar o método, cancele com 1 clique no app antes da cobrança. Zero burocracia, zero risco."
     },
     {
       q: "Os treinos são longos?",
@@ -65,7 +65,7 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Promo Banner */}
       <div className="pink-gradient text-primary-foreground text-center py-2.5 px-4 text-xs sm:text-sm font-medium">
-        🔥 Promoção de lançamento: <strong>3 dias GRÁTIS</strong> · Apenas para as primeiras que decidirem · Encerra sem aviso
+        🔥 Promoção de lançamento: <strong>7 dias GRÁTIS</strong> · Apenas para as primeiras que decidirem · Encerra sem aviso
       </div>
 
       {/* Navbar */}
@@ -136,7 +136,7 @@ const LandingPage = () => {
             {[
               { value: "142", label: "exercícios com vídeo", icon: Dumbbell },
               { value: "4.9★", label: "avaliação das alunas", icon: Star },
-              { value: "3 dias", label: "grátis para testar", icon: Shield },
+              { value: "7 dias", label: "grátis para testar", icon: Shield },
             ].map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="flex justify-center mb-2">
@@ -391,7 +391,7 @@ const LandingPage = () => {
               Invista em quem <em className="text-primary not-italic">mais importa.</em>
             </h2>
             <p className="text-muted-foreground text-sm">Acesso completo. Cancele quando quiser.</p>
-            <p className="text-foreground text-sm font-semibold mt-2">3 dias grátis — sem burocracia.</p>
+            <p className="text-foreground text-sm font-semibold mt-2">7 dias grátis — sem burocracia.</p>
           </div>
 
           <div className="soft-card p-6 sm:p-8 border-2 border-primary/30 rounded-3xl shadow-lg mt-8">
@@ -427,7 +427,7 @@ const LandingPage = () => {
             </Button>
 
             <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Check className="w-3 h-3" /> 3 dias grátis</span>
+              <span className="flex items-center gap-1"><Check className="w-3 h-3" /> 7 dias grátis</span>
               <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Acesso imediato</span>
               <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Cancele quando quiser</span>
             </div>
@@ -442,9 +442,9 @@ const LandingPage = () => {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Shield className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="font-heading text-xl font-bold text-foreground mb-2">3 dias de garantia total</h3>
+            <h3 className="font-heading text-xl font-bold text-foreground mb-2">7 dias de garantia total</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Use tudo por 3 dias. Se não sentir diferença, cancele com 1 clique. Sem burocracia, sem perguntas.
+              Use tudo por 7 dias. Se não sentir diferença, cancele com 1 clique. Sem burocracia, sem perguntas.
             </p>
           </div>
         </div>
@@ -484,15 +484,15 @@ const LandingPage = () => {
             Sua transformação começa <span className="text-primary">agora.</span>
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            3 dias grátis. Sem risco. Sem burocracia.
+            7 dias grátis. Sem risco. Sem burocracia.
           </p>
           <Button size="lg" onClick={goToOnboarding}
             className="w-full max-w-sm mx-auto pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-            COMEÇAR MEUS 3 DIAS GRÁTIS
+            COMEÇAR MEUS 7 DIAS GRÁTIS
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <p className="text-xs text-muted-foreground mt-4">
-            A partir de R$49,90/mês · 3 dias grátis
+            A partir de R$49,90/mês · 7 dias grátis
           </p>
         </div>
       </section>
