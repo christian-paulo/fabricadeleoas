@@ -340,11 +340,11 @@ const LandingPage = () => {
             ))}
           </div>
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 px-4">
             <Button size="lg" onClick={goToOnboarding}
-              className="pink-gradient text-primary-foreground font-heading font-bold text-base py-6 px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
+              className="w-full sm:w-auto pink-gradient text-primary-foreground font-heading font-bold text-sm sm:text-base py-6 px-6 sm:px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
               COMEÇAR MINHA TRANSFORMAÇÃO
-              <ArrowRight className="ml-2 w-5 h-5" />
+              <ArrowRight className="ml-2 w-5 h-5 shrink-0" />
             </Button>
           </div>
         </div>
