@@ -107,7 +107,7 @@ serve(async (req) => {
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: "price_1TEx9fI4dFrhArZvg5kThQaN" }],
-      trial_period_days: 3,
+      trial_period_days: 7,
       payment_behavior: "default_incomplete",
       payment_settings: {
         save_default_payment_method: "on_subscription",

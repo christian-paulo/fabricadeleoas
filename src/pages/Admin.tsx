@@ -90,7 +90,7 @@ const Admin = () => {
   const isInTrial = (p: any) => {
     if (!p.trial_start_date) return false;
     const trialEnd = new Date(p.trial_start_date);
-    trialEnd.setDate(trialEnd.getDate() + 3);
+    trialEnd.setDate(trialEnd.getDate() + 7);
     return new Date() < trialEnd;
   };
 

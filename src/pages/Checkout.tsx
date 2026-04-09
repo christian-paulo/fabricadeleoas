@@ -77,7 +77,7 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
         ) : (
           <span className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
-            Iniciar 3 Dias Grátis
+            Iniciar 7 Dias Grátis
           </span>
         )}
       </Button>
@@ -537,7 +537,7 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
         className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
         onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
       >
-        Liberar meus 3 dias gratuitos
+        Liberar meus 7 dias gratuitos
       </Button>
     </div>
   );
@@ -623,7 +623,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
           className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
           onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
         >
-          Liberar meus 3 dias gratuitos
+          Liberar meus 7 dias gratuitos
         </Button>
       </div>
     </div>
@@ -720,7 +720,7 @@ const OrderSummary = () => {
           </div>
           <div className="border-t border-border my-3" />
           <div className="flex items-center justify-between">
-            <span className="text-sm text-primary font-medium">3 dias grátis</span>
+            <span className="text-sm text-primary font-medium">7 dias grátis</span>
             <span className="text-sm text-primary font-medium">- R$ 49,90</span>
           </div>
           <div className="border-t border-border my-3" />
@@ -740,7 +740,7 @@ const OrderSummary = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
-          Você não será cobrada durante o período de teste. Após 3 dias, a assinatura de R$ 49,90/mês
+          Você não será cobrada durante o período de teste. Após 7 dias, a assinatura de R$ 49,90/mês
           será ativada automaticamente. Cancele a qualquer momento com 1 clique.
         </p>
       </div>
