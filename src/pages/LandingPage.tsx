@@ -147,6 +147,9 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
+          <div className="mt-10">
+            <ResultsCarousel />
+          </div>
         </div>
       </section>
 
