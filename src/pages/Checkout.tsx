@@ -46,6 +46,11 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/dashboard`,
+          payment_method_data: {
+            billing_details: {
+              email,
+            },
+          },
         },
         redirect: "if_required",
       });
