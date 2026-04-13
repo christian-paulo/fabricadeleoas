@@ -616,7 +616,7 @@ const Treinos = () => {
 
       {/* Success celebration screen */}
       {showSuccess && (
-        <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+        <div className="fixed inset-0 z-[60] bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto overflow-y-auto py-10">
           {/* Fire icon with streak */}
           <div className="relative mb-6">
             <div className="w-32 h-32 flex items-center justify-center">
