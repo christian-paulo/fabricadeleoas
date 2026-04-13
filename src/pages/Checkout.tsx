@@ -581,7 +581,7 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
         className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
         onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
       >
-        Liberar meus 7 dias gratuitos
+        Começar agora
       </Button>
     </div>
   );
@@ -667,7 +667,7 @@ const PersonalizedPlan = ({ targetArea, workoutDuration, goal, hasPain, painLoca
           className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl"
           onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
         >
-          Liberar meus 7 dias gratuitos
+          Começar agora
         </Button>
       </div>
     </div>
