@@ -34,7 +34,7 @@ serve(async (req) => {
       }
     }
 
-    let priceId = "price_1TLku9I4dFrhArZvUiP58bOG"; // default annual
+    let priceId = "price_1TLlHSI4dFrhArZvmSEUhAL9"; // default semestral
     let trialDays = 3;
 
     if (!email) {
@@ -57,7 +57,7 @@ serve(async (req) => {
     }
 
     // Validate price_id
-    const validPrices = ["price_1TLku9I4dFrhArZvUiP58bOG", "price_1TEx9fI4dFrhArZvg5kThQaN"];
+    const validPrices = ["price_1TLlHSI4dFrhArZvmSEUhAL9", "price_1TEx9fI4dFrhArZvg5kThQaN"];
     if (!validPrices.includes(priceId)) {
       throw new Error("Invalid price selected");
     }
