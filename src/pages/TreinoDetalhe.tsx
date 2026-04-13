@@ -108,24 +108,9 @@ const Treinos = () => {
       .eq("completed", true)
       .order("date", { ascending: false });
 
-    // Compute streak
-    let streak = 0;
-    if (allWorkouts && allWorkouts.length > 0) {
-      const uniqueDates = [...new Set(allWorkouts.map(w => w.date))].sort().reverse();
-      const today = new Date().toISOString().split("T")[0];
-      
-      for (let i = 0; i < uniqueDates.length; i++) {
-        const expected = new Date();
-        expected.setDate(expected.getDate() - i);
-        const expectedStr = expected.toISOString().split("T")[0];
-        if (uniqueDates[i] === expectedStr) {
-          streak++;
-        } else {
-          break;
-        }
-      }
-    }
-    setStreakCount(streak);
+    // Count total completed workouts
+    const totalCompleted = allWorkouts?.length || 0;
+    setStreakCount(totalCompleted);
 
     // Compute week days
     const completedDates = new Set(allWorkouts?.map(w => w.date) || []);
@@ -663,13 +648,13 @@ const Treinos = () => {
             {streakCount === 1 ? "Você começou sua sequência!" : "Você está em uma sequência de"}
           </h1>
           <p className="text-3xl font-black text-primary text-center mb-8">
-            {streakCount} {streakCount === 1 ? "dia" : "dias"}!
+            {streakCount} {streakCount === 1 ? "treino" : "treinos"}!
           </p>
 
           {/* Week card */}
           <div className="w-full bg-card border border-border rounded-2xl p-5 mb-8">
             <p className="text-center text-muted-foreground mb-4">
-              O primeiro marco: <span className="font-bold text-foreground">7 Dias</span>
+              O primeiro marco: <span className="font-bold text-foreground">7 Treinos</span>
             </p>
             
             <div className="flex justify-between mb-3">
@@ -694,7 +679,7 @@ const Treinos = () => {
             <p className="text-sm text-muted-foreground text-center leading-relaxed">
               {streakCount >= 7
                 ? "Incrível! Você atingiu seu primeiro marco! 🎉 Continue assim!"
-                : `Você foi muito bem hoje! Faltam apenas ${7 - streakCount} ${7 - streakCount === 1 ? "dia" : "dias"} para atingir o seu objetivo. Continue assim!`}
+                : `Você foi muito bem hoje! Faltam apenas ${7 - streakCount} ${7 - streakCount === 1 ? "treino" : "treinos"} para atingir o seu objetivo. Continue assim!`}
             </p>
           </div>
 
@@ -721,7 +706,7 @@ const Treinos = () => {
           {/* CTA */}
           <Button
             onClick={() => navigate("/treinos")}
-            className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg"
+            className="w-full pink-gradient text-primary-foreground font-heading text-lg h-14 rounded-2xl shadow-lg mb-6"
           >
             Pronto
           </Button>
