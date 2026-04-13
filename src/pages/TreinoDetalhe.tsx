@@ -98,6 +98,9 @@ const Treinos = () => {
     return [];
   };
 
+  const getLocalDateString = (date = new Date()) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
   const computeStreakAndWeek = async () => {
     if (!user) return;
     // Fetch completed workouts
@@ -113,9 +116,9 @@ const Treinos = () => {
     setStreakCount(totalCompleted);
 
     // Compute week days
-    const completedDates = new Set(allWorkouts?.map(w => w.date) || []);
+    const completedDates = new Set(allWorkouts?.map((w) => w.date) || []);
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayStr = getLocalDateString(today);
     const dayOfWeek = today.getDay(); // 0=Sun
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
@@ -124,7 +127,7 @@ const Treinos = () => {
     const days = labels.map((label, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dateStr = getLocalDateString(d);
       return {
         label,
         completed: completedDates.has(dateStr),
@@ -139,6 +142,7 @@ const Treinos = () => {
     const completedCount = exercises.filter((_: any, idx: number) => isExerciseComplete(idx)).length;
     const totalCount = exercises.length;
     const durationMinutes = Math.ceil(elapsedSeconds / 60);
+    const completedDate = getLocalDateString();
     const updatedJson = {
       ...workoutJson,
       tracking_summary: {
@@ -147,10 +151,12 @@ const Treinos = () => {
         skipped_exercises: totalCount - completedCount,
         duration_minutes: durationMinutes,
         duration_seconds: elapsedSeconds,
+        completed_on: completedDate,
       },
     };
     const { error } = await supabase.from("workouts").update({
       completed: true,
+      date: completedDate,
       feedback_effort: selectedEffort,
       workout_json: updatedJson,
     }).eq("id", workout.id);
@@ -160,6 +166,9 @@ const Treinos = () => {
     setCompleted(true);
     setFeedbackStep(null);
     setShowFeedback(false);
+    setWeekDays((current) => current.map((day) => (
+      day.isToday ? { ...day, completed: true } : day
+    )));
     await computeStreakAndWeek();
     setShowSuccess(true);
   };
