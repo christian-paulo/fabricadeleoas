@@ -257,7 +257,7 @@ const Treinos = () => {
   // Timer effect
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-    if (workoutStarted && !completed) {
+    if (workoutStarted && !completed && !showFeedback && !showSuccess) {
       interval = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
     }
     return () => clearInterval(interval);
