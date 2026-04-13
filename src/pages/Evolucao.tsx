@@ -64,32 +64,9 @@ const Evolucao = () => {
     return () => window.removeEventListener("focus", handleFocus);
   }, [user]);
 
-  // --- Streak calculation ---
+  // --- Streak calculation (total completed workouts) ---
   const streak = useMemo(() => {
-    const completedDates = workouts
-      .filter(w => w.completed)
-      .map(w => w.date)
-      .sort((a, b) => b.localeCompare(a)); // descending
-
-    if (completedDates.length === 0) return 0;
-
-    let count = 0;
-    const today = format(new Date(), "yyyy-MM-dd");
-    let checkDate = today;
-
-    // If today isn't completed, start from yesterday
-    if (!completedDates.includes(today)) {
-      const yesterday = format(addDays(new Date(), -1), "yyyy-MM-dd");
-      if (!completedDates.includes(yesterday)) return 0;
-      checkDate = yesterday;
-    }
-
-    for (let i = 0; i < 365; i++) {
-      const d = format(addDays(new Date(checkDate), -i), "yyyy-MM-dd");
-      if (completedDates.includes(d)) count++;
-      else break;
-    }
-    return count;
+    return workouts.filter(w => w.completed).length;
   }, [workouts]);
 
   // --- Weekly calendar ---
@@ -178,7 +155,7 @@ const Evolucao = () => {
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-lg font-heading text-foreground">
-              Sequência de <span className="text-primary font-bold">{streak}</span> {streak === 1 ? "dia" : "dias"}
+              Sequência de <span className="text-primary font-bold">{streak}</span> {streak === 1 ? "treino" : "treinos"}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {streak === 0 ? "Comece seu primeiro treino!" : streak < 3 ? "Você começou muito bem!" : streak < 7 ? "Continue assim, leoa! 🦁" : "Você está imparável! 🔥"}
