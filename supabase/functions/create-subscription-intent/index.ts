@@ -120,21 +120,24 @@ serve(async (req) => {
       );
     }
 
-    const subscription = await stripe.subscriptions.create({
+    const subscriptionParams: any = {
       customer: customerId,
-      items: [{ price: "price_1TEx9fI4dFrhArZvg5kThQaN" }],
-      trial_period_days: 7,
+      items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
       payment_settings: {
         save_default_payment_method: "on_subscription",
       },
-      trial_settings: {
-        end_behavior: {
-          missing_payment_method: "cancel",
-        },
-      },
       expand: ["pending_setup_intent"],
-    });
+    };
+
+    if (trialDays > 0) {
+      subscriptionParams.trial_period_days = trialDays;
+      subscriptionParams.trial_settings = {
+        end_behavior: { missing_payment_method: "cancel" },
+      };
+    }
+
+    const subscription = await stripe.subscriptions.create(subscriptionParams);
 
     const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null;
     if (!setupIntent?.client_secret) {
