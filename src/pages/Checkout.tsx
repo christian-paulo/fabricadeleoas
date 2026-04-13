@@ -748,41 +748,39 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
       <WhatYouGet />
 
       {/* Plan selector */}
-      <div className="soft-card p-6 md:p-8 h-fit">
-        <div className="mb-6">
-          <h1 className="font-heading text-2xl text-primary mb-1 text-center">O seu plano está pronto! 🦁</h1>
-          <p className="text-sm text-muted-foreground text-center">Protocolo Personalizado</p>
+      <div className="soft-card p-4 md:p-6 h-fit">
+        <div className="mb-4">
+          <h1 className="font-heading text-xl text-primary mb-0.5 text-center">O seu plano está pronto! 🦁</h1>
+          <p className="text-xs text-muted-foreground text-center">Protocolo Personalizado</p>
         </div>
 
         {/* Plan cards */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-2.5 mb-4">
           {/* Annual Plan */}
           <button
             onClick={() => onPlanChange("annual")}
-            className={`w-full text-left rounded-2xl border-2 p-4 transition-all relative ${
+            className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all relative ${
               selectedPlan === "annual"
                 ? "border-primary bg-primary/5 shadow-md"
                 : "border-border bg-background"
             }`}
           >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-0.5 rounded-full">
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
               MAIS POPULAR!
             </span>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-heading text-foreground">Grátis teste de 3</p>
-                <p className="text-xs text-muted-foreground">R$ 149,90/ano</p>
+                <p className="font-heading text-sm text-foreground">Grátis teste de 3</p>
+                <p className="text-[11px] text-muted-foreground">R$ 149,90/ano</p>
               </div>
-              <div className="text-right">
-                <p className="font-heading text-foreground">R$ 12,49/mês</p>
-              </div>
+              <p className="font-heading text-sm text-foreground">R$ 12,49/mês</p>
             </div>
           </button>
 
           {/* Monthly Plan */}
           <button
             onClick={() => onPlanChange("monthly")}
-            className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
+            className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all ${
               selectedPlan === "monthly"
                 ? "border-primary bg-primary/5 shadow-md"
                 : "border-border bg-background"
@@ -790,19 +788,17 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-heading text-foreground">Plano Mensal</p>
-                <p className="text-xs text-muted-foreground">R$ 49,90/mês</p>
+                <p className="font-heading text-sm text-foreground">Plano Mensal</p>
+                <p className="text-[11px] text-muted-foreground">R$ 49,90/mês</p>
               </div>
-              <div className="text-right">
-                <p className="font-heading text-foreground">R$ 12,47/semana</p>
-              </div>
+              <p className="font-heading text-sm text-foreground">R$ 12,47/semana</p>
             </div>
           </button>
         </div>
 
         {/* Trial info for annual */}
         {selectedPlan === "annual" && (
-          <p className="text-xs text-muted-foreground text-center mb-4 flex items-center justify-center gap-1">
+          <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
             <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 149,90/ano
           </p>
         )}
