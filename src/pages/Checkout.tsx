@@ -236,7 +236,7 @@ const PLANS = {
   annual: {
     id: "annual",
     priceId: "price_1TLku9I4dFrhArZvUiP58bOG",
-    label: "Grátis teste de 3",
+    label: "Grátis teste de 3 dias",
     badge: "MAIS POPULAR!",
     priceMain: "R$ 149,90/ano",
     priceSecondary: "R$ 12,49/mês",
@@ -770,7 +770,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
             </span>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-heading text-sm text-foreground">Grátis teste de 3</p>
+                <p className="font-heading text-sm text-foreground">Grátis teste de 3 dias</p>
                 <p className="text-[11px] text-muted-foreground">R$ 149,90/ano</p>
               </div>
               <p className="font-heading text-sm text-foreground">R$ 12,49/mês</p>
