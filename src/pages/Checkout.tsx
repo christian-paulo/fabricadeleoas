@@ -232,6 +232,39 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
   );
 };
 
+const PLANS = {
+  annual: {
+    id: "annual",
+    priceId: "price_1TLku9I4dFrhArZvUiP58bOG",
+    label: "Grátis teste de 3",
+    badge: "MAIS POPULAR!",
+    priceMain: "R$ 149,90/ano",
+    priceSecondary: "R$ 12,49/mês",
+    priceWeek: "R$ 2,88/semana",
+    trialDays: 3,
+    orderName: "Plano Anual",
+    orderPrice: "R$ 149,90",
+    orderInterval: "Assinatura recorrente anual",
+    trialLabel: "3 dias grátis",
+    trialDiscount: "- R$ 149,90",
+  },
+  monthly: {
+    id: "monthly",
+    priceId: "price_1TEx9fI4dFrhArZvg5kThQaN",
+    label: "Plano Mensal",
+    badge: null,
+    priceMain: "R$ 49,90/mês",
+    priceSecondary: null,
+    priceWeek: "R$ 12,47/semana",
+    trialDays: 0,
+    orderName: "Plano Mensal",
+    orderPrice: "R$ 49,90",
+    orderInterval: "Assinatura recorrente",
+    trialLabel: null,
+    trialDiscount: null,
+  },
+};
+
 const Checkout = () => {
   const { user, loading: authLoading, checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
@@ -242,8 +275,10 @@ const Checkout = () => {
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
   const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
+  const [selectedPlan, setSelectedPlan] = useState<"annual" | "monthly">("annual");
 
   const isAuthenticated = !!user;
+  const plan = PLANS[selectedPlan];
 
   // If already authenticated, go straight to payment
   useEffect(() => {
@@ -253,17 +288,23 @@ const Checkout = () => {
     }
   }, [isAuthenticated]);
 
+  // Reset client secret when plan changes
+  const handlePlanChange = (newPlan: "annual" | "monthly") => {
+    if (newPlan === selectedPlan) return;
+    setSelectedPlan(newPlan);
+    setClientSecret(null);
+  };
+
   // Load checkout when we have an email and are on payment step
   useEffect(() => {
     if (!emailConfirmed || !checkoutEmail || clientSecret) return;
     setLoading(true);
     const createIntent = async () => {
       try {
-        const invokeOptions: any = {};
+        const body: any = { price_id: plan.priceId, trial_days: plan.trialDays };
         
         if (isAuthenticated) {
-          // Authenticated user - will use auth header automatically
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent");
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
           if (fnError) throw fnError;
           if (data.already_subscribed) {
             await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
@@ -274,10 +315,8 @@ const Checkout = () => {
           if (data.client_secret) setClientSecret(data.client_secret);
           else throw new Error("Não foi possível iniciar o checkout");
         } else {
-          // Guest user - pass email in body
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", {
-            body: { email: checkoutEmail },
-          });
+          body.email = checkoutEmail;
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
           if (fnError) throw fnError;
           if (data.already_subscribed) {
             toast.info("Este email já possui uma assinatura ativa! Faça login.");
@@ -295,7 +334,7 @@ const Checkout = () => {
       }
     };
     createIntent();
-  }, [emailConfirmed, checkoutEmail]);
+  }, [emailConfirmed, checkoutEmail, selectedPlan]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
@@ -697,8 +736,9 @@ const SuccessStoriesAutoCarousel = () => {
 };
 
 // ─── Order Summary Component ────────────────────────────────────
-const OrderSummary = () => {
+const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" | "monthly"; onPlanChange: (p: "annual" | "monthly") => void }) => {
   const { data: onboardingData } = useOnboarding();
+  const plan = PLANS[selectedPlan];
 
   return (
     <div className="flex flex-col gap-6">
@@ -707,31 +747,91 @@ const OrderSummary = () => {
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
 
-      {/* Order summary */}
+      {/* Plan selector */}
       <div className="soft-card p-6 md:p-8 h-fit">
         <div className="mb-6">
           <h1 className="font-heading text-2xl text-primary mb-1 text-center">O seu plano está pronto! 🦁</h1>
           <p className="text-sm text-muted-foreground text-center">Protocolo Personalizado</p>
         </div>
 
+        {/* Plan cards */}
+        <div className="space-y-3 mb-6">
+          {/* Annual Plan */}
+          <button
+            onClick={() => onPlanChange("annual")}
+            className={`w-full text-left rounded-2xl border-2 p-4 transition-all relative ${
+              selectedPlan === "annual"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "border-border bg-background"
+            }`}
+          >
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-0.5 rounded-full">
+              MAIS POPULAR!
+            </span>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-heading text-foreground">Grátis teste de 3</p>
+                <p className="text-xs text-muted-foreground">R$ 149,90/ano</p>
+              </div>
+              <div className="text-right">
+                <p className="font-heading text-foreground">R$ 12,49/mês</p>
+              </div>
+            </div>
+          </button>
+
+          {/* Monthly Plan */}
+          <button
+            onClick={() => onPlanChange("monthly")}
+            className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
+              selectedPlan === "monthly"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "border-border bg-background"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-heading text-foreground">Plano Mensal</p>
+                <p className="text-xs text-muted-foreground">R$ 49,90/mês</p>
+              </div>
+              <div className="text-right">
+                <p className="font-heading text-foreground">R$ 12,47/semana</p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Trial info for annual */}
+        {selectedPlan === "annual" && (
+          <p className="text-xs text-muted-foreground text-center mb-4 flex items-center justify-center gap-1">
+            <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 149,90/ano
+          </p>
+        )}
+
+        {/* Order summary */}
         <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
           <h2 className="font-heading text-lg text-foreground mb-4">Resumo do Pedido</h2>
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="font-medium text-foreground">Plano Mensal</p>
-              <p className="text-xs text-muted-foreground italic">Assinatura recorrente</p>
+              <p className="font-medium text-foreground">{plan.orderName}</p>
+              <p className="text-xs text-muted-foreground italic">{plan.orderInterval}</p>
             </div>
-            <p className="font-heading text-lg text-foreground">R$ 49,90</p>
+            <p className="font-heading text-lg text-foreground">{plan.orderPrice}</p>
           </div>
-          <div className="border-t border-border my-3" />
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-primary font-medium">7 dias grátis</span>
-            <span className="text-sm text-primary font-medium">- R$ 49,90</span>
-          </div>
+          {plan.trialLabel && (
+            <>
+              <div className="border-t border-border my-3" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-primary font-medium">{plan.trialLabel}</span>
+                <span className="text-sm text-primary font-medium">{plan.trialDiscount}</span>
+              </div>
+            </>
+          )}
           <div className="border-t border-border my-3" />
           <div className="flex items-center justify-between">
             <span className="font-heading text-foreground">Total hoje</span>
-            <span className="font-heading text-2xl text-primary">R$ 0,00</span>
+            <span className="font-heading text-2xl text-primary">
+              {plan.trialDays > 0 ? "R$ 0,00" : plan.orderPrice}
+            </span>
           </div>
         </div>
 
@@ -744,9 +844,23 @@ const OrderSummary = () => {
           ))}
         </div>
 
-        <p className="text-xs text-muted-foreground mt-6 leading-relaxed">
-          Você não será cobrada durante o período de teste. Após 7 dias, a assinatura de R$ 49,90/mês
-          será ativada automaticamente. Cancele a qualquer momento com 1 clique.
+        <Button
+          className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl uppercase"
+          onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
+        >
+          {plan.trialDays > 0 ? `TESTE GRATUITO DE ${plan.trialDays} DIAS` : "ASSINAR AGORA"}
+        </Button>
+        {plan.trialDays > 0 && (
+          <p className="text-xs text-center text-primary mt-2 flex items-center justify-center gap-1">
+            <Check className="w-3 h-3" /> não pague nada agora
+          </p>
+        )}
+
+        <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+          {plan.trialDays > 0
+            ? `Você não será cobrada durante o período de teste. Após ${plan.trialDays} dias, a assinatura de ${plan.orderPrice} será ativada automaticamente. Cancele a qualquer momento com 1 clique.`
+            : `A assinatura de ${plan.orderPrice} será cobrada imediatamente. Cancele a qualquer momento com 1 clique.`
+          }
         </p>
       </div>
     </div>
