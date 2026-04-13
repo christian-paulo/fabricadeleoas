@@ -82,7 +82,7 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
         ) : (
           <span className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
-            Iniciar 7 Dias Grátis
+            Confirmar Assinatura
           </span>
         )}
       </Button>
