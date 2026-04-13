@@ -804,55 +804,55 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
         )}
 
         {/* Order summary */}
-        <div className="border border-border rounded-2xl p-5 mb-6 bg-background">
-          <h2 className="font-heading text-lg text-foreground mb-4">Resumo do Pedido</h2>
-          <div className="flex items-center justify-between mb-2">
+        <div className="border border-border rounded-xl p-4 mb-4 bg-background">
+          <h2 className="font-heading text-base text-foreground mb-3">Resumo do Pedido</h2>
+          <div className="flex items-center justify-between mb-1.5">
             <div>
-              <p className="font-medium text-foreground">{plan.orderName}</p>
-              <p className="text-xs text-muted-foreground italic">{plan.orderInterval}</p>
+              <p className="font-medium text-sm text-foreground">{plan.orderName}</p>
+              <p className="text-[11px] text-muted-foreground italic">{plan.orderInterval}</p>
             </div>
-            <p className="font-heading text-lg text-foreground">{plan.orderPrice}</p>
+            <p className="font-heading text-base text-foreground">{plan.orderPrice}</p>
           </div>
           {plan.trialLabel && (
             <>
-              <div className="border-t border-border my-3" />
+              <div className="border-t border-border my-2" />
               <div className="flex items-center justify-between">
-                <span className="text-sm text-primary font-medium">{plan.trialLabel}</span>
-                <span className="text-sm text-primary font-medium">{plan.trialDiscount}</span>
+                <span className="text-xs text-primary font-medium">{plan.trialLabel}</span>
+                <span className="text-xs text-primary font-medium">{plan.trialDiscount}</span>
               </div>
             </>
           )}
-          <div className="border-t border-border my-3" />
+          <div className="border-t border-border my-2" />
           <div className="flex items-center justify-between">
-            <span className="font-heading text-foreground">Total hoje</span>
-            <span className="font-heading text-2xl text-primary">
+            <span className="font-heading text-sm text-foreground">Total hoje</span>
+            <span className="font-heading text-xl text-primary">
               {plan.trialDays > 0 ? "R$ 0,00" : plan.orderPrice}
             </span>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {benefits.map((benefit, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">{benefit}</span>
+            <div key={i} className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-xs text-muted-foreground">{benefit}</span>
             </div>
           ))}
         </div>
 
         <Button
-          className="w-full mt-4 bg-primary text-primary-foreground font-bold text-base py-6 rounded-xl uppercase"
+          className="w-full mt-3 bg-primary text-primary-foreground font-bold text-sm py-5 rounded-xl uppercase"
           onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
         >
           {plan.trialDays > 0 ? `TESTE GRATUITO DE ${plan.trialDays} DIAS` : "ASSINAR AGORA"}
         </Button>
         {plan.trialDays > 0 && (
-          <p className="text-xs text-center text-primary mt-2 flex items-center justify-center gap-1">
+          <p className="text-[11px] text-center text-primary mt-1.5 flex items-center justify-center gap-1">
             <Check className="w-3 h-3" /> não pague nada agora
           </p>
         )}
 
-        <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+        <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
           {plan.trialDays > 0
             ? `Você não será cobrada durante o período de teste. Após ${plan.trialDays} dias, a assinatura de ${plan.orderPrice} será ativada automaticamente. Cancele a qualquer momento com 1 clique.`
             : `A assinatura de ${plan.orderPrice} será cobrada imediatamente. Cancele a qualquer momento com 1 clique.`
