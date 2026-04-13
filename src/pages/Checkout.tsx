@@ -773,20 +773,18 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral
                 : "border-border bg-background"
             }`}
           >
-            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 flex gap-1.5">
-              <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
-                MAIS POPULAR!
-              </span>
-              <span className="bg-green-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
-                60% OFF
-              </span>
-            </div>
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
+              MAIS POPULAR!
+            </span>
             <div className="flex items-center justify-between mt-1">
               <div>
-                <p className="font-heading text-sm text-foreground">6 meses</p>
-                <p className="text-[11px] text-muted-foreground">3 dias grátis • R$ 119,90/semestre</p>
+                <p className="font-heading text-sm text-foreground">Grátis teste de 3 dias</p>
+                <p className="text-[11px] text-muted-foreground">R$ 119,90/semestre</p>
               </div>
-              <p className="font-heading text-sm text-foreground">R$ 19,98/mês</p>
+              <div className="text-right">
+                <p className="font-heading text-sm text-foreground">R$ 19,98/mês</p>
+                <p className="text-[10px] text-primary/70 font-bold">60% OFF</p>
+              </div>
             </div>
           </button>
 
