@@ -751,6 +751,12 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral
 
       {/* Plan selector */}
       <div className="soft-card p-4 md:p-6 h-fit">
+        {/* Conversion badges */}
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">🔥 Preço de Lançamento</span>
+          <span className="bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">🍕 Mais barato que uma pizza</span>
+        </div>
+
         <div className="mb-4">
           <h1 className="font-heading text-xl text-primary mb-0.5 text-center">O seu plano está pronto! 🦁</h1>
           <p className="text-xs text-muted-foreground text-center">Protocolo Personalizado</p>
@@ -758,7 +764,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral
 
         {/* Plan cards */}
         <div className="space-y-2.5 mb-4">
-          {/* Annual Plan */}
+          {/* Semestral Plan */}
           <button
             onClick={() => onPlanChange("semestral")}
             className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all relative ${
@@ -767,15 +773,20 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral
                 : "border-border bg-background"
             }`}
           >
-            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
-              MAIS POPULAR!
-            </span>
-            <div className="flex items-center justify-between">
+            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
+                MAIS POPULAR!
+              </span>
+              <span className="bg-green-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
+                60% OFF
+              </span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
               <div>
-                <p className="font-heading text-sm text-foreground">Grátis teste de 3 dias</p>
-                <p className="text-[11px] text-muted-foreground">R$ 149,90/ano</p>
+                <p className="font-heading text-sm text-foreground">6 meses</p>
+                <p className="text-[11px] text-muted-foreground">3 dias grátis • R$ 119,90/semestre</p>
               </div>
-              <p className="font-heading text-sm text-foreground">R$ 12,49/mês</p>
+              <p className="font-heading text-sm text-foreground">R$ 19,98/mês</p>
             </div>
           </button>
 
@@ -790,18 +801,18 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-heading text-sm text-foreground">Plano Mensal</p>
+                <p className="font-heading text-sm text-foreground">1 mês</p>
                 <p className="text-[11px] text-muted-foreground">R$ 49,90/mês</p>
               </div>
-              <p className="font-heading text-sm text-foreground">R$ 12,47/semana</p>
+              <p className="font-heading text-sm text-foreground">R$ 49,90</p>
             </div>
           </button>
         </div>
 
-        {/* Trial info for annual */}
+        {/* Trial info for semestral */}
         {selectedPlan === "semestral" && (
           <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
-            <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 149,90/ano
+            <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 119,90/semestre
           </p>
         )}
 
