@@ -397,7 +397,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 font-heading">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
-          <OrderSummary />
+          <OrderSummary selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
           <RegistrationForm checkoutEmail={checkoutEmail} />
         </div>
       </div>
@@ -427,7 +427,7 @@ const Checkout = () => {
     <div className="min-h-screen bg-background px-4 py-8 font-heading">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <OrderSummary />
+          <OrderSummary selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
           {/* Payment Form */}
           <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
             {/* Email input for guest users */}
