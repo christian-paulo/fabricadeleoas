@@ -277,7 +277,7 @@ const Checkout = () => {
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
   const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
-  const [selectedPlan, setSelectedPlan] = useState<"annual" | "monthly">("annual");
+  const [selectedPlan, setSelectedPlan] = useState<"semestral" | "monthly">("semestral");
 
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
@@ -291,7 +291,7 @@ const Checkout = () => {
   }, [isAuthenticated]);
 
   // Reset client secret when plan changes
-  const handlePlanChange = (newPlan: "annual" | "monthly") => {
+  const handlePlanChange = (newPlan: "semestral" | "monthly") => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
     setClientSecret(null);
@@ -738,7 +738,7 @@ const SuccessStoriesAutoCarousel = () => {
 };
 
 // ─── Order Summary Component ────────────────────────────────────
-const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" | "monthly"; onPlanChange: (p: "annual" | "monthly") => void }) => {
+const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral" | "monthly"; onPlanChange: (p: "semestral" | "monthly") => void }) => {
   const { data: onboardingData } = useOnboarding();
   const plan = PLANS[selectedPlan];
 
@@ -760,9 +760,9 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
         <div className="space-y-2.5 mb-4">
           {/* Annual Plan */}
           <button
-            onClick={() => onPlanChange("annual")}
+            onClick={() => onPlanChange("semestral")}
             className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all relative ${
-              selectedPlan === "annual"
+              selectedPlan === "semestral"
                 ? "border-primary bg-primary/5 shadow-md"
                 : "border-border bg-background"
             }`}
@@ -799,7 +799,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "annual" |
         </div>
 
         {/* Trial info for annual */}
-        {selectedPlan === "annual" && (
+        {selectedPlan === "semestral" && (
           <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
             <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 149,90/ano
           </p>
