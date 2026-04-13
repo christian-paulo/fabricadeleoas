@@ -115,6 +115,7 @@ const Treinos = () => {
     // Compute week days
     const completedDates = new Set(allWorkouts?.map(w => w.date) || []);
     const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const dayOfWeek = today.getDay(); // 0=Sun
     const monday = new Date(today);
     monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
@@ -123,11 +124,11 @@ const Treinos = () => {
     const days = labels.map((label, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const dateStr = d.toISOString().split("T")[0];
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       return {
         label,
         completed: completedDates.has(dateStr),
-        isToday: dateStr === today.toISOString().split("T")[0],
+        isToday: dateStr === todayStr,
       };
     });
     setWeekDays(days);
