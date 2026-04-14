@@ -44,27 +44,52 @@ const Treinos = () => {
   const [streakCount, setStreakCount] = useState(0);
   const [weekDays, setWeekDays] = useState<{ label: string; completed: boolean; isToday: boolean }[]>([]);
 
+  // Load from cache instantly, then refresh in background
   useEffect(() => {
     if (!user) return;
-    fetchCurrentWorkout();
+    const cacheKey = `workout_cache_${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const data = JSON.parse(cached);
+        if (data?.workout) {
+          setWorkout(data.workout);
+          setCompleted(data.workout.completed || false);
+          setFeedback(data.workout.feedback_effort as FeedbackType);
+          setPhase(data.phase || "initial");
+          setWorkoutNumber(data.workoutNumber || 1);
+          initializeTracking(data.workout.workout_json);
+          setLoading(false);
+        }
+      } catch {}
+    }
+    fetchCurrentWorkout(cacheKey);
   }, [user]);
 
-  const fetchCurrentWorkout = async () => {
-    setLoading(true);
+  const fetchCurrentWorkout = async (cacheKey?: string) => {
+    if (!cacheKey && user) cacheKey = `workout_cache_${user.id}`;
+    if (!loading) {
+      // Background refresh — don't show loading spinner
+    } else {
+      setLoading(true);
+    }
     try {
       const { data: rawData, error } = await supabase.functions.invoke("generate-workout", { body: {} });
-      if (error) { toast.error("Erro ao carregar protocolo"); return; }
+      if (error) { if (loading) toast.error("Erro ao carregar protocolo"); return; }
       const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
       if (data?.workout) {
+        // Save to cache
+        if (cacheKey) {
+          try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch {}
+        }
         setWorkout(data.workout);
         setCompleted(data.workout.completed || false);
         setFeedback(data.workout.feedback_effort as FeedbackType);
         setPhase(data.phase || "initial");
         setWorkoutNumber(data.workoutNumber || 1);
-        // Initialize tracking from workout exercises
         initializeTracking(data.workout.workout_json);
-      } else { toast.error("Protocolo não encontrado"); }
-    } catch { toast.error("Erro ao carregar protocolo"); }
+      } else if (loading) { toast.error("Protocolo não encontrado"); }
+    } catch { if (loading) toast.error("Erro ao carregar protocolo"); }
     setLoading(false);
   };
 
