@@ -37,7 +37,7 @@ const Treinos = () => {
   const [workoutNumber, setWorkoutNumber] = useState<number>(1);
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
   const [tracking, setTracking] = useState<ExerciseTracking>({});
-  const [editingCell, setEditingCell] = useState<{ exIdx: number; seriesIdx: number } | null>(null);
+  
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -243,11 +243,18 @@ const Treinos = () => {
 
   // Toggle series completion
   const toggleSeriesComplete = (exIdx: number, seriesIdx: number) => {
+    const series = tracking[exIdx]?.[seriesIdx];
+    if (!series) return;
+    // Only allow completing if reps have been filled
+    if (!series.completed && (series.reps === null || series.reps === undefined)) {
+      toast.error("Preencha as repetições antes de marcar");
+      return;
+    }
     setTracking(prev => {
       const updated = { ...prev };
-      const series = [...(updated[exIdx] || [])];
-      series[seriesIdx] = { ...series[seriesIdx], completed: !series[seriesIdx].completed };
-      updated[exIdx] = series;
+      const s = [...(updated[exIdx] || [])];
+      s[seriesIdx] = { ...s[seriesIdx], completed: !s[seriesIdx].completed };
+      updated[exIdx] = s;
       return updated;
     });
   };
@@ -423,23 +430,21 @@ const Treinos = () => {
                               <span className={`text-lg font-bold ${series.completed ? "text-primary" : "text-foreground"}`}>
                                 {sIdx + 1}
                               </span>
-                              <button
-                                onClick={() => setEditingCell(
-                                  editingCell?.exIdx === idx && editingCell?.seriesIdx === sIdx
-                                    ? null
-                                    : { exIdx: idx, seriesIdx: sIdx }
-                                )}
-                                className={`rounded-xl py-3 px-4 text-center text-base font-medium ${
-                                  editingCell?.exIdx === idx && editingCell?.seriesIdx === sIdx
-                                    ? "bg-primary/20 ring-2 ring-primary text-foreground"
-                                    : "bg-muted text-foreground"
-                                }`}
-                              >
-                                {series.reps !== null ? series.reps : ex.reps || "—"}
-                              </button>
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder={ex.reps || "—"}
+                                value={series.reps !== null && series.reps !== undefined ? series.reps : ""}
+                                onChange={(e) => {
+                                  const val = e.target.value === "" ? null : parseInt(e.target.value);
+                                  updateReps(idx, sIdx, val);
+                                }}
+                                className="rounded-xl py-3 px-4 text-center text-base font-medium bg-muted text-foreground w-full outline-none focus:ring-2 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
                               <button
                                 onClick={() => toggleSeriesComplete(idx, sIdx)}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
                                   series.completed
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-muted text-muted-foreground"
@@ -450,23 +455,6 @@ const Treinos = () => {
                             </div>
                           </div>
                         ))}
-
-                        {/* Inline NumberPad */}
-                        {editingCell?.exIdx === idx && (
-                          <div className="mt-2 mb-2">
-                            <NumberPad
-                              initialValue={tracking[editingCell.exIdx]?.[editingCell.seriesIdx]?.reps}
-                              onConfirm={(val) => {
-                                updateReps(editingCell.exIdx, editingCell.seriesIdx, val);
-                                if (val !== null) {
-                                  toggleSeriesComplete(editingCell.exIdx, editingCell.seriesIdx);
-                                }
-                                setEditingCell(null);
-                              }}
-                              onClose={() => setEditingCell(null)}
-                            />
-                          </div>
-                        )}
 
                         {/* Rest info */}
                         <p className="text-xs text-muted-foreground text-center mt-2">
@@ -728,60 +716,5 @@ const Treinos = () => {
   );
 };
 
-// Number pad component for rep input
-const NumberPad = ({ initialValue, onConfirm, onClose }: { initialValue: number | null; onConfirm: (val: number | null) => void; onClose: () => void }) => {
-  const [value, setValue] = useState(initialValue?.toString() || "");
-
-  const handleKey = (key: string) => {
-    if (key === "backspace") {
-      setValue(prev => prev.slice(0, -1));
-    } else if (key === "00") {
-      setValue(prev => prev + "00");
-    } else {
-      setValue(prev => prev + key);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-3">
-      {/* Display */}
-      <div className="text-center py-3">
-        <span className="text-3xl font-bold text-foreground">{value || "0"}</span>
-        <span className="text-lg text-muted-foreground ml-1">reps</span>
-      </div>
-
-      {/* Number grid */}
-      <div className="grid grid-cols-4 gap-2">
-        {["1", "2", "3", "backspace", "4", "5", "6", "", "7", "8", "9", "confirm", "00", "0"].map((key, i) => {
-          if (key === "") return <div key={i} />;
-          if (key === "backspace") {
-            return (
-              <button key={i} onClick={() => handleKey("backspace")} className="bg-muted rounded-xl py-4 text-lg font-bold text-foreground flex items-center justify-center">
-                ⌫
-              </button>
-            );
-          }
-          if (key === "confirm") {
-            return (
-              <button
-                key={i}
-                onClick={() => onConfirm(value ? parseInt(value) : null)}
-                className="bg-primary text-primary-foreground rounded-xl py-4 text-sm font-bold row-span-2 flex items-center justify-center"
-                style={{ gridRow: "span 2" }}
-              >
-                OK
-              </button>
-            );
-          }
-          return (
-            <button key={i} onClick={() => handleKey(key)} className="bg-muted rounded-xl py-4 text-lg font-bold text-foreground">
-              {key}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
 export default Treinos;
