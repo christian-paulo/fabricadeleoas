@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
+import logoLeoa from "@/assets/logo-leoa.png";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -93,10 +94,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-heading text-primary mb-2">Fábrica de Leoas</h1>
-        <p className="text-sm text-muted-foreground">Consultoria Fitness Feminina Premium</p>
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+      <div className="mb-8 text-center flex flex-col items-center">
+        <img src={logoLeoa} alt="Fábrica de Leoas" className="h-20 w-auto mb-3" />
+        <p className="text-sm text-muted-foreground tracking-wide">Consultoria Fitness Feminina Premium</p>
       </div>
 
       <div className="soft-card p-6 w-full">
