@@ -37,7 +37,7 @@ const Treinos = () => {
   const [workoutNumber, setWorkoutNumber] = useState<number>(1);
   const [expandedExercise, setExpandedExercise] = useState<number | null>(null);
   const [tracking, setTracking] = useState<ExerciseTracking>({});
-  const [editingCell, setEditingCell] = useState<{ exIdx: number; seriesIdx: number } | null>(null);
+  
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
