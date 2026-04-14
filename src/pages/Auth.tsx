@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
+import logoLeoa from "@/assets/logo-leoa.png";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
