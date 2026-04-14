@@ -96,8 +96,9 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
       <div className="mb-8 text-center flex flex-col items-center">
-        <img src={logoLeoa} alt="Fábrica de Leoas" className="h-20 w-auto mb-3" />
-        <p className="text-sm text-muted-foreground tracking-wide">Consultoria Fitness Feminina Premium</p>
+        <img src={logoLeoa} alt="Fábrica de Leoas" className="h-20 w-auto mb-2 [filter:brightness(0)_saturate(100%)_invert(20%)_sepia(90%)_saturate(4000%)_hue-rotate(330deg)_brightness(95%)]" />
+        <h1 className="text-2xl font-heading text-primary font-bold tracking-tight">Fábrica de Leoas</h1>
+        <p className="text-sm text-muted-foreground tracking-wide mt-1">Consultoria Fitness Feminina Premium</p>
       </div>
 
       <div className="soft-card p-6 w-full">
