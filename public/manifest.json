@@ -2,7 +2,7 @@
   "name": "Fábrica de Leoas",
   "short_name": "Leoas",
   "description": "Pare de Treinar sem Resultado! Seu treino personalizado na palma da mão.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#1A1A1A",
   "theme_color": "#D4AF37",
