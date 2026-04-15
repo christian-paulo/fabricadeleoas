@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import AppLayout from "@/components/AppLayout";
-import { Play, Download, Loader2, Lock } from "lucide-react";
+import { Play, Download, Loader2, Lock, Flame, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
