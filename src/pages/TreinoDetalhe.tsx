@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import BadgeCelebrationModal from "@/components/BadgeCelebrationModal";
 import { Play, CheckCircle2, Loader2, ArrowLeft, Dumbbell, Target, Send, ChevronUp, ChevronDown, Timer, Flame, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -43,6 +44,7 @@ const Treinos = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
   const [weekDays, setWeekDays] = useState<{ label: string; completed: boolean; isToday: boolean }[]>([]);
+  const [celebrationBadge, setCelebrationBadge] = useState<string | null>(null);
 
   // Load from cache instantly, then refresh in background
   useEffect(() => {
@@ -200,6 +202,42 @@ const Treinos = () => {
     // Trigger post-workout push notification
     import('@/lib/pushTriggers').then(({ sendPostWorkoutPush }) => {
       sendPostWorkoutPush(user!.id);
+    });
+
+    // Check and award badges
+    import('@/lib/badges').then(async ({ checkAndAwardBadges }) => {
+      const { data: profileData } = await supabase.from('profiles')
+        .select('workout_days, trial_start_date')
+        .eq('id', user!.id).single();
+      
+      // Count total completed workouts (including this one)
+      const { count: totalCount } = await supabase.from('workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('profile_id', user!.id).eq('completed', true);
+      
+      // Count weekly completed workouts
+      const now = new Date();
+      const day = now.getDay();
+      const diffToMonday = day === 0 ? 6 : day - 1;
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - diffToMonday);
+      const { count: weekCount } = await supabase.from('workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('profile_id', user!.id).eq('completed', true)
+        .gte('date', weekStart.toISOString().split('T')[0]);
+
+      const newBadges = await checkAndAwardBadges(
+        user!.id,
+        totalCount || 0,
+        weekCount || 0,
+        profileData?.workout_days || 4,
+        profileData?.trial_start_date || null,
+      );
+
+      if (newBadges.length > 0) {
+        // Show first new badge celebration after success screen closes
+        setTimeout(() => setCelebrationBadge(newBadges[0]), 2000);
+      }
     });
   };
 
