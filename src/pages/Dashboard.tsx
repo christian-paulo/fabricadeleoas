@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [weekFrequency, setWeekFrequency] = useState(0);
   const [totalDays, setTotalDays] = useState(0);
   const [loadingWorkout, setLoadingWorkout] = useState(false);
+  const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
 
   useEffect(() => {
     if (!user) return;
