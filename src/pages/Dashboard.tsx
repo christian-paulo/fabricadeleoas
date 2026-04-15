@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import AppLayout from "@/components/AppLayout";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Play, Download, Loader2, Lock, Flame, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +22,7 @@ import TreinosClassicos from "@/components/TreinosClassicos";
 
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
+  usePushNotifications();
   const navigate = useNavigate();
   const [weekFrequency, setWeekFrequency] = useState(0);
   const [totalDays, setTotalDays] = useState(0);
