@@ -40,14 +40,12 @@ const Evolucao = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [measRes, workRes, badgeRes] = await Promise.all([
+    const [measRes, workRes] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", user.id).order("date", { ascending: true }),
       supabase.from("workouts").select("*").eq("profile_id", user.id).order("date", { ascending: false }),
-      supabase.from("user_badges").select("badge_key, earned_at").eq("profile_id", user.id),
     ]);
     if (measRes.data) setMeasurements(measRes.data);
     if (workRes.data) setWorkouts(workRes.data as WorkoutRecord[]);
-    if (badgeRes.data) setEarnedBadges(badgeRes.data as EarnedBadge[]);
   };
 
   useEffect(() => { fetchData(); }, [user]);
@@ -422,7 +420,6 @@ const Evolucao = () => {
         </div>
       )}
 
-      </div>
 
       {/* Recent workouts */}
       {workouts.filter(w => w.completed).length > 0 && (
