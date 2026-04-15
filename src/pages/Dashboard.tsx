@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import AppLayout from "@/components/AppLayout";
-import { Play, Download, Loader2, Lock } from "lucide-react";
+import { Play, Download, Loader2, Lock, Flame, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -30,8 +30,11 @@ const Dashboard = () => {
     if (!user) return;
     const fetchStats = async () => {
       const now = new Date();
+      // Monday-based week (resets every Monday)
+      const day = now.getDay(); // 0=Sun,1=Mon,...
+      const diffToMonday = day === 0 ? 6 : day - 1;
       const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setDate(now.getDate() - diffToMonday);
       const { data: weekWorkouts } = await supabase.from("workouts")
         .select("id").eq("profile_id", user.id).eq("completed", true)
         .gte("date", weekStart.toISOString().split("T")[0]);
@@ -107,7 +110,33 @@ const Dashboard = () => {
       <h1 className="text-3xl text-foreground mb-1">
         Olá, <span className="text-primary">{name}</span>! 👋
       </h1>
-      <p className="text-base text-muted-foreground mb-6">Vamos treinar hoje?</p>
+      <p className="text-base text-muted-foreground mb-4">Vamos treinar hoje?</p>
+
+      {/* Weekly Consistency Bar */}
+      <div className="soft-card p-5 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-heading text-foreground uppercase">Meta semanal</span>
+          <span className="text-sm text-muted-foreground">{weekFrequency} de {weekTarget} treinos</span>
+        </div>
+        <div className="relative h-3 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full rounded-full pink-gradient transition-all duration-500 ease-out"
+            style={{ width: `${Math.min((weekFrequency / weekTarget) * 100, 100)}%` }}
+          />
+        </div>
+        {weekFrequency >= weekTarget ? (
+          <div className="flex items-center gap-2 mt-3">
+            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <span className="text-sm font-semibold text-primary">🔥 Semana completa! Você cumpriu sua meta.</span>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground mt-2">
+            {weekTarget - weekFrequency === 1
+              ? "Falta 1 treino para fechar sua semana!"
+              : `Faltam ${weekTarget - weekFrequency} treinos para fechar sua semana.`}
+          </p>
+        )}
+      </div>
 
       {/* Challenge Cards Carousel */}
       <div className="mb-6">
