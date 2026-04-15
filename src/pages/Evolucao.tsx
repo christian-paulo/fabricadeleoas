@@ -7,9 +7,10 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer } from "lucide-react";
+import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer, Lock } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { BADGE_DEFINITIONS, type EarnedBadge } from "@/lib/badges";
 
 interface WorkoutRecord {
   id: string;

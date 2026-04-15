@@ -779,6 +779,12 @@ const Treinos = () => {
         </div>
       )}
 
+      <BadgeCelebrationModal
+        badgeKey={celebrationBadge}
+        open={!!celebrationBadge}
+        onClose={() => setCelebrationBadge(null)}
+      />
+
       <BottomNav />
     </div>
   );
