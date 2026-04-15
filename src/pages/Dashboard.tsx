@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { BADGE_DEFINITIONS, type EarnedBadge } from "@/lib/badges";
 import cardProtocolo from "@/assets/card-protocolo.jpg";
 import cardCoxa from "@/assets/card-coxa.jpg";
@@ -35,8 +34,7 @@ const Dashboard = () => {
     if (!user) return;
     const fetchStats = async () => {
       const now = new Date();
-      // Monday-based week (resets every Monday)
-      const day = now.getDay(); // 0=Sun,1=Mon,...
+      const day = now.getDay();
       const diffToMonday = day === 0 ? 6 : day - 1;
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - diffToMonday);
@@ -78,6 +76,10 @@ const Dashboard = () => {
   const weekTarget = profile?.workout_days || 4;
   const name = profile?.full_name || "Leoa";
 
+  const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
+  const earnedCount = earnedBadges.length;
+  const totalBadges = BADGE_DEFINITIONS.length;
+
   return (
     <AppLayout>
       {/* Expired subscription modal — cannot be closed */}
@@ -118,118 +120,13 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
+      {/* 1. Greeting */}
       <h1 className="text-3xl text-foreground mb-1">
         Olá, <span className="text-primary">{name}</span>! 👋
       </h1>
       <p className="text-base text-muted-foreground mb-4">Vamos treinar hoje?</p>
 
-      {/* Weekly Consistency Bar */}
-      <div className="soft-card p-5 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-heading text-foreground uppercase">Meta semanal</span>
-          <span className="text-sm text-muted-foreground">{weekFrequency} de {weekTarget} treinos</span>
-        </div>
-        <div className="relative h-3 w-full overflow-hidden rounded-full bg-secondary">
-          <div
-            className="h-full rounded-full pink-gradient transition-all duration-500 ease-out"
-            style={{ width: `${Math.min((weekFrequency / weekTarget) * 100, 100)}%` }}
-          />
-        </div>
-        {weekFrequency >= weekTarget ? (
-          <div className="flex items-center gap-2 mt-3">
-            <CheckCircle2 className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold text-primary">🔥 Semana completa! Você cumpriu sua meta.</span>
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground mt-2">
-            {weekTarget - weekFrequency === 1
-              ? "Falta 1 treino para fechar sua semana!"
-              : `Faltam ${weekTarget - weekFrequency} treinos para fechar sua semana.`}
-          </p>
-        )}
-      </div>
-
-      {/* Badges / Conquistas Carousel */}
-      {(() => {
-        const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
-        const earnedCount = earnedBadges.length;
-        const totalBadges = BADGE_DEFINITIONS.length;
-        const progressPercent = totalBadges > 0 ? (earnedCount / totalBadges) * 100 : 0;
-        const today = new Date().toISOString().split("T")[0];
-
-        const sorted = [...BADGE_DEFINITIONS].sort((a, b) => {
-          const aE = earnedKeys.has(a.key) ? 0 : 1;
-          const bE = earnedKeys.has(b.key) ? 0 : 1;
-          return aE - bE;
-        });
-
-        return (
-          <div className="mb-6">
-            <h2 className="text-lg font-heading text-foreground uppercase mb-2">Suas Conquistas</h2>
-            <p className="text-sm text-muted-foreground mb-2">
-              {earnedCount} de {totalBadges} conquistas desbloqueadas
-            </p>
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary mb-4">
-              <div
-                className="h-full rounded-full pink-gradient transition-all duration-1000 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-
-            <div
-              className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-            >
-              <style>{`.snap-x::-webkit-scrollbar { display: none; }`}</style>
-              {sorted.map((badge, idx) => {
-                const isEarned = earnedKeys.has(badge.key);
-                const earnedBadge = earnedBadges.find(b => b.badge_key === badge.key);
-                const isNew = isEarned && earnedBadge && earnedBadge.earned_at.split("T")[0] === today;
-
-                const earnedDate = earnedBadge
-                  ? new Date(earnedBadge.earned_at).toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
-                  : "";
-
-                return (
-                  <Popover key={badge.key}>
-                    <PopoverTrigger asChild>
-                      <div
-                        className={`flex-shrink-0 w-[90px] h-[90px] rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer snap-start transition-all
-                          ${isEarned ? "bg-primary/10" : "bg-muted/40"}
-                          ${isNew ? "animate-badge-pop shadow-[0_0_20px_hsl(var(--primary)/0.4)]" : ""}
-                        `}
-                        style={{
-                          opacity: 0,
-                          animation: `fade-in 0.4s ease-out ${idx * 100}ms forwards${isNew ? ", badge-pop 0.5s ease-out 0.4s" : ""}`,
-                        }}
-                      >
-                        <div className="relative">
-                          <span className={`text-[40px] leading-none ${!isEarned ? "grayscale opacity-40" : ""}`}>
-                            {badge.emoji}
-                          </span>
-                          {!isEarned && (
-                            <Lock className="absolute -bottom-1 -right-1 w-4 h-4 text-muted-foreground animate-lock-pulse" />
-                          )}
-                        </div>
-                        <span className={`text-[10px] font-bold text-center leading-tight px-1 ${isEarned ? "text-foreground" : "text-muted-foreground"}`}>
-                          {badge.name}
-                        </span>
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto max-w-[200px] p-3 text-center text-sm">
-                      {isEarned
-                        ? `Conquistado em ${earnedDate} 🎉`
-                        : badge.triggerDescription}
-                    </PopoverContent>
-                  </Popover>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Challenge Cards Carousel */}
+      {/* 2. Protocolos */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-heading text-foreground uppercase">Protocolos</h2>
@@ -237,7 +134,7 @@ const Dashboard = () => {
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 pl-4 pr-4 snap-x snap-mandatory overscroll-x-contain" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x', scrollPaddingLeft: '16px' }}>
           <style>{`.overscroll-x-contain::-webkit-scrollbar { display: none; }`}</style>
           {(() => {
-            const protocolTotalDays = weekTarget * 4; // 4-week protocol
+            const protocolTotalDays = weekTarget * 4;
             const protocolPercent = protocolTotalDays > 0 ? Math.min(Math.round((totalDays / protocolTotalDays) * 100), 100) : 0;
             
             const cards = [
@@ -327,7 +224,56 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Streak / Sequência de dias */}
+      {/* 3. Meta Semanal + Badges inline */}
+      <div className="soft-card p-5 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-heading text-foreground uppercase">Meta semanal</span>
+          <span className="text-sm text-muted-foreground">{weekFrequency} de {weekTarget} treinos</span>
+        </div>
+        <div className="relative h-3 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full rounded-full pink-gradient transition-all duration-500 ease-out"
+            style={{ width: `${Math.min((weekFrequency / weekTarget) * 100, 100)}%` }}
+          />
+        </div>
+        {weekFrequency >= weekTarget ? (
+          <div className="flex items-center gap-2 mt-3">
+            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <span className="text-sm font-semibold text-primary">🔥 Semana completa! Você cumpriu sua meta.</span>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground mt-2">
+            {weekTarget - weekFrequency === 1
+              ? "Falta 1 treino para fechar sua semana!"
+              : `Faltam ${weekTarget - weekFrequency} treinos para fechar sua semana.`}
+          </p>
+        )}
+
+        {/* Inline badges summary */}
+        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
+          <div className="flex items-center gap-1.5">
+            {BADGE_DEFINITIONS.map((badge) => (
+              <span
+                key={badge.key}
+                className={`text-[24px] leading-none ${!earnedKeys.has(badge.key) ? "grayscale opacity-40" : ""}`}
+              >
+                {badge.emoji}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate("/evolucao")}
+            className="text-xs font-semibold text-primary whitespace-nowrap ml-auto"
+          >
+            ver conquistas →
+          </button>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-1.5">
+          {earnedCount} de {totalBadges} conquistas
+        </p>
+      </div>
+
+      {/* 4. Streak / Sequência de dias */}
       <div className="soft-card p-6 mb-6 flex items-center gap-5">
         <div className="flex-shrink-0 w-14 h-16">
           <svg viewBox="0 0 56 68" className="w-full h-full">
@@ -349,8 +295,10 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* 5. Treinos por Divisões */}
       <TreinosClassicos />
 
+      {/* 6. Conteúdos da Alcateia */}
       <h2 className="text-lg font-heading text-foreground mb-4 uppercase">Conteúdos da Alcateia</h2>
       <div className="space-y-3 mb-4">
         {[

@@ -7,10 +7,11 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer } from "lucide-react";
+import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer, Lock } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { BADGE_DEFINITIONS, type EarnedBadge } from "@/lib/badges";
 
 interface WorkoutRecord {
   id: string;
@@ -28,7 +29,7 @@ const Evolucao = () => {
   const [saving, setSaving] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
   const [showMeasureForm, setShowMeasureForm] = useState(false);
-  
+  const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
 
   const fields = [
     { key: "weight", label: "Peso (kg)", icon: "⚖️" },
@@ -40,17 +41,18 @@ const Evolucao = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [measRes, workRes] = await Promise.all([
+    const [measRes, workRes, badgeRes] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", user.id).order("date", { ascending: true }),
       supabase.from("workouts").select("*").eq("profile_id", user.id).order("date", { ascending: false }),
+      supabase.from("user_badges").select("badge_key, earned_at").eq("profile_id", user.id),
     ]);
     if (measRes.data) setMeasurements(measRes.data);
     if (workRes.data) setWorkouts(workRes.data as WorkoutRecord[]);
+    if (badgeRes.data) setEarnedBadges(badgeRes.data as EarnedBadge[]);
   };
 
   useEffect(() => { fetchData(); }, [user]);
 
-  // Refetch when page becomes visible (e.g. navigating back)
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") fetchData();
@@ -59,14 +61,13 @@ const Evolucao = () => {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [user]);
 
-  // Refetch on navigation focus
   useEffect(() => {
     const handleFocus = () => fetchData();
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [user]);
 
-  // --- Streak calculation (total completed workouts) ---
+  // --- Streak calculation ---
   const streak = useMemo(() => {
     return workouts.filter(w => w.completed).length;
   }, [workouts]);
@@ -81,7 +82,6 @@ const Evolucao = () => {
     return workouts.find(w => w.date === dateStr);
   };
 
-  // --- Stats ---
   const totalCompleted = workouts.filter(w => w.completed).length;
   const thisWeekCompleted = weekDays.filter(d => {
     const w = getWorkoutForDay(d);
@@ -142,15 +142,91 @@ const Evolucao = () => {
     setSaving(false);
   };
 
-  // Streak milestones
   const streakMilestones = [2, 5, 7, 14, 21, 30];
   const nextMilestone = streakMilestones.find(m => m > streak) || 30;
   const streakProgress = Math.min((streak / nextMilestone) * 100, 100);
+
+  // Badge data
+  const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
+  const earnedCount = earnedBadges.length;
+  const totalBadgesCount = BADGE_DEFINITIONS.length;
+  const progressPercent = totalBadgesCount > 0 ? (earnedCount / totalBadgesCount) * 100 : 0;
+  const today = new Date().toISOString().split("T")[0];
+
+  const sortedBadges = [...BADGE_DEFINITIONS].sort((a, b) => {
+    const aE = earnedKeys.has(a.key) ? 0 : 1;
+    const bE = earnedKeys.has(b.key) ? 0 : 1;
+    return aE - bE;
+  });
 
   return (
     <AppLayout>
       <h1 className="text-2xl font-heading text-foreground mb-1">Sua Evolução</h1>
       <p className="text-sm text-muted-foreground mb-5">Acompanhe cada conquista 🦁</p>
+
+      {/* Suas Conquistas — full detail */}
+      <div className="mb-4">
+        <h2 className="text-lg font-heading text-foreground uppercase mb-2">Suas Conquistas</h2>
+        <p className="text-sm text-muted-foreground mb-2">
+          {earnedCount} de {totalBadgesCount} conquistas desbloqueadas
+        </p>
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary mb-4">
+          <div
+            className="h-full rounded-full pink-gradient transition-all duration-1000 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+
+        <div
+          className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+        >
+          <style>{`.snap-x::-webkit-scrollbar { display: none; }`}</style>
+          {sortedBadges.map((badge, idx) => {
+            const isEarned = earnedKeys.has(badge.key);
+            const earnedBadge = earnedBadges.find(b => b.badge_key === badge.key);
+            const isNew = isEarned && earnedBadge && earnedBadge.earned_at.split("T")[0] === today;
+
+            const earnedDate = earnedBadge
+              ? new Date(earnedBadge.earned_at).toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
+              : "";
+
+            return (
+              <Popover key={badge.key}>
+                <PopoverTrigger asChild>
+                  <div
+                    className={`flex-shrink-0 w-[90px] h-[90px] rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer snap-start transition-all
+                      ${isEarned ? "bg-primary/10" : "bg-muted/40"}
+                      ${isNew ? "animate-badge-pop shadow-[0_0_20px_hsl(var(--primary)/0.4)]" : ""}
+                    `}
+                    style={{
+                      opacity: 0,
+                      animation: `fade-in 0.4s ease-out ${idx * 100}ms forwards${isNew ? ", badge-pop 0.5s ease-out 0.4s" : ""}`,
+                    }}
+                  >
+                    <div className="relative">
+                      <span className={`text-[40px] leading-none ${!isEarned ? "grayscale opacity-40" : ""}`}>
+                        {badge.emoji}
+                      </span>
+                      {!isEarned && (
+                        <Lock className="absolute -bottom-1 -right-1 w-4 h-4 text-muted-foreground animate-lock-pulse" />
+                      )}
+                    </div>
+                    <span className={`text-[10px] font-bold text-center leading-tight px-1 ${isEarned ? "text-foreground" : "text-muted-foreground"}`}>
+                      {badge.name}
+                    </span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto max-w-[200px] p-3 text-center text-sm">
+                  {isEarned
+                    ? `Conquistado em ${earnedDate} 🎉`
+                    : badge.triggerDescription}
+                </PopoverContent>
+              </Popover>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Streak Card */}
       <div className="soft-card p-5 mb-4">
@@ -183,13 +259,11 @@ const Evolucao = () => {
             )}
           </div>
         </div>
-        {/* Progress bar */}
         <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full pink-gradient rounded-full transition-all duration-700"
             style={{ width: `${streakProgress}%` }}
           />
-          {/* Milestone markers */}
           {streakMilestones.filter(m => m <= nextMilestone).map(m => (
             <div
               key={m}
@@ -250,7 +324,6 @@ const Evolucao = () => {
           })}
         </div>
 
-        {/* Week summary */}
         <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-border">
           <div className="flex items-center gap-1.5">
             <Dumbbell className="w-3.5 h-3.5 text-primary" />
@@ -279,7 +352,6 @@ const Evolucao = () => {
           </button>
         </div>
 
-        {/* Weight highlight */}
         {latestMeasurement?.weight ? (
           <div className="flex items-start gap-4 mb-4">
             <div className="flex-1">
@@ -296,7 +368,6 @@ const Evolucao = () => {
                 </div>
               )}
             </div>
-            {/* Mini weight chart */}
             {chartData.length > 1 && (
               <div className="w-28 h-16">
                 <ResponsiveContainer width="100%" height="100%">
@@ -311,7 +382,6 @@ const Evolucao = () => {
           <p className="text-sm text-muted-foreground text-center py-3 mb-3">Registre seu peso para acompanhar</p>
         )}
 
-        {/* Measurements grid */}
         {latestMeasurement && (
           <div className="grid grid-cols-2 gap-2.5 mb-4">
             {[
@@ -340,7 +410,6 @@ const Evolucao = () => {
           </div>
         )}
 
-        {/* Update button / form */}
         {!showMeasureForm ? (
           <button
             onClick={() => setShowMeasureForm(true)}
@@ -420,7 +489,6 @@ const Evolucao = () => {
         </div>
       )}
 
-
       {/* Recent workouts */}
       {workouts.filter(w => w.completed).length > 0 && (
         <div className="soft-card p-5 mb-4">
@@ -457,7 +525,6 @@ const Evolucao = () => {
                       <span className={`text-xs font-semibold ${effortColor}`}>{effort}</span>
                     )}
                   </div>
-                  {/* Stats row */}
                   <div className="grid grid-cols-3 gap-2">
                     <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
@@ -486,7 +553,6 @@ const Evolucao = () => {
             })}
           </div>
 
-          {/* Motivational message */}
           <div className="mt-4 pt-4 border-t border-border text-center">
             <p className="text-sm text-foreground font-medium">
               {(() => {
