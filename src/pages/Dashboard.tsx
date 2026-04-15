@@ -29,6 +29,12 @@ const Dashboard = () => {
   const [totalDays, setTotalDays] = useState(0);
   const [loadingWorkout, setLoadingWorkout] = useState(false);
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
+  const [todayWorkoutLabel, setTodayWorkoutLabel] = useState<string | null>(null);
+  const [countdownText, setCountdownText] = useState("");
+
+  // Compute unlock target date from trial_start_date + 7 days
+  const trialStart = profile?.trial_start_date ? new Date(profile.trial_start_date) : null;
+  const unlockDate = trialStart ? new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000) : null;
 
   useEffect(() => {
     if (!user) return;
@@ -52,9 +58,51 @@ const Dashboard = () => {
         .select("badge_key, earned_at")
         .eq("profile_id", user.id);
       if (badges) setEarnedBadges(badges as EarnedBadge[]);
+
+      // Fetch next uncompleted workout for today's label
+      const { data: nextWorkout } = await supabase
+        .from("workouts")
+        .select("workout_json")
+        .eq("profile_id", user.id)
+        .eq("completed", false)
+        .order("date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (nextWorkout?.workout_json) {
+        const wj = nextWorkout.workout_json as any;
+        const week = wj.week || wj.semana || null;
+        const dayNum = wj.day || wj.dia || null;
+        const workoutName = wj.name || wj.nome || wj.title || wj.titulo || null;
+        if (week && dayNum) {
+          setTodayWorkoutLabel(`📅 Hoje: Semana ${week} · Dia ${dayNum}${workoutName ? ` — ${workoutName}` : ""}`);
+        }
+      }
     };
     fetchStats();
   }, [user]);
+
+  // Countdown timer for locked protocols
+  useEffect(() => {
+    if (!unlockDate) return;
+
+    const update = () => {
+      const now = new Date();
+      const diff = unlockDate.getTime() - now.getTime();
+      if (diff <= 0) {
+        setCountdownText("Desbloqueado! 🎉");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setCountdownText(`🔒 Desbloqueia em ${days}d, ${hours}h e ${minutes}min`);
+    };
+
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [unlockDate?.getTime()]);
 
   const handleStartWorkout = async () => {
     setLoadingWorkout(true);
@@ -158,7 +206,7 @@ const Dashboard = () => {
                   <img
                     src={card.image}
                     alt={card.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className={`absolute inset-0 w-full h-full object-cover ${isLocked ? "blur-[3px]" : ""}`}
                     loading={idx === 0 ? "eager" : "lazy"}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
@@ -169,9 +217,15 @@ const Dashboard = () => {
                         <span className="inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full mb-3 text-white">
                           Seu Plano
                         </span>
-                        <h3 className="text-2xl font-bold text-white leading-tight mb-2">
+                        <h3 className="text-2xl font-bold text-white leading-tight mb-1">
                           {card.title}
                         </h3>
+
+                        {/* Today's workout label */}
+                        {todayWorkoutLabel && (
+                          <p className="text-xs text-white/80 mb-2">{todayWorkoutLabel}</p>
+                        )}
+
                         {totalDays > 0 && (
                           <div className="w-full mb-3">
                             <div className="flex items-center justify-between mb-1">
@@ -190,27 +244,18 @@ const Dashboard = () => {
                         <button className="w-full bg-white text-black font-bold py-3 rounded-2xl text-base uppercase tracking-wide">
                           Iniciar
                         </button>
+                        <p className="text-[11px] text-white/50 mt-1.5">
+                          Complete o treino de hoje para liberar o próximo dia do protocolo
+                        </p>
                       </>
                     )}
 
                     {isUnlockable && (
                       <>
-                        <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm mb-3">
-                          <Lock className="w-5 h-5 text-white/70" />
-                        </div>
-                        <span className="inline-block text-xs font-semibold text-white/80 mb-3">
-                          {card.unlockDays} dias 🔥
-                        </span>
-                        <button
-                          disabled={!canUnlock}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (canUnlock) toast.success(`${card.title} desbloqueado! 🎉🦁`);
-                          }}
-                          className={`inline-block bg-white/20 backdrop-blur-sm text-xs font-semibold px-4 py-1 rounded-full text-white mb-3 ${!canUnlock ? "opacity-60 cursor-not-allowed" : "cursor-pointer active:scale-95 transition-transform"}`}
-                        >
-                          Desbloquear
-                        </button>
+                        {/* Countdown instead of static lock */}
+                        <p className="text-xs font-semibold text-white/90 mb-3 leading-snug">
+                          {countdownText || "🔒 Em breve"}
+                        </p>
                         <h3 className="text-2xl font-bold text-white leading-tight">
                           {card.title}
                         </h3>
