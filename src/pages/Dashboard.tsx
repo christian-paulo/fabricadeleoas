@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Play, Download, Loader2, Lock, Flame, CheckCircle2 } from "lucide-react";
@@ -14,6 +14,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { BADGE_DEFINITIONS, type EarnedBadge } from "@/lib/badges";
 import cardProtocolo from "@/assets/card-protocolo.jpg";
 import cardCoxa from "@/assets/card-coxa.jpg";
 import card10min from "@/assets/card-10min.jpg";
