@@ -196,6 +196,11 @@ const Treinos = () => {
     )));
     await computeStreakAndWeek();
     setShowSuccess(true);
+    
+    // Trigger post-workout push notification
+    import('@/lib/pushTriggers').then(({ sendPostWorkoutPush }) => {
+      sendPostWorkoutPush(user!.id);
+    });
   };
 
   const [dbExercises, setDbExercises] = useState<{ name: string; video_url: string }[]>([]);
