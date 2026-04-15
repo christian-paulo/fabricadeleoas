@@ -48,6 +48,12 @@ const Dashboard = () => {
       const { count } = await supabase.from("workouts")
         .select("id", { count: "exact", head: true }).eq("profile_id", user.id).eq("completed", true);
       setTotalDays(count || 0);
+
+      const { data: badges } = await supabase
+        .from("user_badges")
+        .select("badge_key, earned_at")
+        .eq("profile_id", user.id);
+      if (badges) setEarnedBadges(badges as EarnedBadge[]);
     };
     fetchStats();
   }, [user]);
