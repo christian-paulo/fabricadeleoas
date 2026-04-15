@@ -422,6 +422,42 @@ const Evolucao = () => {
         </div>
       )}
 
+      {/* Badges / Conquistas */}
+      <div className="soft-card p-5 mb-4">
+        <h3 className="text-base font-heading text-foreground mb-4 uppercase">Suas Conquistas</h3>
+        <div className="space-y-3">
+          {(() => {
+            const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
+            const sorted = [...BADGE_DEFINITIONS].sort((a, b) => {
+              const aEarned = earnedKeys.has(a.key) ? 0 : 1;
+              const bEarned = earnedKeys.has(b.key) ? 0 : 1;
+              return aEarned - bEarned;
+            });
+            return sorted.map(badge => {
+              const isEarned = earnedKeys.has(badge.key);
+              return (
+                <div key={badge.key} className={`flex items-center gap-4 rounded-2xl p-4 transition-all ${isEarned ? 'bg-primary/10' : 'bg-muted/40'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${isEarned ? '' : 'grayscale opacity-40'}`}>
+                    {badge.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold ${isEarned ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {badge.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {isEarned ? 'Conquistado ✓' : badge.triggerDescription}
+                    </p>
+                  </div>
+                  {!isEarned && (
+                    <Lock className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+                  )}
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </div>
+
       {/* Recent workouts */}
       {workouts.filter(w => w.completed).length > 0 && (
         <div className="soft-card p-5 mb-4">
