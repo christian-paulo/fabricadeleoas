@@ -149,6 +149,86 @@ const Dashboard = () => {
         )}
       </div>
 
+      {/* Badges / Conquistas Carousel */}
+      {(() => {
+        const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
+        const earnedCount = earnedBadges.length;
+        const totalBadges = BADGE_DEFINITIONS.length;
+        const progressPercent = totalBadges > 0 ? (earnedCount / totalBadges) * 100 : 0;
+        const today = new Date().toISOString().split("T")[0];
+
+        const sorted = [...BADGE_DEFINITIONS].sort((a, b) => {
+          const aE = earnedKeys.has(a.key) ? 0 : 1;
+          const bE = earnedKeys.has(b.key) ? 0 : 1;
+          return aE - bE;
+        });
+
+        return (
+          <div className="mb-6">
+            <h2 className="text-lg font-heading text-foreground uppercase mb-2">Suas Conquistas</h2>
+            <p className="text-sm text-muted-foreground mb-2">
+              {earnedCount} de {totalBadges} conquistas desbloqueadas
+            </p>
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary mb-4">
+              <div
+                className="h-full rounded-full pink-gradient transition-all duration-1000 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <div
+              className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+            >
+              <style>{`.snap-x::-webkit-scrollbar { display: none; }`}</style>
+              {sorted.map((badge, idx) => {
+                const isEarned = earnedKeys.has(badge.key);
+                const earnedBadge = earnedBadges.find(b => b.badge_key === badge.key);
+                const isNew = isEarned && earnedBadge && earnedBadge.earned_at.split("T")[0] === today;
+
+                const earnedDate = earnedBadge
+                  ? new Date(earnedBadge.earned_at).toLocaleDateString("pt-BR", { day: "numeric", month: "long" })
+                  : "";
+
+                return (
+                  <Popover key={badge.key}>
+                    <PopoverTrigger asChild>
+                      <div
+                        className={`flex-shrink-0 w-[90px] h-[90px] rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer snap-start transition-all
+                          ${isEarned ? "bg-primary/10" : "bg-muted/40"}
+                          ${isNew ? "animate-badge-pop shadow-[0_0_20px_hsl(var(--primary)/0.4)]" : ""}
+                        `}
+                        style={{
+                          opacity: 0,
+                          animation: `fade-in 0.4s ease-out ${idx * 100}ms forwards${isNew ? ", badge-pop 0.5s ease-out 0.4s" : ""}`,
+                        }}
+                      >
+                        <div className="relative">
+                          <span className={`text-[40px] leading-none ${!isEarned ? "grayscale opacity-40" : ""}`}>
+                            {badge.emoji}
+                          </span>
+                          {!isEarned && (
+                            <Lock className="absolute -bottom-1 -right-1 w-4 h-4 text-muted-foreground animate-lock-pulse" />
+                          )}
+                        </div>
+                        <span className={`text-[10px] font-bold text-center leading-tight px-1 ${isEarned ? "text-foreground" : "text-muted-foreground"}`}>
+                          {badge.name}
+                        </span>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto max-w-[200px] p-3 text-center text-sm">
+                      {isEarned
+                        ? `Conquistado em ${earnedDate} 🎉`
+                        : badge.triggerDescription}
+                    </PopoverContent>
+                  </Popover>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Challenge Cards Carousel */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
