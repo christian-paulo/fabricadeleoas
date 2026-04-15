@@ -7,10 +7,10 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer, Lock } from "lucide-react";
+import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BADGE_DEFINITIONS, type EarnedBadge } from "@/lib/badges";
+
 
 interface WorkoutRecord {
   id: string;
@@ -28,7 +28,7 @@ const Evolucao = () => {
   const [saving, setSaving] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
   const [showMeasureForm, setShowMeasureForm] = useState(false);
-  const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
+  
 
   const fields = [
     { key: "weight", label: "Peso (kg)", icon: "⚖️" },
@@ -40,14 +40,12 @@ const Evolucao = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [measRes, workRes, badgeRes] = await Promise.all([
+    const [measRes, workRes] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", user.id).order("date", { ascending: true }),
       supabase.from("workouts").select("*").eq("profile_id", user.id).order("date", { ascending: false }),
-      supabase.from("user_badges").select("badge_key, earned_at").eq("profile_id", user.id),
     ]);
     if (measRes.data) setMeasurements(measRes.data);
     if (workRes.data) setWorkouts(workRes.data as WorkoutRecord[]);
-    if (badgeRes.data) setEarnedBadges(badgeRes.data as EarnedBadge[]);
   };
 
   useEffect(() => { fetchData(); }, [user]);
@@ -422,41 +420,6 @@ const Evolucao = () => {
         </div>
       )}
 
-      {/* Badges / Conquistas */}
-      <div className="soft-card p-5 mb-4">
-        <h3 className="text-base font-heading text-foreground mb-4 uppercase">Suas Conquistas</h3>
-        <div className="space-y-3">
-          {(() => {
-            const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
-            const sorted = [...BADGE_DEFINITIONS].sort((a, b) => {
-              const aEarned = earnedKeys.has(a.key) ? 0 : 1;
-              const bEarned = earnedKeys.has(b.key) ? 0 : 1;
-              return aEarned - bEarned;
-            });
-            return sorted.map(badge => {
-              const isEarned = earnedKeys.has(badge.key);
-              return (
-                <div key={badge.key} className={`flex items-center gap-4 rounded-2xl p-4 transition-all ${isEarned ? 'bg-primary/10' : 'bg-muted/40'}`}>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${isEarned ? '' : 'grayscale opacity-40'}`}>
-                    {badge.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold ${isEarned ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {badge.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isEarned ? 'Conquistado ✓' : badge.triggerDescription}
-                    </p>
-                  </div>
-                  {!isEarned && (
-                    <Lock className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                  )}
-                </div>
-              );
-            });
-          })()}
-        </div>
-      </div>
 
       {/* Recent workouts */}
       {workouts.filter(w => w.completed).length > 0 && (
