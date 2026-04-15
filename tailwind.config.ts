@@ -99,6 +99,15 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "badge-pop": {
+          "0%": { transform: "scale(0.8)", opacity: "0" },
+          "60%": { transform: "scale(1.2)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        "lock-pulse": {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.5", transform: "scale(1.15)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -106,6 +115,8 @@ export default {
         "pulse-pink": "pulse-pink 2s infinite",
         "pulse-gold": "pulse-pink 2s infinite",
         "marquee": "marquee 20s linear infinite",
+        "badge-pop": "badge-pop 0.5s ease-out forwards",
+        "lock-pulse": "lock-pulse 3s ease-in-out infinite",
       },
     },
   },
