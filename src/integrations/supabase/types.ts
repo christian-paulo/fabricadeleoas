@@ -97,6 +97,41 @@ export type Database = {
           },
         ]
       }
+      notification_log: {
+        Row: {
+          date: string | null
+          id: string
+          message_key: string
+          profile_id: string
+          sent_at: string | null
+          trial_day: number
+        }
+        Insert: {
+          date?: string | null
+          id?: string
+          message_key: string
+          profile_id: string
+          sent_at?: string | null
+          trial_day: number
+        }
+        Update: {
+          date?: string | null
+          id?: string
+          message_key?: string
+          profile_id?: string
+          sent_at?: string | null
+          trial_day?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_responses: {
         Row: {
           altura: number | null
@@ -251,6 +286,41 @@ export type Database = {
           workout_duration?: number | null
         }
         Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          p256dh: string
+          profile_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          p256dh: string
+          profile_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
