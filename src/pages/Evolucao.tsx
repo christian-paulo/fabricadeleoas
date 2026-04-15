@@ -28,6 +28,7 @@ const Evolucao = () => {
   const [saving, setSaving] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
   const [showMeasureForm, setShowMeasureForm] = useState(false);
+  const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
 
   const fields = [
     { key: "weight", label: "Peso (kg)", icon: "⚖️" },
@@ -39,12 +40,14 @@ const Evolucao = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [measRes, workRes] = await Promise.all([
+    const [measRes, workRes, badgeRes] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", user.id).order("date", { ascending: true }),
       supabase.from("workouts").select("*").eq("profile_id", user.id).order("date", { ascending: false }),
+      supabase.from("user_badges").select("badge_key, earned_at").eq("profile_id", user.id),
     ]);
     if (measRes.data) setMeasurements(measRes.data);
     if (workRes.data) setWorkouts(workRes.data as WorkoutRecord[]);
+    if (badgeRes.data) setEarnedBadges(badgeRes.data as EarnedBadge[]);
   };
 
   useEffect(() => { fetchData(); }, [user]);
