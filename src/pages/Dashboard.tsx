@@ -126,8 +126,8 @@ const Dashboard = () => {
         </div>
         {weekFrequency >= weekTarget ? (
           <div className="flex items-center gap-2 mt-3">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <span className="text-sm font-semibold text-green-600">🔥 Semana completa! Você cumpriu sua meta.</span>
+            <CheckCircle2 className="w-5 h-5 text-primary" />
+            <span className="text-sm font-semibold text-primary">🔥 Semana completa! Você cumpriu sua meta.</span>
           </div>
         ) : (
           <p className="text-xs text-muted-foreground mt-2">
