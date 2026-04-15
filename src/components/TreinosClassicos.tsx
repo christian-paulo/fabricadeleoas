@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 import catPochete from "@/assets/cat-pochete.jpg";
 import catBraco from "@/assets/cat-braco.jpg";
 import catBumbum from "@/assets/cat-bumbum.jpg";
@@ -20,11 +19,11 @@ type Exercise = {
 };
 
 const CATEGORIES = [
-  { key: "pochete", label: "Pochete", searchTag: "Pochete", image: catPochete, bg: "bg-pink-100" },
-  { key: "braco", label: "Braço", searchTag: "Merendeira", image: catBraco, bg: "bg-pink-50" },
-  { key: "bumbum", label: "Bumbum", searchTag: "Bumbum", image: catBumbum, bg: "bg-blue-100" },
-  { key: "coxa", label: "Coxa", searchTag: "Coxa", image: catCoxa, bg: "bg-orange-50" },
-  { key: "flancos", label: "Flancos", searchTag: "Barriga Grande", image: catFlancos, bg: "bg-green-50" },
+  { key: "pochete", label: "Pochete", searchTag: "Pochete", image: catPochete },
+  { key: "braco", label: "Braço", searchTag: "Merendeira", image: catBraco },
+  { key: "bumbum", label: "Bumbum", searchTag: "Bumbum", image: catBumbum },
+  { key: "coxa", label: "Coxa", searchTag: "Coxa", image: catCoxa },
+  { key: "flancos", label: "Flancos", searchTag: "Barriga Grande", image: catFlancos },
 ] as const;
 
 const TreinosClassicos = () => {
@@ -70,7 +69,8 @@ const TreinosClassicos = () => {
 
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-heading text-foreground uppercase mb-3">Treinos POR DIVISÕES</h2>
+      <h2 className="text-lg font-heading text-foreground uppercase mb-1">Turbine seu Treino</h2>
+      <p className="text-sm text-muted-foreground mb-3">Quer ir além hoje? Adiciona esse treino:</p>
 
       {/* Category tabs */}
       <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
@@ -89,40 +89,42 @@ const TreinosClassicos = () => {
         ))}
       </div>
 
-      {/* Grouped workout cards */}
-      <div className="space-y-3">
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">Carregando...</div>
-        ) : groups.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">Nenhum treino encontrado</div>
-        ) : (
-          groups.map((group) => (
+      {/* Horizontal scrollable cards */}
+      {loading ? (
+        <div className="text-center py-8 text-muted-foreground text-sm">Carregando...</div>
+      ) : groups.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground text-sm">Nenhum treino encontrado</div>
+      ) : (
+        <div
+          className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+        >
+          <style>{`.snap-x::-webkit-scrollbar { display: none; }`}</style>
+          {groups.map((group) => (
             <div
               key={group.muscleGroup}
               onClick={() => handleCardClick(group.muscleGroup)}
-              className="soft-card flex items-center gap-4 p-3 cursor-pointer active:scale-[0.98] transition-transform"
+              className="flex-shrink-0 w-[160px] snap-start rounded-2xl overflow-hidden cursor-pointer active:scale-[0.97] transition-transform relative h-[120px]"
             >
-              <div className={`w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 ${activeCat.bg}`}>
-                <img
-                  src={activeCat.image}
-                  alt={group.muscleGroup}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-heading text-foreground truncate">
+              <img
+                src={activeCat.image}
+                alt={group.muscleGroup}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="relative z-10 flex flex-col justify-end h-full p-3">
+                <h3 className="text-sm font-bold text-white leading-tight truncate">
                   {group.muscleGroup} {group.level}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] text-white/70">
                   {group.count} exercício{group.count > 1 ? "s" : ""}
                 </p>
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

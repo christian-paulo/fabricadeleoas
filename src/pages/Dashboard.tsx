@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { Play, Download, Loader2, Lock, Flame, CheckCircle2 } from "lucide-react";
+import { Play, Loader2, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
