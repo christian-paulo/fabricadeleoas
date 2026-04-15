@@ -231,11 +231,24 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify internal call via service role
+    // Verify caller: service role OR authenticated user
     const authHeader = req.headers.get('Authorization')
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    if (!authHeader?.includes(serviceRoleKey)) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    const isServiceRole = authHeader?.includes(serviceRoleKey)
+
+    let callerUserId: string | null = null
+    if (!isServiceRole) {
+      // Verify JWT for authenticated user calls
+      const anonClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader || '' } } }
+      )
+      const { data: { user } } = await anonClient.auth.getUser()
+      if (!user) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      callerUserId = user.id
     }
 
     const { profile_id, title, body, message_key, trial_day } = await req.json()
