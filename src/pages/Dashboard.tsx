@@ -30,8 +30,11 @@ const Dashboard = () => {
     if (!user) return;
     const fetchStats = async () => {
       const now = new Date();
+      // Monday-based week (resets every Monday)
+      const day = now.getDay(); // 0=Sun,1=Mon,...
+      const diffToMonday = day === 0 ? 6 : day - 1;
       const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setDate(now.getDate() - diffToMonday);
       const { data: weekWorkouts } = await supabase.from("workouts")
         .select("id").eq("profile_id", user.id).eq("completed", true)
         .gte("date", weekStart.toISOString().split("T")[0]);
