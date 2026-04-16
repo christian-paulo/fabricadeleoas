@@ -143,6 +143,16 @@ const Treinos = () => {
     const totalCompleted = allWorkouts?.length || 0;
     setStreakCount(totalCompleted);
 
+    // Calculate days since first workout
+    if (allWorkouts && allWorkouts.length > 0) {
+      const firstDate = new Date(allWorkouts[allWorkouts.length - 1].date);
+      const today = new Date();
+      const diffMs = today.getTime() - firstDate.getTime();
+      setDaysSinceFirst(Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24))));
+    } else {
+      setDaysSinceFirst(1);
+    }
+
     // Compute week days
     const completedDates = new Set(allWorkouts?.map((w) => w.date) || []);
     const today = new Date();
