@@ -31,6 +31,38 @@ Deno.serve(async (req) => {
       .not('trial_start_date', 'is', null)
       .gte('trial_start_date', sevenDaysAgo.toISOString())
 
+    // Sunday 19h measurement reminder for ALL active users
+    const isSunday = brazilNow.getDay() === 0
+    if (isSunday && currentHour === 19) {
+      const { data: allActiveProfiles } = await supabase.from('profiles')
+        .select('id, full_name')
+        .eq('is_subscriber', true)
+
+      if (allActiveProfiles) {
+        for (const p of allActiveProfiles) {
+          try {
+            await fetch(
+              `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-push`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                },
+                body: JSON.stringify({
+                  profile_id: p.id,
+                  title: 'Fábrica de Leoas 🦁',
+                  body: 'Você treinou essa semana 💪 Que tal registrar suas medidas? Ver o número mudar é o melhor combustível.',
+                  message_key: 'sunday_measurements',
+                  trial_day: 0,
+                }),
+              }
+            )
+          } catch (_) {}
+        }
+      }
+    }
+
     if (!profiles || profiles.length === 0) {
       return new Response(JSON.stringify({ message: 'No trial users' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
