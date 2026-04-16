@@ -343,6 +343,33 @@ const Dashboard = () => {
         </p>
       </div>
 
+      {/* Measurement reminder card */}
+      {showMeasurementReminder && (
+        <div className="soft-card p-4 mb-6">
+          <p className="text-sm text-foreground font-medium mb-3">
+            📏 Já faz 7 dias sem atualizar suas medidas. Registra hoje?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => navigate("/evolucao")}
+              className="flex-1 pink-gradient text-primary-foreground font-heading rounded-xl h-10"
+            >
+              Atualizar agora
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                localStorage.setItem(MEASUREMENT_REMINDER_KEY, new Date().toISOString());
+                setShowMeasurementReminder(false);
+              }}
+              className="text-xs text-muted-foreground"
+            >
+              Depois
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* 4. Turbine seu Treino */}
       <TreinosClassicos />
     </AppLayout>
