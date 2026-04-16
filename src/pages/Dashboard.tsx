@@ -21,6 +21,8 @@ import card10min from "@/assets/card-10min.jpg";
 import cardSeca from "@/assets/card-seca.jpg";
 import TreinosClassicos from "@/components/TreinosClassicos";
 
+const MEASUREMENT_REMINDER_KEY = "measurement_reminder_dismissed_at";
+
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
   usePushNotifications();
@@ -31,6 +33,8 @@ const Dashboard = () => {
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const [todayWorkoutLabel, setTodayWorkoutLabel] = useState<string | null>(null);
   const [countdownText, setCountdownText] = useState("");
+  const [showMeasurementReminder, setShowMeasurementReminder] = useState(false);
+  const [lastMeasurementDate, setLastMeasurementDate] = useState<string | null>(null);
 
   // Compute unlock target date from trial_start_date + 7 days
   const trialStart = profile?.trial_start_date ? new Date(profile.trial_start_date) : null;
