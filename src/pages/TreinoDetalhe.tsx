@@ -43,6 +43,7 @@ const Treinos = () => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
+  const [daysSinceFirst, setDaysSinceFirst] = useState(0);
   const [weekDays, setWeekDays] = useState<{ label: string; completed: boolean; isToday: boolean }[]>([]);
   const [celebrationBadge, setCelebrationBadge] = useState<string | null>(null);
 
