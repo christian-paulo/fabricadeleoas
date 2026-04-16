@@ -7,7 +7,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Flame, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, CheckCircle2, XCircle, Timer, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Minus, Dumbbell, Clock, CalendarDays, Ruler, Lock } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks, isSameDay, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -21,6 +21,14 @@ interface WorkoutRecord {
   workout_json: any;
 }
 
+const METRIC_OPTIONS = [
+  { key: "peso", label: "Peso", dbKey: "weight", unit: "kg" },
+  { key: "cintura", label: "Cintura", dbKey: "waist", unit: "cm" },
+  { key: "quadril", label: "Quadril", dbKey: "hip", unit: "cm" },
+  { key: "coxa", label: "Coxa", dbKey: "thigh", unit: "cm" },
+  { key: "braco", label: "Braço", dbKey: "arm", unit: "cm" },
+] as const;
+
 const Evolucao = () => {
   const { user } = useAuth();
   const [form, setForm] = useState({ weight: "", waist: "", hip: "", thigh: "", arm: "" });
@@ -30,6 +38,7 @@ const Evolucao = () => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [showMeasureForm, setShowMeasureForm] = useState(false);
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
+  const [selectedMetric, setSelectedMetric] = useState<typeof METRIC_OPTIONS[number]>(METRIC_OPTIONS[0]);
 
   const fields = [
     { key: "weight", label: "Peso (kg)", icon: "⚖️" },
@@ -67,9 +76,16 @@ const Evolucao = () => {
     return () => window.removeEventListener("focus", handleFocus);
   }, [user]);
 
-  // --- Streak calculation ---
-  const streak = useMemo(() => {
-    return workouts.filter(w => w.completed).length;
+  // --- Total completed workouts ---
+  const totalCompleted = useMemo(() => workouts.filter(w => w.completed).length, [workouts]);
+
+  // --- Days since first workout ---
+  const daysSinceFirst = useMemo(() => {
+    const completed = workouts.filter(w => w.completed);
+    if (completed.length === 0) return 0;
+    const first = completed[completed.length - 1]; // oldest (sorted desc)
+    const diffMs = new Date().getTime() - new Date(first.date).getTime();
+    return Math.max(Math.floor(diffMs / (1000 * 60 * 60 * 24)), 1);
   }, [workouts]);
 
   // --- Weekly calendar ---
@@ -82,24 +98,21 @@ const Evolucao = () => {
     return workouts.find(w => w.date === dateStr);
   };
 
-  const totalCompleted = workouts.filter(w => w.completed).length;
-  const thisWeekCompleted = weekDays.filter(d => {
-    const w = getWorkoutForDay(d);
-    return w?.completed;
-  }).length;
+  const thisWeekCompleted = weekDays.filter(d => getWorkoutForDay(d)?.completed).length;
 
-  // --- Weight trend ---
+  // --- Chart data for selected metric ---
   const chartData = useMemo(() => {
-    return measurements.map((m: any) => ({
-      date: format(new Date(m.date), "dd/MM"),
-      peso: m.weight,
-      cintura: m.waist,
-      quadril: m.hip,
-    }));
-  }, [measurements]);
+    return measurements
+      .filter((m: any) => m[selectedMetric.dbKey] != null)
+      .map((m: any) => ({
+        date: format(new Date(m.date), "dd/MM"),
+        value: m[selectedMetric.dbKey],
+      }));
+  }, [measurements, selectedMetric]);
 
   const latestMeasurement = measurements.length > 0 ? measurements[measurements.length - 1] : null;
   const previousMeasurement = measurements.length > 1 ? measurements[measurements.length - 2] : null;
+  const firstMeasurement = measurements.length > 0 ? measurements[0] : null;
 
   const getDiff = (key: string) => {
     if (!latestMeasurement || !previousMeasurement) return null;
@@ -108,6 +121,31 @@ const Evolucao = () => {
     if (curr == null || prev == null) return null;
     return (curr - prev).toFixed(1);
   };
+
+  // Best variation since start (biggest reduction)
+  const bestVariation = useMemo(() => {
+    if (!latestMeasurement || !firstMeasurement) return null;
+    const keys = [
+      { key: "waist", label: "cintura" },
+      { key: "hip", label: "quadril" },
+      { key: "thigh", label: "coxa" },
+      { key: "arm", label: "braço" },
+      { key: "weight", label: "peso" },
+    ];
+    let best: { label: string; diff: number; unit: string } | null = null;
+    for (const k of keys) {
+      const first = (firstMeasurement as any)[k.key];
+      const last = (latestMeasurement as any)[k.key];
+      if (first != null && last != null) {
+        const diff = first - last; // positive = reduction
+        const unit = k.key === "weight" ? "kg" : "cm";
+        if (diff > 0 && (!best || diff > best.diff)) {
+          best = { label: k.label, diff: parseFloat(diff.toFixed(1)), unit };
+        }
+      }
+    }
+    return best;
+  }, [latestMeasurement, firstMeasurement]);
 
   const getLastUpdatedLabel = () => {
     if (!latestMeasurement) return null;
@@ -142,10 +180,6 @@ const Evolucao = () => {
     setSaving(false);
   };
 
-  const streakMilestones = [2, 5, 7, 14, 21, 30];
-  const nextMilestone = streakMilestones.find(m => m > streak) || 30;
-  const streakProgress = Math.min((streak / nextMilestone) * 100, 100);
-
   // Badge data
   const earnedKeys = new Set(earnedBadges.map(b => b.badge_key));
   const earnedCount = earnedBadges.length;
@@ -158,6 +192,11 @@ const Evolucao = () => {
     const bE = earnedKeys.has(b.key) ? 0 : 1;
     return aE - bE;
   });
+
+  // Check if any measurement data exists
+  const hasMeasurements = measurements.length > 0 && latestMeasurement && (
+    latestMeasurement.weight || latestMeasurement.waist || latestMeasurement.hip || latestMeasurement.thigh || latestMeasurement.arm
+  );
 
   return (
     <AppLayout>
@@ -228,56 +267,6 @@ const Evolucao = () => {
         </div>
       </div>
 
-      {/* Streak Card */}
-      <div className="soft-card p-5 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-lg font-heading text-foreground">
-              Sequência de <span className="text-primary font-bold">{streak}</span> {streak === 1 ? "treino" : "treinos"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {streak === 0 ? "Comece seu primeiro treino!" : streak < 3 ? "Você começou muito bem!" : streak < 7 ? "Continue assim, leoa! 🦁" : "Você está imparável! 🔥"}
-            </p>
-          </div>
-          <div className="relative flex-shrink-0 w-12 h-14">
-            <svg viewBox="0 0 56 68" className="w-full h-full">
-              <defs>
-                <radialGradient id="fireGradEvo" cx="50%" cy="65%" r="50%">
-                  <stop offset="0%" stopColor="#FF6B00" />
-                  <stop offset="55%" stopColor="#FF9500" />
-                  <stop offset="100%" stopColor="#FFD580" stopOpacity="0.5" />
-                </radialGradient>
-              </defs>
-              <ellipse cx="28" cy="42" rx="26" ry="26" fill="#FFD580" opacity={streak > 0 ? 0.3 : 0.1} />
-              <path d="M28 4 C18 20, 6 33, 6 46 C6 58, 15 66, 28 66 C41 66, 50 58, 50 46 C50 33, 38 20, 28 4Z" fill={streak > 0 ? "url(#fireGradEvo)" : "hsl(0 0% 80%)"} />
-              <ellipse cx="28" cy="48" rx="10" ry="12" fill="#FFD580" opacity={streak > 0 ? 0.6 : 0.15} />
-            </svg>
-            {streak > 0 && (
-              <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                {streak}
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full pink-gradient rounded-full transition-all duration-700"
-            style={{ width: `${streakProgress}%` }}
-          />
-          {streakMilestones.filter(m => m <= nextMilestone).map(m => (
-            <div
-              key={m}
-              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-muted-foreground/20"
-              style={{ left: `${(m / nextMilestone) * 100}%` }}
-            />
-          ))}
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-muted-foreground">0</span>
-          <span className="text-[10px] text-primary font-semibold">{nextMilestone} dias 🔥</span>
-        </div>
-      </div>
-
       {/* Weekly Calendar */}
       <div className="soft-card p-5 mb-4">
         <div className="flex items-center justify-between mb-4">
@@ -339,86 +328,99 @@ const Evolucao = () => {
 
       {/* Weight & Body Stats */}
       <div className="soft-card p-5 mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-heading text-foreground flex items-center gap-2">
-            <Ruler className="w-4 h-4 text-primary" />
-            Corpo
-          </h3>
-          <button
-            onClick={() => setShowMeasureForm(!showMeasureForm)}
-            className="text-xs font-semibold text-primary"
-          >
-            {showMeasureForm ? "Fechar" : "Atualizar"}
-          </button>
-        </div>
-
-        {latestMeasurement?.weight ? (
-          <div className="flex items-start gap-4 mb-4">
-            <div className="flex-1">
-              <p className="text-4xl font-bold text-foreground">
-                {latestMeasurement.weight}<span className="text-lg font-normal text-muted-foreground ml-1">kg</span>
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{getLastUpdatedLabel()}</p>
-              {getDiff("weight") && (
-                <div className={`flex items-center gap-1 mt-1.5 ${
-                  parseFloat(getDiff("weight")!) < 0 ? "text-green-500" : parseFloat(getDiff("weight")!) > 0 ? "text-orange-500" : "text-muted-foreground"
-                }`}>
-                  {parseFloat(getDiff("weight")!) < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : parseFloat(getDiff("weight")!) > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
-                  <span className="text-xs font-bold">{Math.abs(parseFloat(getDiff("weight")!))} kg</span>
-                </div>
-              )}
+        {hasMeasurements ? (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-heading text-foreground flex items-center gap-2">
+                <Ruler className="w-4 h-4 text-primary" />
+                Corpo
+              </h3>
+              <button
+                onClick={() => setShowMeasureForm(!showMeasureForm)}
+                className="text-xs font-semibold text-primary"
+              >
+                {showMeasureForm ? "Fechar" : "Atualizar"}
+              </button>
             </div>
-            {chartData.length > 1 && (
-              <div className="w-28 h-16">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData.slice(-7)}>
-                    <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground text-center py-3 mb-3">Registre seu peso para acompanhar</p>
-        )}
 
-        {latestMeasurement && (
-          <div className="grid grid-cols-2 gap-2.5 mb-4">
-            {[
-              { label: "Cintura", value: latestMeasurement.waist, unit: "cm", key: "waist" },
-              { label: "Quadril", value: latestMeasurement.hip, unit: "cm", key: "hip" },
-              { label: "Coxa", value: latestMeasurement.thigh, unit: "cm", key: "thigh" },
-              { label: "Braço", value: latestMeasurement.arm, unit: "cm", key: "arm" },
-            ].filter(s => s.value).map((stat) => {
-              const diff = getDiff(stat.key);
-              return (
-                <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
-                  <p className="text-lg font-bold text-foreground mt-0.5">{stat.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
-                  {diff && (
-                    <div className={`flex items-center justify-center gap-0.5 mt-1 ${
-                      parseFloat(diff) < 0 ? "text-green-500" : parseFloat(diff) > 0 ? "text-orange-500" : "text-muted-foreground"
+            {latestMeasurement?.weight ? (
+              <div className="flex items-start gap-4 mb-4">
+                <div className="flex-1">
+                  <p className="text-4xl font-bold text-foreground">
+                    {latestMeasurement.weight}<span className="text-lg font-normal text-muted-foreground ml-1">kg</span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{getLastUpdatedLabel()}</p>
+                  {getDiff("weight") && (
+                    <div className={`flex items-center gap-1 mt-1.5 ${
+                      parseFloat(getDiff("weight")!) < 0 ? "text-green-500" : parseFloat(getDiff("weight")!) > 0 ? "text-orange-500" : "text-muted-foreground"
                     }`}>
-                      {parseFloat(diff) < 0 ? <TrendingDown className="w-3 h-3" /> : parseFloat(diff) > 0 ? <TrendingUp className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-                      <span className="text-[10px] font-bold">{Math.abs(parseFloat(diff))} {stat.unit}</span>
+                      {parseFloat(getDiff("weight")!) < 0 ? <TrendingDown className="w-3.5 h-3.5" /> : parseFloat(getDiff("weight")!) > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                      <span className="text-xs font-bold">{Math.abs(parseFloat(getDiff("weight")!))} kg</span>
                     </div>
                   )}
                 </div>
-              );
-            })}
+                {chartData.length > 1 && selectedMetric.key === "peso" && (
+                  <div className="w-28 h-16">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData.slice(-7)}>
+                        <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              {[
+                { label: "Cintura", value: latestMeasurement?.waist, unit: "cm", key: "waist" },
+                { label: "Quadril", value: latestMeasurement?.hip, unit: "cm", key: "hip" },
+                { label: "Coxa", value: latestMeasurement?.thigh, unit: "cm", key: "thigh" },
+                { label: "Braço", value: latestMeasurement?.arm, unit: "cm", key: "arm" },
+              ].filter(s => s.value).map((stat) => {
+                const diff = getDiff(stat.key);
+                return (
+                  <div key={stat.label} className="bg-muted/50 rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{stat.label}</p>
+                    <p className="text-lg font-bold text-foreground mt-0.5">{stat.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{stat.unit}</p>
+                    {diff && (
+                      <div className={`flex items-center justify-center gap-0.5 mt-1 ${
+                        parseFloat(diff) < 0 ? "text-green-500" : parseFloat(diff) > 0 ? "text-orange-500" : "text-muted-foreground"
+                      }`}>
+                        {parseFloat(diff) < 0 ? <TrendingDown className="w-3 h-3" /> : parseFloat(diff) > 0 ? <TrendingUp className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                        <span className="text-[10px] font-bold">{Math.abs(parseFloat(diff))} {stat.unit}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {bestVariation && (
+              <p className="text-xs text-green-600 font-medium mb-3">
+                ✨ Sua {bestVariation.label} reduziu {bestVariation.diff} {bestVariation.unit} desde que você começou.
+              </p>
+            )}
+          </>
+        ) : (
+          /* Empty state */
+          <div className="text-center py-4">
+            <h3 className="text-base font-heading text-foreground mb-2">📏 Suas medidas</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Registre hoje para ver sua evolução em números.
+            </p>
+            <Button
+              onClick={() => setShowMeasureForm(true)}
+              className="pink-gradient text-primary-foreground font-heading rounded-2xl shadow-lg"
+            >
+              Registrar minhas medidas agora
+            </Button>
           </div>
         )}
 
-        {!showMeasureForm ? (
-          <button
-            onClick={() => setShowMeasureForm(true)}
-            className="w-full text-center text-sm font-semibold text-primary py-3 border-t border-border"
-          >
-            Atualizar dados de hoje
-          </button>
-        ) : (
-          <div className="border-t border-border pt-4 mt-2">
+        {showMeasureForm && (
+          <div className={hasMeasurements ? "border-t border-border pt-4 mt-2" : "mt-4"}>
             <div className="grid grid-cols-2 gap-3">
               {fields.map((f) => (
                 <div key={f.key}>
@@ -450,104 +452,83 @@ const Evolucao = () => {
         )}
       </div>
 
-      {/* Full chart */}
-      {chartData.length > 1 && (
+      {/* Chart with metric selector */}
+      {measurements.length > 1 && (
         <div className="soft-card p-5 mb-4">
-          <h3 className="text-base font-heading text-foreground mb-4 flex items-center gap-2">
+          <h3 className="text-base font-heading text-foreground mb-3 flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-primary" />
             Histórico
           </h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={chartData}>
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} width={35} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  fontSize: 12,
-                }}
-                labelStyle={{ color: "hsl(var(--primary))" }}
-              />
-              <Line type="monotone" dataKey="peso" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} name="Peso (kg)" />
-              <Line type="monotone" dataKey="cintura" stroke="hsl(340 90% 70%)" strokeWidth={2} dot={{ r: 2 }} name="Cintura (cm)" />
-              <Line type="monotone" dataKey="quadril" stroke="hsl(0 0% 65%)" strokeWidth={2} dot={{ r: 2 }} name="Quadril (cm)" />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="flex gap-4 mt-3 justify-center">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-              <span className="w-3 h-1 rounded bg-primary inline-block" /> Peso
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-              <span className="w-3 h-1 rounded inline-block" style={{ backgroundColor: "hsl(340 90% 70%)" }} /> Cintura
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-              <span className="w-3 h-1 rounded inline-block" style={{ backgroundColor: "hsl(0 0% 65%)" }} /> Quadril
-            </span>
+
+          {/* Metric selector */}
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {METRIC_OPTIONS.map((metric) => (
+              <button
+                key={metric.key}
+                onClick={() => setSelectedMetric(metric)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  selectedMetric.key === metric.key
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {metric.label}
+              </button>
+            ))}
           </div>
+
+          {chartData.length > 1 ? (
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={chartData}>
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(0 0% 50%)" }} axisLine={false} tickLine={false} width={35} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "12px",
+                      fontSize: 12,
+                    }}
+                    labelStyle={{ color: "hsl(var(--primary))" }}
+                    formatter={(value: number) => [`${value} ${selectedMetric.unit}`, selectedMetric.label]}
+                  />
+                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} name={`${selectedMetric.label} (${selectedMetric.unit})`} />
+                </LineChart>
+              </ResponsiveContainer>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Registre mais uma medida de {selectedMetric.label.toLowerCase()} para ver o gráfico.
+            </p>
+          )}
         </div>
       )}
 
-      {/* Recent workouts */}
+      {/* Recent workouts — simplified */}
       {workouts.filter(w => w.completed).length > 0 && (
         <div className="soft-card p-5 mb-4">
           <h3 className="text-base font-heading text-foreground mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
             Últimos Treinos
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {workouts.filter(w => w.completed).slice(0, 5).map((w) => {
               const wJson = w.workout_json as any;
-              const title = wJson?.title || "Treino";
+              const title = wJson?.title || wJson?.name || wJson?.nome || "Treino";
               const summary = wJson?.tracking_summary;
-              const allExercises = summary?.total_exercises || wJson?.exercises?.length || wJson?.tri_sets?.reduce((a: number, t: any) => a + (t.exercises?.length || 0), 0) || 0;
-              const completedExercises = summary?.completed_exercises ?? allExercises;
-              const skipped = summary?.skipped_exercises ?? 0;
               const durationMins = summary?.duration_minutes;
-              const duration = durationMins ? `${durationMins} min` : (wJson?.estimated_duration || "~30 min");
-              const effort = w.feedback_effort === "facil" ? "😊 Fácil" : w.feedback_effort === "ideal" ? "💪 Ideal" : w.feedback_effort === "dificil" ? "🔥 Difícil" : "";
-              const effortColor = w.feedback_effort === "facil" ? "text-green-500" : w.feedback_effort === "ideal" ? "text-primary" : w.feedback_effort === "dificil" ? "text-orange-500" : "text-muted-foreground";
+              const duration = durationMins ? `${durationMins} min` : null;
+              const effortLabel = w.feedback_effort === "facil" ? "😊 Fácil" : w.feedback_effort === "ideal" ? "💪 Ideal" : w.feedback_effort === "dificil" ? "🔥 Difícil" : "";
 
               return (
-                <div key={w.id} className="bg-muted/40 rounded-2xl p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Dumbbell className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{title}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {format(new Date(w.date), "d 'de' MMM", { locale: ptBR })}
-                      </p>
-                    </div>
-                    {effort && (
-                      <span className={`text-xs font-semibold ${effortColor}`}>{effort}</span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-bold text-foreground">{completedExercises}</p>
-                        <p className="text-[9px] text-muted-foreground">Feitos</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
-                      <XCircle className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-bold text-foreground">{skipped}</p>
-                        <p className="text-[9px] text-muted-foreground">Restam</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-2">
-                      <Timer className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-bold text-foreground">{duration}</p>
-                        <p className="text-[9px] text-muted-foreground">Duração</p>
-                      </div>
-                    </div>
-                  </div>
+                <div key={w.id} className="bg-muted/40 rounded-xl px-4 py-3">
+                  <p className="text-sm font-bold text-foreground truncate">{title}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {format(new Date(w.date), "d 'de' MMM", { locale: ptBR })}
+                    {duration && ` · ${duration}`}
+                    {effortLabel && ` · ${effortLabel}`}
+                  </p>
                 </div>
               );
             })}
@@ -555,19 +536,21 @@ const Evolucao = () => {
 
           <div className="mt-4 pt-4 border-t border-border text-center">
             <p className="text-sm text-foreground font-medium">
-              {(() => {
-                const done = totalCompleted;
-                if (done === 0) return "Seu corpo está esperando por você. Comece hoje! 💪";
-                if (done === 1) return "Primeiro treino feito! O mais difícil já passou. Continue! 🌱";
-                if (done < 5) return `${done} treinos completos! Você está criando um hábito poderoso 🔥`;
-                if (done < 10) return "Você já está no ritmo! Sua disciplina inspira 🦁";
-                if (done < 20) return "Leoa dedicada! Sua evolução é visível a cada treino 🦁";
-                return `${done} treinos! Você é uma máquina de determinação! 👑`;
-              })()}
+              {totalCompleted === 0
+                ? "Seu corpo está esperando por você. Comece hoje! 💪"
+                : totalCompleted === 1
+                ? "Primeiro treino feito! O mais difícil já passou. Continue! 🌱"
+                : totalCompleted < 5
+                ? `${totalCompleted} treinos completos! Você está criando um hábito poderoso 🔥`
+                : totalCompleted < 10
+                ? "Você já está no ritmo! Sua disciplina inspira 🦁"
+                : totalCompleted < 20
+                ? "Leoa dedicada! Sua evolução é visível a cada treino 🦁"
+                : `${totalCompleted} treinos! Você é uma máquina de determinação! 👑`}
             </p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {streak > 0
-                ? `${streak} ${streak === 1 ? "dia" : "dias"} seguido${streak === 1 ? "" : "s"} treinando — não pare agora!`
+              {totalCompleted > 0
+                ? `${totalCompleted} ${totalCompleted === 1 ? "treino" : "treinos"} em ${daysSinceFirst} ${daysSinceFirst === 1 ? "dia" : "dias"} — continue assim!`
                 : "Cada treino é um passo rumo à sua melhor versão"}
             </p>
           </div>
