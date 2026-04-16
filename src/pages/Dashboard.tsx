@@ -82,6 +82,27 @@ const Dashboard = () => {
           setTodayWorkoutLabel(`📅 Hoje: Semana ${week} · Dia ${dayNum}${workoutName ? ` — ${workoutName}` : ""}`);
         }
       }
+      // Check last measurement date for reminder
+      const { data: latestMeas } = await supabase
+        .from("measurements")
+        .select("date")
+        .eq("profile_id", user.id)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestMeas) {
+        setLastMeasurementDate(latestMeas.date);
+        const daysSince = Math.floor((Date.now() - new Date(latestMeas.date).getTime()) / (1000 * 60 * 60 * 24));
+        const dismissed = localStorage.getItem(MEASUREMENT_REMINDER_KEY);
+        const dismissedDaysAgo = dismissed ? Math.floor((Date.now() - new Date(dismissed).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+        setShowMeasurementReminder(daysSince >= 7 && dismissedDaysAgo >= 7);
+      } else {
+        // No measurements at all — also show reminder
+        const dismissed = localStorage.getItem(MEASUREMENT_REMINDER_KEY);
+        const dismissedDaysAgo = dismissed ? Math.floor((Date.now() - new Date(dismissed).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+        setShowMeasurementReminder(dismissedDaysAgo >= 7);
+      }
     };
     fetchStats();
   }, [user]);
