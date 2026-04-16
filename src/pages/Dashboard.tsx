@@ -21,6 +21,8 @@ import card10min from "@/assets/card-10min.jpg";
 import cardSeca from "@/assets/card-seca.jpg";
 import TreinosClassicos from "@/components/TreinosClassicos";
 
+const MEASUREMENT_REMINDER_KEY = "measurement_reminder_dismissed_at";
+
 const Dashboard = () => {
   const { user, profile, subscription, loading } = useAuth();
   usePushNotifications();
@@ -31,6 +33,8 @@ const Dashboard = () => {
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const [todayWorkoutLabel, setTodayWorkoutLabel] = useState<string | null>(null);
   const [countdownText, setCountdownText] = useState("");
+  const [showMeasurementReminder, setShowMeasurementReminder] = useState(false);
+  const [lastMeasurementDate, setLastMeasurementDate] = useState<string | null>(null);
 
   // Compute unlock target date from trial_start_date + 7 days
   const trialStart = profile?.trial_start_date ? new Date(profile.trial_start_date) : null;
@@ -77,6 +81,27 @@ const Dashboard = () => {
         if (week && dayNum) {
           setTodayWorkoutLabel(`📅 Hoje: Semana ${week} · Dia ${dayNum}${workoutName ? ` — ${workoutName}` : ""}`);
         }
+      }
+      // Check last measurement date for reminder
+      const { data: latestMeas } = await supabase
+        .from("measurements")
+        .select("date")
+        .eq("profile_id", user.id)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestMeas) {
+        setLastMeasurementDate(latestMeas.date);
+        const daysSince = Math.floor((Date.now() - new Date(latestMeas.date).getTime()) / (1000 * 60 * 60 * 24));
+        const dismissed = localStorage.getItem(MEASUREMENT_REMINDER_KEY);
+        const dismissedDaysAgo = dismissed ? Math.floor((Date.now() - new Date(dismissed).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+        setShowMeasurementReminder(daysSince >= 7 && dismissedDaysAgo >= 7);
+      } else {
+        // No measurements at all — also show reminder
+        const dismissed = localStorage.getItem(MEASUREMENT_REMINDER_KEY);
+        const dismissedDaysAgo = dismissed ? Math.floor((Date.now() - new Date(dismissed).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+        setShowMeasurementReminder(dismissedDaysAgo >= 7);
       }
     };
     fetchStats();
@@ -317,6 +342,33 @@ const Dashboard = () => {
           {earnedCount} de {totalBadges} conquistas
         </p>
       </div>
+
+      {/* Measurement reminder card */}
+      {showMeasurementReminder && (
+        <div className="soft-card p-4 mb-6">
+          <p className="text-sm text-foreground font-medium mb-3">
+            📏 Já faz 7 dias sem atualizar suas medidas. Registra hoje?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => navigate("/evolucao")}
+              className="flex-1 pink-gradient text-primary-foreground font-heading rounded-xl h-10"
+            >
+              Atualizar agora
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                localStorage.setItem(MEASUREMENT_REMINDER_KEY, new Date().toISOString());
+                setShowMeasurementReminder(false);
+              }}
+              className="text-xs text-muted-foreground"
+            >
+              Depois
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* 4. Turbine seu Treino */}
       <TreinosClassicos />
