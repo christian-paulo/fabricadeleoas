@@ -309,7 +309,7 @@ const Checkout = () => {
   }, [isAuthenticated]);
 
   // Reset client secret when plan changes
-  const handlePlanChange = (newPlan: "semestral" | "monthly") => {
+  const handlePlanChange = (newPlan: PlanKey) => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
     setClientSecret(null);
