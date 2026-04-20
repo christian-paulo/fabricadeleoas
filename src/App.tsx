@@ -19,6 +19,7 @@ import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
 import TreinoClassicoDetalhe from "./pages/TreinoClassicoDetalhe";
 import AdminLogin from "./pages/AdminLogin";
+import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/treinos" element={<PlanoProtocolo />} />
                 <Route path="/treinos/detalhe" element={<TreinoDetalhe />} />
+                <Route path="/feed" element={<Feed />} />
                 <Route path="/evolucao" element={<Evolucao />} />
                 <Route path="/perfil" element={<Perfil />} />
                 <Route path="/admin" element={<Admin />} />
