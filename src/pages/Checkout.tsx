@@ -780,61 +780,52 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
           <p className="text-xs text-muted-foreground text-center">Protocolo Personalizado</p>
         </div>
 
-        {/* Plan cards */}
-        <div className="space-y-2.5 mb-4">
-          {/* Semestral Plan */}
-          <button
-            onClick={() => onPlanChange("semestral")}
-            className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all relative ${
-              selectedPlan === "semestral"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "border-border bg-background"
-            }`}
-          >
-            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-              <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full leading-tight">
-                MAIS POPULAR!
-              </span>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <div>
-                <p className="font-heading text-sm text-foreground">6 meses</p>
-                <p className="text-[11px] text-muted-foreground">R$ 119,90/semestre</p>
-              </div>
-              <div className="text-right">
-                <p className="font-heading text-sm text-foreground">R$ 19,98/mês</p>
-                <span className="text-[10px] text-muted-foreground/70 bg-muted px-1.5 py-0.5 rounded">60% OFF</span>
-              </div>
-            </div>
-            <div className="mt-2 bg-green-500/10 border border-green-500/30 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5">
-              <span className="text-green-600 text-xs">🎁</span>
-              <span className="text-green-600 text-xs font-bold">3 DIAS GRÁTIS</span>
-            </div>
-          </button>
-
-          {/* Monthly Plan */}
-          <button
-            onClick={() => onPlanChange("monthly")}
-            className={`w-full text-left rounded-xl border-2 px-3 py-2.5 transition-all ${
-              selectedPlan === "monthly"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "border-border bg-background"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-heading text-sm text-foreground">1 mês</p>
-                <p className="text-[11px] text-muted-foreground">R$ 49,90/mês</p>
-              </div>
-              <p className="font-heading text-sm text-foreground">R$ 49,90</p>
-            </div>
-          </button>
+        {/* Plan cards - 3 columns */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {(["monthly", "semestral", "annual"] as PlanKey[]).map((key) => {
+            const p = PLANS[key];
+            const isSelected = selectedPlan === key;
+            const isPopular = !!p.badge;
+            return (
+              <button
+                key={key}
+                onClick={() => onPlanChange(key)}
+                className={`relative text-center rounded-xl border-2 px-2 py-3 transition-all flex flex-col items-center justify-between min-h-[140px] ${
+                  isSelected
+                    ? "border-primary bg-primary/5 shadow-md"
+                    : "border-border bg-background"
+                } ${isPopular ? "mt-2" : ""}`}
+              >
+                {isPopular && (
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                    <span className="bg-primary text-primary-foreground text-[9px] font-bold px-2 py-0.5 rounded-full leading-tight flex items-center gap-0.5">
+                      <span>⭐</span> {p.badge}
+                    </span>
+                  </div>
+                )}
+                <p className="font-heading text-[11px] text-foreground uppercase tracking-wide">{p.label}</p>
+                <div className="my-1">
+                  <p className="font-heading text-base text-foreground leading-tight">{p.priceMain}</p>
+                  {p.priceSecondary && (
+                    <p className="text-[10px] text-muted-foreground">{p.priceSecondary}</p>
+                  )}
+                </div>
+                {p.trialDays > 0 ? (
+                  <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded">
+                    {p.trialDays} dias grátis
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Sem trial</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Trial info for semestral */}
-        {selectedPlan === "semestral" && (
+        {/* Trial info for selected plan */}
+        {plan.trialDays > 0 && (
           <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
-            <span>🎁</span> Desfrute de 3 dias de teste gratuito, depois R$ 119,90/semestre
+            <span>🎁</span> Desfrute de {plan.trialDays} dias de teste gratuito, depois {plan.orderPrice}
           </p>
         )}
 
