@@ -22,9 +22,10 @@ import {
   Users, Dumbbell, Plus, Pencil, Trash2, Eye, LogOut,
   ChevronLeft, ChevronRight, Search, LayoutDashboard, ArrowLeft,
   DollarSign, TrendingDown, TrendingUp, UserPlus, AlertTriangle,
-  Activity, Target, Globe, ClipboardList, Download,
+  Activity, Target, Globe, ClipboardList, Download, MessageSquare, Pin,
 } from "lucide-react";
 import { toast } from "sonner";
+import NewPostModal from "@/components/NewPostModal";
 
 type Exercise = {
   id?: string;
@@ -46,7 +47,7 @@ const emptyExercise: Exercise = {
 const ITEMS_PER_PAGE = 10;
 const PRICE = 49.90;
 
-type Section = "overview" | "students" | "exercises" | "quiz";
+type Section = "overview" | "students" | "exercises" | "quiz" | "feed";
 
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -78,13 +79,61 @@ const Admin = () => {
   const [quizGoalFilter, setQuizGoalFilter] = useState("all");
   const [quizPage, setQuizPage] = useState(1);
 
+  // Feed
+  const [feedPosts, setFeedPosts] = useState<any[]>([]);
+  const [showNewPost, setShowNewPost] = useState(false);
+
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate("/admin/login");
   }, [user, isAdmin, loading]);
 
   useEffect(() => {
-    if (isAdmin) { fetchProfiles(); fetchExercises(); fetchQuizResponses(); }
+    if (isAdmin) { fetchProfiles(); fetchExercises(); fetchQuizResponses(); fetchFeed(); }
   }, [isAdmin]);
+
+  const fetchFeed = async () => {
+    const { data } = await supabase
+      .from("posts")
+      .select("*")
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (!data) return;
+    const ids = [...new Set(data.map((p: any) => p.profile_id))];
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", ids);
+    const pmap: Record<string, any> = {};
+    (profs || []).forEach((p: any) => { pmap[p.id] = p; });
+    const postIds = data.map((p: any) => p.id);
+    const { data: likes } = await supabase
+      .from("post_likes")
+      .select("post_id")
+      .in("post_id", postIds);
+    const likeMap: Record<string, number> = {};
+    (likes || []).forEach((l: any) => { likeMap[l.post_id] = (likeMap[l.post_id] || 0) + 1; });
+    setFeedPosts(data.map((p: any) => ({ ...p, author: pmap[p.profile_id], like_count: likeMap[p.id] || 0 })));
+  };
+
+  const adminTogglePin = async (post: any) => {
+    if (!post.is_pinned) {
+      await supabase.from("posts").update({ is_pinned: false }).eq("is_pinned", true);
+    }
+    const { error } = await supabase
+      .from("posts")
+      .update({ is_pinned: !post.is_pinned })
+      .eq("id", post.id);
+    if (error) toast.error("Erro ao fixar");
+    else { toast.success(post.is_pinned ? "Desafixado" : "Fixado no topo"); fetchFeed(); }
+  };
+
+  const adminDeletePost = async (post: any) => {
+    if (!confirm("Excluir este post da Alcateia?")) return;
+    const { error } = await supabase.from("posts").delete().eq("id", post.id);
+    if (error) toast.error("Erro ao excluir");
+    else { toast.success("Post excluído"); fetchFeed(); }
+  };
 
   // ─── Helpers ───
   const isInTrial = (p: any) => {
@@ -301,6 +350,7 @@ const Admin = () => {
     { title: "Alunas", section: "students" as Section, icon: Users },
     { title: "Respostas Quiz", section: "quiz" as Section, icon: ClipboardList },
     { title: "Exercícios", section: "exercises" as Section, icon: Dumbbell },
+    { title: "Feed Alcateia", section: "feed" as Section, icon: MessageSquare },
   ];
 
   // Drawer helpers
