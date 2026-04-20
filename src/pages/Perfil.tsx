@@ -221,6 +221,25 @@ const Perfil = () => {
           </div>
           <p className="font-heading text-base text-foreground">Notificações</p>
         </div>
+
+        {pushPermission !== "granted" && (
+          <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20">
+            <p className="text-sm font-bold text-foreground mb-1">Ative as notificações</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              {pushPermission === "denied"
+                ? "Você bloqueou as notificações. Habilite nas configurações do navegador."
+                : "Receba avisos de curtidas e novidades da Alcateia."}
+            </p>
+            <Button
+              onClick={handleEnablePush}
+              disabled={pushPermission === "denied" || pushPermission === "unsupported"}
+              className="w-full pink-gradient text-primary-foreground font-heading h-11 rounded-xl"
+            >
+              {pushPermission === "denied" ? "Bloqueadas" : "Ativar notificações"}
+            </Button>
+          </div>
+        )}
+
         <label className="flex items-center justify-between gap-3 cursor-pointer">
           <div>
             <p className="text-sm font-bold text-foreground">Curtidas no meu post</p>
