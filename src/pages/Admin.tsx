@@ -415,6 +415,7 @@ const Admin = () => {
               {activeSection === "students" && "Gestão de Alunas"}
               {activeSection === "quiz" && "Respostas do Quiz"}
               {activeSection === "exercises" && "Biblioteca de Exercícios"}
+              {activeSection === "feed" && "Feed Alcateia"}
             </h1>
           </header>
 
