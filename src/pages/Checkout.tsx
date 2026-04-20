@@ -756,7 +756,7 @@ const SuccessStoriesAutoCarousel = () => {
 };
 
 // ─── Order Summary Component ────────────────────────────────────
-const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: "semestral" | "monthly"; onPlanChange: (p: "semestral" | "monthly") => void }) => {
+const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; onPlanChange: (p: PlanKey) => void }) => {
   const { data: onboardingData } = useOnboarding();
   const plan = PLANS[selectedPlan];
 
