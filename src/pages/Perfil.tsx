@@ -16,6 +16,26 @@ const Perfil = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [notifyLikes, setNotifyLikes] = useState<boolean>(true);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | "unsupported">(
+    typeof Notification !== "undefined" ? Notification.permission : "unsupported"
+  );
+  const { registerPush } = usePushNotifications();
+
+  const handleEnablePush = async () => {
+    if (typeof Notification === "undefined") {
+      toast.error("Seu navegador não suporta notificações");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      toast.error("Notificações bloqueadas. Habilite nas configurações do navegador.");
+      return;
+    }
+    await registerPush();
+    setPushPermission(Notification.permission);
+    if (Notification.permission === "granted") {
+      toast.success("Notificações ativadas! 🦁");
+    }
+  };
 
   useEffect(() => {
     if (user) {
