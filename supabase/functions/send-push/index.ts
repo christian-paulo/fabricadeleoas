@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
       callerUserId = user.id
     }
 
-    const { profile_id, title, body, message_key, trial_day } = await req.json()
+    const { profile_id, title, body, message_key, trial_day, url, bypass_limit } = await req.json()
     if (!profile_id || !title || !body) {
       return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
@@ -265,32 +265,37 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
+    // Only service-role callers may bypass the daily limit
+    const allowBypass = isServiceRole && bypass_limit === true
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Check max 2 pushes per day
+    // Check max 2 pushes per day (skipped for bypass)
     const today = new Date().toISOString().split('T')[0]
-    const { count } = await supabase.from('notification_log')
-      .select('id', { count: 'exact', head: true })
-      .eq('profile_id', profile_id)
-      .eq('date', today)
-    
-    if ((count || 0) >= 2) {
-      return new Response(JSON.stringify({ skipped: true, reason: 'max_daily_limit' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+    if (!allowBypass) {
+      const { count } = await supabase.from('notification_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('profile_id', profile_id)
+        .eq('date', today)
+
+      if ((count || 0) >= 2) {
+        return new Response(JSON.stringify({ skipped: true, reason: 'max_daily_limit' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
     }
 
-    // Check if this exact message was already sent today
-    if (message_key) {
+    // Check if this exact message was already sent today (skipped for bypass — caller manages dedup)
+    if (message_key && !allowBypass) {
       const { count: existing } = await supabase.from('notification_log')
         .select('id', { count: 'exact', head: true })
         .eq('profile_id', profile_id)
         .eq('message_key', message_key)
         .eq('date', today)
-      
+
       if ((existing || 0) > 0) {
         return new Response(JSON.stringify({ skipped: true, reason: 'already_sent' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -312,7 +317,7 @@ Deno.serve(async (req) => {
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!
     const vapidPublicKey = 'BFhFpj1YIfrATG_wnPe-k3LyFqUmgQmI2xFiCPn1qc_EIWUtw84_irWSu8druPWaEOP2i7gnBoOMwXDPA0rG8nU'
 
-    const payload = JSON.stringify({ title, body })
+    const payload = JSON.stringify({ title, body, url: url || '/dashboard' })
     let sent = 0
 
     for (const sub of subs) {
