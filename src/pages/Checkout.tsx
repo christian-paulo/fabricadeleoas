@@ -295,7 +295,7 @@ const Checkout = () => {
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
   const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
-  const [selectedPlan, setSelectedPlan] = useState<"semestral" | "monthly">("semestral");
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>("semestral");
 
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
