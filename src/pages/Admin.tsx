@@ -714,9 +714,81 @@ const Admin = () => {
                   label="exercício" onPrev={() => setExercisePage(exercisePage - 1)} onNext={() => setExercisePage(exercisePage + 1)} />
               </div>
             )}
+
+            {/* ===== FEED ===== */}
+            {activeSection === "feed" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">{feedPosts.length} posts publicados</p>
+                  <Button onClick={() => setShowNewPost(true)} className="gold-gradient text-primary-foreground font-heading h-10">
+                    <Plus size={16} className="mr-2" /> Postar como Gilvan
+                  </Button>
+                </div>
+
+                <div className="neu-card overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-border">
+                        <TableHead className="text-muted-foreground">Autora</TableHead>
+                        <TableHead className="text-muted-foreground">Legenda</TableHead>
+                        <TableHead className="text-muted-foreground">Fotos</TableHead>
+                        <TableHead className="text-muted-foreground">Curtidas</TableHead>
+                        <TableHead className="text-muted-foreground">Status</TableHead>
+                        <TableHead className="text-muted-foreground">Data</TableHead>
+                        <TableHead className="text-muted-foreground">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {feedPosts.map((p: any) => (
+                        <TableRow key={p.id} className="border-border">
+                          <TableCell className="text-foreground font-medium whitespace-nowrap">
+                            {p.author?.full_name || "—"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm max-w-[280px] truncate">
+                            {p.caption || "—"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {(p.image_urls || []).length}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{p.like_count}</TableCell>
+                          <TableCell>
+                            {p.is_pinned ? (
+                              <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-primary/20 text-primary inline-flex items-center gap-1">
+                                <Pin size={10} /> Fixado
+                              </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {new Date(p.created_at).toLocaleDateString("pt-BR")}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => adminTogglePin(p)} title={p.is_pinned ? "Desafixar" : "Fixar"}>
+                                <Pin size={14} className={p.is_pinned ? "text-primary fill-primary" : "text-muted-foreground"} />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => adminDeletePost(p)}>
+                                <Trash2 size={14} className="text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {feedPosts.length === 0 && (
+                        <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum post ainda</TableCell></TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
           </main>
         </div>
       </div>
+
+      <NewPostModal open={showNewPost} onOpenChange={setShowNewPost} onPosted={fetchFeed} />
+
 
       {/* ===== EXERCISE MODAL ===== */}
       <Dialog open={showExerciseModal} onOpenChange={setShowExerciseModal}>
