@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const Perfil = () => {
   const { user, profile, subscription, signOut } = useAuth();
@@ -15,6 +16,26 @@ const Perfil = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [notifyLikes, setNotifyLikes] = useState<boolean>(true);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | "unsupported">(
+    typeof Notification !== "undefined" ? Notification.permission : "unsupported"
+  );
+  const { registerPush } = usePushNotifications();
+
+  const handleEnablePush = async () => {
+    if (typeof Notification === "undefined") {
+      toast.error("Seu navegador não suporta notificações");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      toast.error("Notificações bloqueadas. Habilite nas configurações do navegador.");
+      return;
+    }
+    await registerPush();
+    setPushPermission(Notification.permission);
+    if (Notification.permission === "granted") {
+      toast.success("Notificações ativadas! 🦁");
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -200,6 +221,25 @@ const Perfil = () => {
           </div>
           <p className="font-heading text-base text-foreground">Notificações</p>
         </div>
+
+        {pushPermission !== "granted" && (
+          <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20">
+            <p className="text-sm font-bold text-foreground mb-1">Ative as notificações</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              {pushPermission === "denied"
+                ? "Você bloqueou as notificações. Habilite nas configurações do navegador."
+                : "Receba avisos de curtidas e novidades da Alcateia."}
+            </p>
+            <Button
+              onClick={handleEnablePush}
+              disabled={pushPermission === "denied" || pushPermission === "unsupported"}
+              className="w-full pink-gradient text-primary-foreground font-heading h-11 rounded-xl"
+            >
+              {pushPermission === "denied" ? "Bloqueadas" : "Ativar notificações"}
+            </Button>
+          </div>
+        )}
+
         <label className="flex items-center justify-between gap-3 cursor-pointer">
           <div>
             <p className="text-sm font-bold text-foreground">Curtidas no meu post</p>
