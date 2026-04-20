@@ -28,7 +28,7 @@ const BottomNav = () => {
                 aria-label={label}
               >
                 <div
-                  className={`w-14 h-14 rounded-full pink-gradient flex items-center justify-center shadow-lg shadow-primary/40 border-4 border-background transition-transform ${
+                  className={`w-14 h-14 rounded-full pink-gradient flex items-center justify-center shadow-lg shadow-primary/40 transition-transform ${
                     active ? "scale-110" : "group-hover:scale-105"
                   }`}
                 >
