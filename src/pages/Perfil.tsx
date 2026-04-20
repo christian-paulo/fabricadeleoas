@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import AppLayout from "@/components/AppLayout";
-import { User, CreditCard, HelpCircle, LogOut, Camera } from "lucide-react";
+import { User, CreditCard, HelpCircle, LogOut, Camera, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,10 +14,37 @@ const Perfil = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [notifyLikes, setNotifyLikes] = useState<boolean>(true);
 
   useEffect(() => {
-    if (user) loadAvatar();
+    if (user) {
+      loadAvatar();
+      loadNotifyPref();
+    }
   }, [user]);
+
+  const loadNotifyPref = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("notify_likes")
+      .eq("id", user.id)
+      .single();
+    if (data) setNotifyLikes(data.notify_likes !== false);
+  };
+
+  const toggleNotifyLikes = async (value: boolean) => {
+    if (!user) return;
+    setNotifyLikes(value);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ notify_likes: value })
+      .eq("id", user.id);
+    if (error) {
+      setNotifyLikes(!value);
+      toast.error("Erro ao salvar preferência");
+    }
+  };
 
   const loadAvatar = async () => {
     if (!user) return;
@@ -163,6 +191,22 @@ const Perfil = () => {
             </div>
           </button>
         ))}
+      </div>
+
+      <div className="soft-card p-5 mt-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+            <Bell size={18} className="text-primary" />
+          </div>
+          <p className="font-heading text-base text-foreground">Notificações</p>
+        </div>
+        <label className="flex items-center justify-between gap-3 cursor-pointer">
+          <div>
+            <p className="text-sm font-bold text-foreground">Curtidas no meu post</p>
+            <p className="text-xs text-muted-foreground">Avisar quando alguém curtir</p>
+          </div>
+          <Switch checked={notifyLikes} onCheckedChange={toggleNotifyLikes} />
+        </label>
       </div>
 
       <Button onClick={handleSignOut}

@@ -1,9 +1,10 @@
-import { Home, Dumbbell, TrendingUp, User } from "lucide-react";
+import { Home, Dumbbell, Users, TrendingUp, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
   { icon: Dumbbell, label: "Protocolo", path: "/treinos" },
+  { icon: Users, label: "Alcateia", path: "/feed" },
   { icon: TrendingUp, label: "Evolução", path: "/evolucao" },
   { icon: User, label: "Perfil", path: "/perfil" },
 ];
@@ -19,11 +20,11 @@ const BottomNav = () => {
           const active = location.pathname === path;
           return (
             <button key={path} onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-1 px-4 py-2 transition-colors rounded-xl ${
+              className={`flex flex-col items-center gap-1 px-2 py-2 transition-colors rounded-xl ${
                 active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}>
-              <Icon size={24} strokeWidth={active ? 2.8 : 2} />
-              <span className={`text-xs font-semibold ${active ? "text-primary" : ""}`}>{label}</span>
+              <Icon size={22} strokeWidth={active ? 2.8 : 2} />
+              <span className={`text-[11px] font-semibold ${active ? "text-primary" : ""}`}>{label}</span>
               {active && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
           );

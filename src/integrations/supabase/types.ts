@@ -200,6 +200,80 @@ export type Database = {
           },
         ]
       }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_likes_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          caption: string
+          created_at: string
+          id: string
+          image_urls: string[]
+          is_pinned: boolean
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          is_pinned?: boolean
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          is_pinned?: boolean
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           canceled_at: string | null
@@ -212,6 +286,7 @@ export type Database = {
           id: string
           is_subscriber: boolean | null
           medication_feeling: string | null
+          notify_likes: boolean
           onboarding_completed: boolean | null
           pain_location: string | null
           stripe_customer_id: string | null
@@ -240,6 +315,7 @@ export type Database = {
           id: string
           is_subscriber?: boolean | null
           medication_feeling?: string | null
+          notify_likes?: boolean
           onboarding_completed?: boolean | null
           pain_location?: string | null
           stripe_customer_id?: string | null
@@ -268,6 +344,7 @@ export type Database = {
           id?: string
           is_subscriber?: boolean | null
           medication_feeling?: string | null
+          notify_likes?: boolean
           onboarding_completed?: boolean | null
           pain_location?: string | null
           stripe_customer_id?: string | null
