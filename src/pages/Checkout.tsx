@@ -336,11 +336,26 @@ const Checkout = () => {
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
 
-  // If already authenticated, go straight to payment
+  // Detecta retorno do desafio 3DS (Stripe redireciona para /checkout?payment=success)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success" && !isAuthenticated) {
+      toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
+      setStep("registration");
+      // Limpa a query para evitar re-disparo
+      window.history.replaceState({}, "", "/checkout");
+    }
+  }, [isAuthenticated]);
+
+  // If already authenticated, go straight to payment (ou dashboard se veio do 3DS)
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
       setEmailConfirmed(true);
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("payment") === "success") {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [isAuthenticated]);
 
