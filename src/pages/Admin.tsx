@@ -348,7 +348,23 @@ const Admin = () => {
     };
   }, [profiles]);
 
-  // ─── Chart Data ───
+  // ─── Plan distribution (active subscribers only) ───
+  const planDistribution = useMemo(() => {
+    const active = profiles.filter((p) => getStatus(p) === "ativa");
+    const counts = { monthly: 0, semestral: 0, annual: 0 };
+    const revenue = { monthly: 0, semestral: 0, annual: 0 };
+    active.forEach((p) => {
+      const key = detectPlan(p.subscription_plan);
+      counts[key]++;
+      revenue[key] += mrrOf(p.subscription_plan);
+    });
+    const total = active.length;
+    return [
+      { key: "semestral", label: "Semestral", price: "R$ 119,90 / 6 meses", count: counts.semestral, mrr: revenue.semestral, pct: total ? (counts.semestral / total) * 100 : 0, color: "hsl(46 85% 55%)" },
+      { key: "annual", label: "Anual", price: "R$ 197,00 / ano", count: counts.annual, mrr: revenue.annual, pct: total ? (counts.annual / total) * 100 : 0, color: "hsl(142 70% 45%)" },
+      { key: "monthly", label: "Mensal", price: "R$ 39,90 / mês", count: counts.monthly, mrr: revenue.monthly, pct: total ? (counts.monthly / total) * 100 : 0, color: "hsl(210 80% 60%)" },
+    ];
+  }, [profiles]);
   const signupChartData = useMemo(() => {
     const days: Record<string, number> = {};
     const now = new Date();
@@ -554,6 +570,51 @@ const Admin = () => {
                     <KpiCard icon={Target} label="LTV Estimado" value={`R$ ${kpis.ltv.toFixed(0)}`} color="text-accent" />
                   </div>
                 </div>
+
+                {/* Plan Distribution */}
+                <div>
+                  <h2 className="text-sm font-heading text-muted-foreground uppercase tracking-widest mb-3">📊 Planos Escolhidos (Ativas)</h2>
+                  <div className="neu-card p-5">
+                    {kpis.active === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhuma assinante ativa ainda.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {planDistribution.map((p) => (
+                          <div key={p.key}>
+                            <div className="flex items-center justify-between mb-1.5 gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: p.color }}
+                                />
+                                <span className="font-heading text-sm text-foreground">{p.label}</span>
+                                <span className="text-xs text-muted-foreground hidden sm:inline">· {p.price}</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="text-muted-foreground">
+                                  <strong className="text-foreground font-heading text-sm">{p.count}</strong> aluna{p.count === 1 ? "" : "s"}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  MRR: <strong className="text-primary font-heading text-sm">R$ {p.mrr.toFixed(2).replace(".", ",")}</strong>
+                                </span>
+                                <span className="font-heading text-sm text-foreground tabular-nums w-12 text-right">
+                                  {p.pct.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${p.pct}%`, backgroundColor: p.color }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
 
                 {/* User KPIs */}
                 <div>
