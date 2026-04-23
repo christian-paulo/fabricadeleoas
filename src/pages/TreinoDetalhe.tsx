@@ -553,7 +553,7 @@ const Treinos = () => {
 
           {/* Floating bottom bar */}
           {!completed ? (
-            <div className="fixed bottom-20 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+            <div className="fixed bottom-24 left-0 right-0 z-40 flex items-center justify-center gap-3 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
               {workoutStarted && (
                 <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-4 shadow-lg">
                   <Timer className="w-5 h-5 text-primary" />
