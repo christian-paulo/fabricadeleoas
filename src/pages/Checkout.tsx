@@ -20,7 +20,12 @@ import dep5 from "@/assets/dep5.webp";
 import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 import printApp from "@/assets/print-app.webp";
 import atual1 from "@/assets/atual1.webp";
+import atual2 from "@/assets/atual2.webp";
+import atual3 from "@/assets/atual3.webp";
+import atual4 from "@/assets/atual4.webp";
+import desejadoSaudavel from "@/assets/desejado-saudavel.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
+import desejadoMusculosa from "@/assets/desejado-musculosa.webp";
 import logoLeoa from "@/assets/logo-leoa-pink.png";
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
@@ -572,7 +577,22 @@ const ReservedSlotBanner = () => {
   );
 };
 
-const BeforeAfterPreview = () => {
+const CORPO_ATUAL_MAP: Record<string, string> = {
+  "Médio": atual1,
+  "Flácida": atual2,
+  "Magro": atual3,
+  "Tonificada": atual4,
+};
+const CORPO_DESEJADO_MAP: Record<string, string> = {
+  "Saudável e Funcional": desejadoSaudavel,
+  "Definida e com Curvas": desejadoDefinida,
+  "Musculosa": desejadoMusculosa,
+};
+
+const BeforeAfterPreview = ({ corpoAtual, corpoDesejado }: { corpoAtual: string; corpoDesejado: string }) => {
+  const imgAtual = CORPO_ATUAL_MAP[corpoAtual] || atual1;
+  const imgDesejado = CORPO_DESEJADO_MAP[corpoDesejado] || desejadoDefinida;
+
   const beforeBars = [
     { label: "Amor próprio e orgulho do corpo", filled: 1, total: 6, percent: null as string | null },
     { label: "Confiança ao se olhar no espelho", filled: 1, total: 6, percent: "25%", caption: "Baixo" },
@@ -611,7 +631,7 @@ const BeforeAfterPreview = () => {
         <div>
           <p className="text-center font-heading text-sm text-destructive mb-2">Agora</p>
           <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
-            <img src={atual1} alt="Antes do programa" className="w-full h-full object-cover" />
+            <img src={imgAtual} alt="Antes do programa" className="w-full h-full object-cover" />
           </div>
           <div className="mt-4 space-y-3">
             {beforeBars.map((b, i) => (
@@ -633,7 +653,7 @@ const BeforeAfterPreview = () => {
         <div>
           <p className="text-center font-heading text-sm text-success mb-2">Após o programa</p>
           <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
-            <img src={desejadoDefinida} alt="Depois do programa" className="w-full h-full object-cover" />
+            <img src={imgDesejado} alt="Depois do programa" className="w-full h-full object-cover" />
           </div>
           <div className="mt-4 space-y-3">
             {afterBars.map((b, i) => (
@@ -892,7 +912,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
     <div className="flex flex-col gap-6">
       {/* Pre-checkout persuasion sections */}
       <ReservedSlotBanner />
-      <BeforeAfterPreview />
+      <BeforeAfterPreview corpoAtual={onboardingData.corpo_atual} corpoDesejado={onboardingData.corpo_desejado} />
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
