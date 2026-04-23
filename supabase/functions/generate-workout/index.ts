@@ -283,7 +283,7 @@ Gere o treino número ${nextWorkoutNumber}.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-6",
+        model: "claude-sonnet-4-6",
         max_tokens: 2048,
         system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: userPrompt }],
