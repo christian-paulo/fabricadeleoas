@@ -92,13 +92,16 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }} />
-      <Button type="submit" disabled={!stripe || loading}
+      <PaymentElement
+        onReady={() => setPaymentReady(true)}
+        options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }}
+      />
+      <Button type="submit" disabled={!stripe || !paymentReady || loading}
         className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
-        {loading ? (
+        {loading || !paymentReady ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            Processando...
+            {loading ? "Processando..." : "Carregando..."}
           </span>
         ) : (
           <span className="flex items-center gap-2">
