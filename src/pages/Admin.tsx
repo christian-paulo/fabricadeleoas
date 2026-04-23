@@ -1044,6 +1044,46 @@ const Admin = () => {
                   )}
                 </div>
               </div>
+
+              {/* Section 4: Histórico de Treinos */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-heading text-muted-foreground uppercase tracking-widest">🏋️ Histórico de Treinos</h3>
+                <div className="neu-card p-4 max-h-96 overflow-y-auto">
+                  {completedWorkouts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhum treino concluído ainda</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {completedWorkouts.slice(0, 50).map((w: any) => {
+                        const wj = w.workout_json || {};
+                        const ts = wj.tracking_summary || {};
+                        const title = wj.title || wj.name || "Treino";
+                        const realDuration = ts.real_duration_min || ts.duration_min;
+                        const exercisesCount = Array.isArray(wj.exercises) ? wj.exercises.length : (ts.exercises_count || null);
+                        return (
+                          <li key={w.id} className="bg-secondary rounded-lg p-3 text-sm">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-foreground truncate">{title}</span>
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {new Date(w.date).toLocaleDateString("pt-BR")}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
+                              {exercisesCount && <span>{exercisesCount} exercícios</span>}
+                              {realDuration && <span>⏱ {Math.round(realDuration)} min</span>}
+                              {w.feedback_effort && <span>RPE: {w.feedback_effort}</span>}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                  {completedWorkouts.length > 50 && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Mostrando 50 de {completedWorkouts.length} treinos
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </SheetContent>
