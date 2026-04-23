@@ -535,6 +535,9 @@ const Checkout = () => {
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
         </div>
 
+        {/* CTA de urgência */}
+        <UrgencyCTA onCta={() => document.getElementById("checkout-form-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
+
         {/* FAQ - última seção */}
         <CheckoutFAQ />
       </div>
