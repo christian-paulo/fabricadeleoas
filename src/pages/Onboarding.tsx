@@ -49,6 +49,7 @@ import RulerSlider from "@/components/RulerSlider";
 import { Slider } from "@/components/ui/slider";
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from "@/contexts/OnboardingContext";
 import { toast } from "sonner";
+import { trackQuizFirstClick } from "@/lib/quizTracking";
 
 
 const Onboarding = () => {
