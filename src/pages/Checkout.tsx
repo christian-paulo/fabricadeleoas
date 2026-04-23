@@ -131,8 +131,23 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
   const [whatsapp, setWhatsapp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { captureUtms(); }, []);
+
+  // Foca a aluna no formulário de cadastro assim que ele aparece
+  useEffect(() => {
+    const t = setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Pequeno delay extra para o scroll terminar antes do focus (evita o teclado mobile reverter o scroll)
+      setTimeout(() => {
+        if (!fullName) firstFieldRef.current?.focus({ preventScroll: true });
+      }, 350);
+    }, 50);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveOnboardingData = async (userId: string) => {
     try {
@@ -229,7 +244,7 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
   };
 
   return (
-    <div className="soft-card p-6 md:p-8 order-1 md:order-2">
+    <div ref={containerRef} className="soft-card p-6 md:p-8 order-1 md:order-2 scroll-mt-4">
       <h2 className="font-heading text-xl text-foreground mb-2">
         Crie sua conta para continuar
       </h2>
@@ -240,7 +255,7 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label className="text-xs text-muted-foreground">Nome completo</Label>
-          <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+          <Input ref={firstFieldRef} type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
             placeholder="Seu nome completo" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
         </div>
         <div>
