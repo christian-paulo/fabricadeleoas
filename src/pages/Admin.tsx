@@ -258,7 +258,7 @@ const Admin = () => {
     setDrawerStudent(profile);
     const [{ data: mData }, { data: wData }] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", profile.id).order("date", { ascending: true }),
-      supabase.from("workouts").select("*").eq("profile_id", profile.id).order("date", { ascending: false }).limit(30),
+      supabase.from("workouts").select("*").eq("profile_id", profile.id).order("date", { ascending: false }).limit(500),
     ]);
     setDrawerMeasurements(mData || []);
     setDrawerWorkouts(wData || []);
