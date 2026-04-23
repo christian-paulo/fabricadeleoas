@@ -1,6 +1,6 @@
 {
   "name": "Fábrica de Leoas",
-  "short_name": "Leoas",
+  "short_name": "Fábrica de Leoas",
   "description": "Pare de Treinar sem Resultado! Seu treino personalizado na palma da mão.",
   "start_url": "/dashboard",
   "display": "standalone",
