@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 const ProtectedRoute = () => {
-  const { user, profile, subscription, loading } = useAuth();
+  const { user, profile, subscription, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -25,7 +25,10 @@ const ProtectedRoute = () => {
 
   // Onboarding is optional — no redirect to quiz
 
-  // Subscription check removed — users access the app freely
+  // Subscription check: redirect to checkout if not subscribed and not admin
+  if (!isAdmin && subscription !== null && !subscription.subscribed) {
+    return <Navigate to="/checkout" replace />;
+  }
 
   return <Outlet />;
 };
