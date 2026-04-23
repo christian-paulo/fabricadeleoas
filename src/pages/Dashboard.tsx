@@ -347,7 +347,9 @@ const Dashboard = () => {
       {showMeasurementReminder && (
         <div className="soft-card p-4 mb-6">
           <p className="text-sm text-foreground font-medium mb-3">
-            📏 Já faz 7 dias sem atualizar suas medidas. Registra hoje?
+            📏 {lastMeasurementDate
+              ? "Já faz 7 dias sem atualizar suas medidas. Registra hoje?"
+              : "Adicione suas primeiras medidas para vermos sua evolução no futuro"}
           </p>
           <div className="flex gap-2">
             <Button
