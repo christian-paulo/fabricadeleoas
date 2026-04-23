@@ -341,6 +341,7 @@ const Checkout = () => {
 
   // Load checkout when we have an email and are on payment step
   useEffect(() => {
+    if (step !== "payment") return;
     if (!emailConfirmed || !checkoutEmail || clientSecret) return;
     setLoading(true);
     const createIntent = async () => {
@@ -363,8 +364,10 @@ const Checkout = () => {
           const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
           if (fnError) throw fnError;
           if (data.already_subscribed) {
-            toast.info("Este email já possui uma assinatura ativa! Faça login.");
-            navigate("/auth");
+            // Pagamento já realizado para este email — pular para criação de conta
+            toast.success("Pagamento já confirmado! Crie sua conta para continuar. 🦁");
+            setStep("registration");
+            setLoading(false);
             return;
           }
           if (data.client_secret) setClientSecret(data.client_secret);
@@ -378,7 +381,7 @@ const Checkout = () => {
       }
     };
     createIntent();
-  }, [emailConfirmed, checkoutEmail, selectedPlan]);
+  }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
