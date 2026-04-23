@@ -577,7 +577,22 @@ const ReservedSlotBanner = () => {
   );
 };
 
-const BeforeAfterPreview = () => {
+const CORPO_ATUAL_MAP: Record<string, string> = {
+  "Médio": atual1,
+  "Flácida": atual2,
+  "Magro": atual3,
+  "Tonificada": atual4,
+};
+const CORPO_DESEJADO_MAP: Record<string, string> = {
+  "Saudável e Funcional": desejadoSaudavel,
+  "Definida e com Curvas": desejadoDefinida,
+  "Musculosa": desejadoMusculosa,
+};
+
+const BeforeAfterPreview = ({ corpoAtual, corpoDesejado }: { corpoAtual: string; corpoDesejado: string }) => {
+  const imgAtual = CORPO_ATUAL_MAP[corpoAtual] || atual1;
+  const imgDesejado = CORPO_DESEJADO_MAP[corpoDesejado] || desejadoDefinida;
+
   const beforeBars = [
     { label: "Amor próprio e orgulho do corpo", filled: 1, total: 6, percent: null as string | null },
     { label: "Confiança ao se olhar no espelho", filled: 1, total: 6, percent: "25%", caption: "Baixo" },
