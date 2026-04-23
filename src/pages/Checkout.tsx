@@ -10,6 +10,7 @@ import { Check, Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
 import testimonial6 from "@/assets/testimonial-6.jpg";
 import dep1 from "@/assets/dep1.webp";
