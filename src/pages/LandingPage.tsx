@@ -444,7 +444,7 @@ const LandingPage = () => {
                 label: "SEMESTRAL",
                 badge: "⭐ MAIS USADO",
                 price: "R$ 119,90",
-                period: "/semestre",
+                period: "/6 meses",
                 perMonth: "≈ R$ 20/mês",
                 trial: "7 dias grátis",
                 discount: "50% OFF",
@@ -471,9 +471,9 @@ const LandingPage = () => {
                 )}
                 <div className="text-center">
                   <p className="font-heading text-xs font-bold text-muted-foreground tracking-widest mb-2">{plan.label}</p>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className={`font-heading text-2xl font-extrabold ${plan.highlight ? "text-primary" : "text-foreground"}`}>{plan.price}</span>
-                    <span className="text-muted-foreground text-xs">{plan.period}</span>
+                  <div className="flex items-baseline justify-center gap-1 flex-wrap">
+                    <span className={`font-heading text-xl font-extrabold whitespace-nowrap ${plan.highlight ? "text-primary" : "text-foreground"}`}>{plan.price}</span>
+                    <span className="text-muted-foreground text-xs whitespace-nowrap">{plan.period}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{plan.perMonth}</p>
                 </div>
