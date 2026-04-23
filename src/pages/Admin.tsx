@@ -348,7 +348,23 @@ const Admin = () => {
     };
   }, [profiles]);
 
-  // ─── Chart Data ───
+  // ─── Plan distribution (active subscribers only) ───
+  const planDistribution = useMemo(() => {
+    const active = profiles.filter((p) => getStatus(p) === "ativa");
+    const counts = { monthly: 0, semestral: 0, annual: 0 };
+    const revenue = { monthly: 0, semestral: 0, annual: 0 };
+    active.forEach((p) => {
+      const key = detectPlan(p.subscription_plan);
+      counts[key]++;
+      revenue[key] += mrrOf(p.subscription_plan);
+    });
+    const total = active.length;
+    return [
+      { key: "semestral", label: "Semestral", price: "R$ 119,90 / 6 meses", count: counts.semestral, mrr: revenue.semestral, pct: total ? (counts.semestral / total) * 100 : 0, color: "hsl(46 85% 55%)" },
+      { key: "annual", label: "Anual", price: "R$ 197,00 / ano", count: counts.annual, mrr: revenue.annual, pct: total ? (counts.annual / total) * 100 : 0, color: "hsl(142 70% 45%)" },
+      { key: "monthly", label: "Mensal", price: "R$ 39,90 / mês", count: counts.monthly, mrr: revenue.monthly, pct: total ? (counts.monthly / total) * 100 : 0, color: "hsl(210 80% 60%)" },
+    ];
+  }, [profiles]);
   const signupChartData = useMemo(() => {
     const days: Record<string, number> = {};
     const now = new Date();
