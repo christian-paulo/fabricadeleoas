@@ -912,7 +912,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
     <div className="flex flex-col gap-6">
       {/* Pre-checkout persuasion sections */}
       <ReservedSlotBanner />
-      <BeforeAfterPreview />
+      <BeforeAfterPreview corpoAtual={onboardingData.corpo_atual} corpoDesejado={onboardingData.corpo_desejado} />
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
       <WhatYouGet />
