@@ -32,13 +32,12 @@ const Dashboard = () => {
   const [loadingWorkout, setLoadingWorkout] = useState(false);
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
   const [todayWorkoutLabel, setTodayWorkoutLabel] = useState<string | null>(null);
-  const [countdownText, setCountdownText] = useState("");
+  const [countdownTexts, setCountdownTexts] = useState<Record<number, string>>({});
   const [showMeasurementReminder, setShowMeasurementReminder] = useState(false);
   const [lastMeasurementDate, setLastMeasurementDate] = useState<string | null>(null);
 
-  // Compute unlock target date from trial_start_date + 7 days
+  // Trial start date used as the base for all unlock countdowns
   const trialStart = profile?.trial_start_date ? new Date(profile.trial_start_date) : null;
-  const unlockDate = trialStart ? new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000) : null;
 
   useEffect(() => {
     if (!user) return;
@@ -107,27 +106,33 @@ const Dashboard = () => {
     fetchStats();
   }, [user]);
 
-  // Countdown timer for locked protocols
+  // Countdown timer for locked protocols (per unlock day: 7, 14, 21)
   useEffect(() => {
-    if (!unlockDate) return;
+    if (!trialStart) return;
+    const unlockDays = [7, 14, 21];
 
     const update = () => {
-      const now = new Date();
-      const diff = unlockDate.getTime() - now.getTime();
-      if (diff <= 0) {
-        setCountdownText("Desbloqueado! 🎉");
-        return;
+      const now = Date.now();
+      const next: Record<number, string> = {};
+      for (const d of unlockDays) {
+        const target = trialStart.getTime() + d * 24 * 60 * 60 * 1000;
+        const diff = target - now;
+        if (diff <= 0) {
+          next[d] = "Desbloqueado! 🎉";
+          continue;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        next[d] = `🔒 Desbloqueia em ${days}d, ${hours}h e ${minutes}min`;
       }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      setCountdownText(`🔒 Desbloqueia em ${days}d, ${hours}h e ${minutes}min`);
+      setCountdownTexts(next);
     };
 
     update();
     const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
-  }, [unlockDate?.getTime()]);
+  }, [trialStart?.getTime()]);
 
   const handleStartWorkout = async () => {
     setLoadingWorkout(true);
@@ -279,7 +284,7 @@ const Dashboard = () => {
                       <>
                         {/* Countdown instead of static lock */}
                         <p className="text-xs font-semibold text-white/90 mb-3 leading-snug">
-                          {countdownText || "🔒 Em breve"}
+                          {countdownTexts[card.unlockDays] || "🔒 Em breve"}
                         </p>
                         <h3 className="text-2xl font-bold text-white leading-tight">
                           {card.title}
