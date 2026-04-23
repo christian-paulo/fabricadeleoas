@@ -164,15 +164,64 @@ const Admin = () => {
   };
 
   const fetchQuizResponses = async () => {
-    const { data } = await supabase.from("onboarding_responses").select("*");
-    if (data && data.length > 0) {
-      // Enrich with profile name/email
-      const profileIds = data.map((r: any) => r.profile_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds);
-      const profMap: Record<string, any> = {};
-      (profs || []).forEach((p: any) => { profMap[p.id] = p; });
-      setQuizResponses(data.map((r: any) => ({ ...r, profile: profMap[r.profile_id] || {} })));
+    // Source of truth = quiz_leads (every first click on the quiz)
+    const { data: leads } = await supabase
+      .from("quiz_leads" as any)
+      .select("*")
+      .order("first_click_at", { ascending: false });
+    if (!leads || leads.length === 0) { setQuizResponses([]); return; }
+
+    const profileIds = [...new Set(leads.map((l: any) => l.profile_id).filter(Boolean))];
+    const emails = [...new Set(leads.map((l: any) => l.email).filter(Boolean).map((e: string) => e.toLowerCase()))];
+
+    const [profByIdRes, profByEmailRes] = await Promise.all([
+      profileIds.length
+        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds)
+        : Promise.resolve({ data: [] as any[] }),
+      emails.length
+        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("email", emails)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const profMap: Record<string, any> = {};
+    const profByEmail: Record<string, any> = {};
+    (profByIdRes.data || []).forEach((p: any) => { profMap[p.id] = p; });
+    (profByEmailRes.data || []).forEach((p: any) => {
+      profMap[p.id] = p;
+      if (p.email) profByEmail[p.email.toLowerCase()] = p;
+    });
+
+    // Pull onboarding_responses for any matched profiles
+    const allProfileIds = [...new Set([
+      ...profileIds,
+      ...Object.values(profByEmail).map((p: any) => p.id),
+    ])];
+    let respMap: Record<string, any> = {};
+    if (allProfileIds.length) {
+      const { data: resps } = await supabase
+        .from("onboarding_responses")
+        .select("*")
+        .in("profile_id", allProfileIds);
+      (resps || []).forEach((r: any) => { respMap[r.profile_id] = r; });
     }
+
+    const merged = leads.map((l: any) => {
+      const profile =
+        (l.profile_id && profMap[l.profile_id]) ||
+        (l.email && profByEmail[l.email.toLowerCase()]) ||
+        {};
+      const resp = profile.id ? (respMap[profile.id] || {}) : {};
+      return {
+        // synthetic row id for React keys
+        id: l.id,
+        // first click date (replaces row index in UI)
+        first_click_at: l.first_click_at,
+        // lead-known email (may exist before signup)
+        lead_email: l.email,
+        profile,
+        ...resp,
+      };
+    });
+    setQuizResponses(merged);
   };
 
   const fetchExercises = async () => {
