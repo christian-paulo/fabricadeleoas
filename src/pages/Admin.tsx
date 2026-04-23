@@ -258,7 +258,7 @@ const Admin = () => {
     setDrawerStudent(profile);
     const [{ data: mData }, { data: wData }] = await Promise.all([
       supabase.from("measurements").select("*").eq("profile_id", profile.id).order("date", { ascending: true }),
-      supabase.from("workouts").select("*").eq("profile_id", profile.id).order("date", { ascending: false }).limit(30),
+      supabase.from("workouts").select("*").eq("profile_id", profile.id).order("date", { ascending: false }).limit(500),
     ]);
     setDrawerMeasurements(mData || []);
     setDrawerWorkouts(wData || []);
@@ -416,6 +416,24 @@ const Admin = () => {
   const weekWorkouts = drawerWorkouts.filter((w) => new Date(w.date) >= weekAgo);
   const weekCompleted = weekWorkouts.filter((w) => w.completed).length;
   const weekGenerated = weekWorkouts.length;
+  const totalCompleted = drawerWorkouts.filter((w) => w.completed).length;
+  const totalGenerated = drawerWorkouts.length;
+  const completedWorkouts = drawerWorkouts.filter((w) => w.completed);
+  const daysInApp = drawerStudent?.created_at
+    ? Math.max(1, Math.floor((Date.now() - new Date(drawerStudent.created_at).getTime()) / 86400000))
+    : 0;
+  const trialStart = drawerStudent?.trial_start_date ? new Date(drawerStudent.trial_start_date) : null;
+  const trialEnd = drawerStudent?.trial_end_date
+    ? new Date(drawerStudent.trial_end_date)
+    : (trialStart ? new Date(trialStart.getTime() + 7 * 86400000) : null);
+  const trialDaysLeft = trialEnd ? Math.ceil((trialEnd.getTime() - Date.now()) / 86400000) : null;
+  const planLabel = (() => {
+    const p = (drawerStudent?.subscription_plan || "").toLowerCase();
+    if (p.includes("semestral") || p.includes("semi")) return "Semestral";
+    if (p.includes("mensal") || p.includes("month")) return "Mensal";
+    if (p.includes("anual") || p.includes("year")) return "Anual";
+    return drawerStudent?.subscription_plan || (drawerStudent?.is_subscriber ? "Ativo" : "—");
+  })();
 
   return (
     <SidebarProvider>
@@ -908,7 +926,31 @@ const Admin = () => {
                   {drawerStudent.whatsapp && <p className="text-sm text-muted-foreground">📱 {drawerStudent.whatsapp}</p>}
                   <p className="text-sm text-muted-foreground">
                     Cadastro: {drawerStudent.created_at ? new Date(drawerStudent.created_at).toLocaleDateString("pt-BR") : "—"}
+                    {daysInApp > 0 && <span className="ml-2 text-primary font-semibold">• {daysInApp} {daysInApp === 1 ? "dia" : "dias"} no app</span>}
                   </p>
+                </div>
+
+                {/* Assinatura & Trial */}
+                <div className="neu-card p-4 space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-heading text-muted-foreground uppercase tracking-widest">💳 Assinatura</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag label="Plano" value={planLabel} />
+                    <Tag label="Assinante" value={drawerStudent.is_subscriber ? "Sim" : "Não"} />
+                    {drawerStudent.canceled_at && (
+                      <Tag label="Cancelada em" value={new Date(drawerStudent.canceled_at).toLocaleDateString("pt-BR")} />
+                    )}
+                  </div>
+                  {trialStart && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Tag label="Trial início" value={trialStart.toLocaleDateString("pt-BR")} />
+                      {trialEnd && <Tag label="Trial fim" value={trialEnd.toLocaleDateString("pt-BR")} />}
+                      {trialDaysLeft !== null && drawerStatus === "trial" && (
+                        <Tag label="Dias restantes" value={Math.max(0, trialDaysLeft)} />
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* UTM / Aquisição */}
@@ -965,12 +1007,22 @@ const Admin = () => {
                 <div className="neu-card p-4">
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-secondary rounded-lg p-3 text-center">
-                      <p className="text-2xl font-heading text-primary">{weekGenerated}</p>
-                      <p className="text-xs text-muted-foreground">Treinos gerados (7d)</p>
+                      <p className="text-2xl font-heading text-primary">{totalGenerated}</p>
+                      <p className="text-xs text-muted-foreground">Treinos gerados (total)</p>
                     </div>
                     <div className="bg-secondary rounded-lg p-3 text-center">
-                      <p className="text-2xl font-heading text-green-400">{weekCompleted}</p>
-                      <p className="text-xs text-muted-foreground">Treinos concluídos (7d)</p>
+                      <p className="text-2xl font-heading text-green-400">{totalCompleted}</p>
+                      <p className="text-xs text-muted-foreground">Treinos concluídos (total)</p>
+                    </div>
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-lg font-heading text-foreground">{weekGenerated}/{weekCompleted}</p>
+                      <p className="text-xs text-muted-foreground">Gerados / Concluídos (7d)</p>
+                    </div>
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-lg font-heading text-foreground">
+                        {totalGenerated > 0 ? Math.round((totalCompleted / totalGenerated) * 100) : 0}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">Taxa de conclusão</p>
                     </div>
                   </div>
 
@@ -989,6 +1041,46 @@ const Admin = () => {
                     </ResponsiveContainer>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-6">Nenhuma medida registrada</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 4: Histórico de Treinos */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-heading text-muted-foreground uppercase tracking-widest">🏋️ Histórico de Treinos</h3>
+                <div className="neu-card p-4 max-h-96 overflow-y-auto">
+                  {completedWorkouts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhum treino concluído ainda</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {completedWorkouts.slice(0, 50).map((w: any) => {
+                        const wj = w.workout_json || {};
+                        const ts = wj.tracking_summary || {};
+                        const title = wj.title || wj.name || "Treino";
+                        const realDuration = ts.real_duration_min || ts.duration_min;
+                        const exercisesCount = Array.isArray(wj.exercises) ? wj.exercises.length : (ts.exercises_count || null);
+                        return (
+                          <li key={w.id} className="bg-secondary rounded-lg p-3 text-sm">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-foreground truncate">{title}</span>
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {new Date(w.date).toLocaleDateString("pt-BR")}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
+                              {exercisesCount && <span>{exercisesCount} exercícios</span>}
+                              {realDuration && <span>⏱ {Math.round(realDuration)} min</span>}
+                              {w.feedback_effort && <span>RPE: {w.feedback_effort}</span>}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                  {completedWorkouts.length > 50 && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Mostrando 50 de {completedWorkouts.length} treinos
+                    </p>
                   )}
                 </div>
               </div>
