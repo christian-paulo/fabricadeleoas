@@ -1007,12 +1007,22 @@ const Admin = () => {
                 <div className="neu-card p-4">
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-secondary rounded-lg p-3 text-center">
-                      <p className="text-2xl font-heading text-primary">{weekGenerated}</p>
-                      <p className="text-xs text-muted-foreground">Treinos gerados (7d)</p>
+                      <p className="text-2xl font-heading text-primary">{totalGenerated}</p>
+                      <p className="text-xs text-muted-foreground">Treinos gerados (total)</p>
                     </div>
                     <div className="bg-secondary rounded-lg p-3 text-center">
-                      <p className="text-2xl font-heading text-green-400">{weekCompleted}</p>
-                      <p className="text-xs text-muted-foreground">Treinos concluídos (7d)</p>
+                      <p className="text-2xl font-heading text-green-400">{totalCompleted}</p>
+                      <p className="text-xs text-muted-foreground">Treinos concluídos (total)</p>
+                    </div>
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-lg font-heading text-foreground">{weekGenerated}/{weekCompleted}</p>
+                      <p className="text-xs text-muted-foreground">Gerados / Concluídos (7d)</p>
+                    </div>
+                    <div className="bg-secondary rounded-lg p-3 text-center">
+                      <p className="text-lg font-heading text-foreground">
+                        {totalGenerated > 0 ? Math.round((totalCompleted / totalGenerated) * 100) : 0}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">Taxa de conclusão</p>
                     </div>
                   </div>
 
