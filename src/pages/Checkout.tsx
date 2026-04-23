@@ -66,7 +66,9 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard`,
+          // Quando o cartão exige 3DS, o Stripe redireciona o navegador para esta URL após o desafio.
+          // Voltamos para /checkout com flag para retomar no passo de criação de conta.
+          return_url: `${window.location.origin}/checkout?payment=success`,
           payment_method_data: {
             billing_details: {
               email,
