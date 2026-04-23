@@ -136,7 +136,7 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
 
   const saveOnboardingData = async (userId: string) => {
     try {
-      await supabase.from("profiles").update({
+      const profileUpdate: any = {
         goal: onboardingData.goal,
         target_area: onboardingData.targetArea.join(", "),
         training_experience: onboardingData.trainingExperience,
@@ -148,7 +148,12 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
         medication_feeling: onboardingData.medicationFeeling,
         equipment: onboardingData.equipment,
         onboarding_completed: true,
-      } as any).eq("id", userId);
+      };
+      // Garante que o nome capturado no onboarding seja persistido como full_name
+      if (onboardingData.nome && onboardingData.nome.trim()) {
+        profileUpdate.full_name = onboardingData.nome.trim();
+      }
+      await supabase.from("profiles").update(profileUpdate).eq("id", userId);
 
       await supabase.from("onboarding_responses" as any).upsert({
         profile_id: userId,
