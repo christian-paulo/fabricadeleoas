@@ -180,14 +180,24 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, whatsapp } },
+        options: {
+          data: { full_name: fullName, whatsapp },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
       });
       if (error) throw error;
 
-      if (data.user) {
+      // Garantir sessão ativa (caso confirmação de email esteja exigida)
+      if (!data.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+      }
+
+      const userId = data.user?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (userId) {
         const utms = getStoredUtms();
         await supabase.from("profiles").upsert({
-          id: data.user.id,
+          id: userId,
           email,
           full_name: fullName,
           whatsapp,
@@ -196,14 +206,14 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
         } as any, { onConflict: "id" });
         clearStoredUtms();
 
-        await saveOnboardingData(data.user.id);
+        await saveOnboardingData(userId);
       }
 
       await checkSubscription();
       await refreshProfile();
 
       toast.success("Bem-vinda à Fábrica de Leoas! 🦁");
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error: any) {
       toast.error(error.message || "Erro na autenticação");
     } finally {
