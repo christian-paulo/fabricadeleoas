@@ -171,8 +171,30 @@ const Admin = () => {
       .order("first_click_at", { ascending: false });
     if (!leads || leads.length === 0) { setQuizResponses([]); return; }
 
-    const profileIds = [...new Set(leads.map((l: any) => l.profile_id).filter(Boolean))];
-    const emails = [...new Set(leads.map((l: any) => l.email).filter(Boolean).map((e: string) => e.toLowerCase()))];
+    // Deduplicate leads that belong to the same student (same email or same profile_id),
+    // which can happen when the user starts the quiz in an in-app browser
+    // (Instagram/Facebook) and finishes checkout in an external browser.
+    // Keep the OLDEST record (the real first click).
+    const sortedAsc = [...leads].sort(
+      (a: any, b: any) =>
+        new Date(a.first_click_at).getTime() - new Date(b.first_click_at).getTime()
+    );
+    const seenEmail = new Set<string>();
+    const seenProfile = new Set<string>();
+    const dedupedAsc: any[] = [];
+    for (const l of sortedAsc as any[]) {
+      const emailKey = l.email ? String(l.email).toLowerCase() : null;
+      const profKey = l.profile_id || null;
+      if (emailKey && seenEmail.has(emailKey)) continue;
+      if (profKey && seenProfile.has(profKey)) continue;
+      if (emailKey) seenEmail.add(emailKey);
+      if (profKey) seenProfile.add(profKey);
+      dedupedAsc.push(l);
+    }
+    const dedupedLeads = dedupedAsc.reverse(); // back to newest-first for UI
+
+    const profileIds = [...new Set(dedupedLeads.map((l: any) => l.profile_id).filter(Boolean))];
+    const emails = [...new Set(dedupedLeads.map((l: any) => l.email).filter(Boolean).map((e: string) => e.toLowerCase()))];
 
     const [profByIdRes, profByEmailRes] = await Promise.all([
       profileIds.length
@@ -204,7 +226,7 @@ const Admin = () => {
       (resps || []).forEach((r: any) => { respMap[r.profile_id] = r; });
     }
 
-    const merged = leads.map((l: any) => {
+    const merged = dedupedLeads.map((l: any) => {
       const profile =
         (l.profile_id && profMap[l.profile_id]) ||
         (l.email && profByEmail[l.email.toLowerCase()]) ||

@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "quiz_session_id";
 const TRACKED_KEY = "quiz_first_click_tracked";
+const EMAIL_KEY = "quiz_lead_email";
 
 const generateSessionId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -10,43 +11,96 @@ const generateSessionId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
+const safeGet = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* in-app browsers (Instagram/FB) may block storage in private mode */
+  }
+};
+
 export const getQuizSessionId = (): string => {
-  let id = localStorage.getItem(SESSION_KEY);
+  let id = safeGet(SESSION_KEY);
   if (!id) {
     id = generateSessionId();
-    localStorage.setItem(SESSION_KEY, id);
+    safeSet(SESSION_KEY, id);
   }
   return id;
 };
 
 /** Records the first click on the quiz (called when user clicks "Começar Agora"). Idempotent. */
 export const trackQuizFirstClick = async (): Promise<void> => {
-  if (localStorage.getItem(TRACKED_KEY) === "1") return;
+  if (safeGet(TRACKED_KEY) === "1") return;
   const sessionId = getQuizSessionId();
   try {
     const { error } = await supabase
       .from("quiz_leads" as any)
       .insert({ session_id: sessionId });
-    // Ignore unique-violation (already tracked from another tab)
     if (error && !String(error.message || "").toLowerCase().includes("duplicate")) {
       console.warn("quiz_leads insert:", error);
     }
-    localStorage.setItem(TRACKED_KEY, "1");
+    safeSet(TRACKED_KEY, "1");
   } catch (e) {
     console.warn("trackQuizFirstClick failed", e);
   }
 };
 
-/** Links the current quiz session to an email/profile (called at checkout). */
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+/**
+ * Links the current quiz session to an email/profile.
+ * Resilient to cross-browser scenarios (e.g. Instagram/FB in-app browsers
+ * where the user opens checkout in an external browser):
+ *  1. Try to update by current session_id (same browser).
+ *  2. If no row was affected and we have an email, try to update by email
+ *     (matches the lead created on the original browser).
+ *  3. If still no match, insert a new lead row so we don't lose the data.
+ */
 export const linkQuizLead = async (params: { email?: string; profileId?: string }) => {
-  const sessionId = localStorage.getItem(SESSION_KEY);
-  if (!sessionId) return;
+  const email = params.email ? normalizeEmail(params.email) : undefined;
+  if (email) safeSet(EMAIL_KEY, email);
+
+  const sessionId = safeGet(SESSION_KEY) ?? safeGet(EMAIL_KEY) ? safeGet(SESSION_KEY) : null;
   const update: Record<string, any> = {};
-  if (params.email) update.email = params.email;
+  if (email) update.email = email;
   if (params.profileId) update.profile_id = params.profileId;
   if (Object.keys(update).length === 0) return;
+
   try {
-    await supabase.from("quiz_leads" as any).update(update).eq("session_id", sessionId);
+    // 1) Same-browser path: update by session_id
+    if (sessionId) {
+      const { data, error } = await supabase
+        .from("quiz_leads" as any)
+        .update(update)
+        .eq("session_id", sessionId)
+        .select("id");
+      if (!error && data && data.length > 0) return;
+    }
+
+    // 2) Cross-browser path: update by email (in-app -> external browser)
+    if (email) {
+      const { data, error } = await supabase
+        .from("quiz_leads" as any)
+        .update(update)
+        .eq("email", email)
+        .select("id");
+      if (!error && data && data.length > 0) return;
+    }
+
+    // 3) No existing lead found — create one so the conversion is still tracked
+    const fallbackSession = sessionId || getQuizSessionId();
+    await supabase.from("quiz_leads" as any).insert({
+      session_id: fallbackSession,
+      ...update,
+    });
   } catch (e) {
     console.warn("linkQuizLead failed", e);
   }
