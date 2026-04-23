@@ -1103,7 +1103,7 @@ const AnaliseIAScreen = ({ onNext, saving }: { onNext: () => void; saving: boole
         {steps[step]}
       </h2>
       <p className="text-sm text-muted-foreground mb-8 text-center">
-        Inteligência Artificial analisando seus dados
+        Gilvan está montando seu protocolo personalizado
       </p>
       <div className="w-full max-w-xs h-3 bg-secondary rounded-full overflow-hidden mb-4">
         <div className="h-full pink-gradient rounded-full transition-all duration-200"
