@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Star, Shield, Quote, Zap, Heart } from "lucide-react";
+import { Check, ArrowRight, Sparkles, ChevronDown, Flame, Target, TrendingUp, Dumbbell, Star, Shield, Quote, Zap, Heart, Home, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureUtms } from "@/lib/utm";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +16,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [showStickyCtа, setShowStickyCtа] = useState(false);
+  const [showStickyCta, setShowStickyCta] = useState(false);
 
   const goToOnboarding = () => navigate("/onboarding/boas-vindas");
   const goToEntrar = () => {
@@ -26,7 +26,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     captureUtms();
-    const handleScroll = () => setShowStickyCtа(window.scrollY > 500);
+    const handleScroll = () => setShowStickyCta(window.scrollY > 500);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -88,9 +88,8 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative pt-14 pb-12 px-4 overflow-hidden">
-        {/* Backgrounds */}
+      {/* ─── HERO ─── */}
+      <section className="relative pt-14 pb-14 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-pink-soft/70 via-background to-background" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/8 blur-3xl pointer-events-none" />
 
@@ -101,24 +100,22 @@ const LandingPage = () => {
             <span className="text-xs text-muted-foreground font-medium">47 mulheres treinando agora</span>
           </div>
 
+          {/* Aspirational H1 — identity, not accusation */}
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-[1.1] mb-3 tracking-tight">
-            PARE DE TREINAR SEM RESULTADO.
+            SEJA A LEOA QUE SEU
           </h1>
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary leading-[1.1] mb-6 italic">
-            SEU CORPO MUDA QUANDO O MÉTODO É CERTO.
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary leading-[1.1] mb-6 italic">
+            CORPO SEMPRE PEDIU.
           </h2>
 
-          <p className="text-muted-foreground text-base sm:text-lg max-w-md mx-auto mb-3 leading-relaxed">
-            Sem direção, sem resultado, sem evolução.
-          </p>
-          <p className="text-foreground font-semibold text-base sm:text-lg mb-10">
-            A Fábrica de Leoas é o sistema que muda isso de vez.
+          <p className="text-muted-foreground text-base sm:text-lg max-w-md mx-auto mb-10 leading-relaxed">
+            Treinos personalizados para o <strong className="text-foreground">seu corpo</strong>, seus objetivos e sua rotina.
+            Sem academia. Sem desculpas. Com resultado.
           </p>
 
-          {/* CTA principal */}
           <Button size="lg" onClick={goToOnboarding}
             className="w-full max-w-sm mx-auto pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-            QUERO COMEÇAR AGORA
+            CRIAR MEU PROTOCOLO GRÁTIS
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
 
@@ -153,7 +150,7 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* ─── STATS ─── */}
       <section className="py-14 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto">
@@ -171,14 +168,53 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
-          <div className="mt-10">
-            <ResultsCarousel />
+        </div>
+      </section>
+
+      {/* ─── PARA QUEM É ─── */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Heart className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs text-primary font-semibold">PARA QUEM É</span>
+            </div>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground">
+              A Fábrica de Leoas foi feita <em className="text-primary not-italic">para você.</em>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: Home,         title: "Treina em casa",          desc: "Sem academia, sem mensalidade, sem deslocamento. O protocolo funciona no seu espaço." },
+              { icon: AlertCircle,  title: "Tem dores ou lesões",     desc: "Cada exercício é adaptado às suas limitações. Você treina com segurança e evolui." },
+              { icon: Clock,        title: "Tem pouco tempo",         desc: "Protocolos de 20 a 50 min que cabem na sua rotina, mesmo nos dias mais corridos." },
+              { icon: TrendingUp,   title: "Já tentou antes e desistiu", desc: "Desta vez é diferente: o método evolui com você. Sem treinos genéricos, sem abandono." },
+            ].map((card, i) => (
+              <div key={i} className="soft-card p-5 flex gap-4 items-start">
+                <div className="w-10 h-10 rounded-xl pink-gradient flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <card.icon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-heading font-bold text-sm text-foreground mb-1">{card.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{card.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button size="lg" onClick={goToOnboarding}
+              className="pink-gradient text-primary-foreground font-heading font-bold text-sm py-6 px-8 rounded-2xl hover:scale-105 transition-transform shadow-lg">
+              ISSO SOU EU — QUERO COMEÇAR
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Diagnóstico — Pain Points */}
-      <section className="py-16 bg-secondary/30">
+      {/* ─── DIAGNÓSTICO — Pain Points ─── */}
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 mb-4">
             <span className="text-xs text-destructive font-semibold">🔴 DIAGNÓSTICO</span>
@@ -193,120 +229,74 @@ const LandingPage = () => {
 
           <div className="space-y-4">
             {[
-              { stat: "3x", desc: "Você já recomeçou dietas e treinos este ano", icon: Flame },
-              { stat: "80%", desc: "Das mulheres desistem por falta de resultado visível", icon: Target },
-              { stat: "1 ano", desc: "E o corpo continua o mesmo de sempre", icon: TrendingUp },
+              { stat: "3x",   desc: "Você já recomeçou dietas e treinos este ano",           icon: Flame },
+              { stat: "80%",  desc: "Das mulheres desistem por falta de resultado visível",  icon: Target },
+              { stat: "1 ano",desc: "E o corpo continua o mesmo de sempre",                  icon: TrendingUp },
             ].map((item, i) => (
               <div key={i} className="soft-card p-5 flex items-center gap-4 border-l-4 border-l-destructive/60">
                 <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
                   <span className="font-heading text-lg font-extrabold text-destructive">{item.stat}</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-foreground text-sm font-medium">{item.desc}</p>
-                </div>
-                <Button size="sm" variant="ghost" onClick={goToOnboarding}
-                  className="text-primary text-xs font-semibold flex-shrink-0 whitespace-nowrap">
-                  RESOLVER →
-                </Button>
+                <p className="text-foreground text-sm font-medium">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* A Solução — Features */}
-      <section className="py-16 bg-background">
+      {/* ─── COMO FUNCIONA (merged with O Método) ─── */}
+      <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs text-primary font-semibold">O MÉTODO</span>
+            <span className="text-xs text-primary font-semibold">COMO FUNCIONA</span>
           </div>
           <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground mb-3">
-            3 pilares. <em className="text-primary not-italic">Um sistema.</em>
+            3 passos. <em className="text-primary not-italic">Resultado real.</em>
           </h2>
           <p className="text-muted-foreground text-sm mb-12 leading-relaxed">
-            Protocolo, acompanhamento e adaptação. Tudo integrado no seu app.
+            Do quiz ao protocolo em menos de 2 minutos. Simples assim.
           </p>
 
-          <div className="space-y-6">
-            {[
-              {
-                num: "01",
-                tag: "PROTOCOLO DIÁRIO",
-                icon: Dumbbell,
-                title: "Treino montado por mim, todo dia.",
-                desc: "Eu cruzo seus dados com meus 142 exercícios e monto Tri-sets personalizados. Cada exercício tem vídeo demonstrativo.",
-                bullets: ["Tri-sets com foco cirúrgico nas suas queixas.", "Vídeo de cada exercício para executar perfeito.", "Adaptado ao seu tempo e local de treino."]
-              },
-              {
-                num: "02",
-                tag: "ADAPTAÇÃO",
-                icon: Zap,
-                title: "Eu ajusto quando você precisa.",
-                desc: "Se doer, eu adapto. Se ficar fácil, eu exijo mais. Seu protocolo evolui com você.",
-                bullets: ["Adaptação a dores e lesões.", "Progressão inteligente de carga.", "Feedback a cada treino concluído."]
-              },
-              {
-                num: "03",
-                tag: "EVOLUÇÃO",
-                icon: TrendingUp,
-                title: "Acompanhe sua transformação.",
-                desc: "Registre medidas, veja gráficos e comprove que o método funciona. Resultado visível, não achismo.",
-                bullets: ["Acompanhamento de medidas corporais.", "Gráficos de evolução ao longo do tempo.", "Histórico completo dos seus treinos."]
-              },
-            ].map((feature, i) => (
-              <div key={i} className="soft-card overflow-hidden">
-                {/* Gradient top bar */}
-                <div className="h-1 pink-gradient w-full" />
-                <div className="p-6 sm:p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl pink-gradient flex items-center justify-center shadow-sm">
-                      <feature.icon className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-primary tracking-wider">{feature.tag}</span>
-                      <div className="font-heading text-[11px] text-muted-foreground">PASSO {feature.num}</div>
-                    </div>
-                  </div>
-                  <h3 className="font-heading text-xl font-bold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-5 leading-relaxed">{feature.desc}</p>
-                  <ul className="space-y-2.5">
-                    {feature.bullets.map((b, j) => (
-                      <li key={j} className="flex items-start gap-2.5 text-sm text-foreground">
-                        <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Como funciona */}
-      <section className="py-16 bg-secondary/30">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-center text-foreground mb-12">
-            Como <span className="text-primary">Funciona</span>
-          </h2>
           <div className="relative">
-            {/* Connecting line */}
             <div className="absolute left-7 top-7 bottom-7 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-transparent hidden sm:block" />
-            <div className="space-y-8">
+            <div className="space-y-6">
               {[
-                { step: "01", title: "DNA da Leoa", desc: "Você responde um quiz rápido sobre seu corpo, tempo disponível e dores. Leva menos de 2 minutos." },
-                { step: "02", title: "Eu Monto Seu Protocolo", desc: "Eu cruzo seus dados com meus 142 exercícios e monto seus Tri-sets diários personalizados." },
-                { step: "03", title: "Eu Acompanho Você", desc: "A cada protocolo, eu ajusto a intensidade baseado no seu feedback. Se doer, eu adapto. Se ficar fácil, eu exijo mais." },
+                {
+                  step: "01", icon: Target,
+                  title: "DNA da Leoa",
+                  desc: "Você responde um quiz rápido sobre seu corpo, objetivos, tempo disponível e dores. Leva menos de 2 minutos.",
+                  bullets: ["Nível de experiência", "Local de treino e equipamentos", "Objetivos e áreas-alvo"]
+                },
+                {
+                  step: "02", icon: Dumbbell,
+                  title: "Seu Protocolo é Montado",
+                  desc: "Eu cruzo seus dados com meus 142 exercícios e monto Tri-sets personalizados com vídeo para cada movimento.",
+                  bullets: ["Tri-sets com foco nas suas queixas", "Vídeo demonstrativo em cada exercício", "Duração que cabe na sua rotina"]
+                },
+                {
+                  step: "03", icon: TrendingUp,
+                  title: "Evolução Contínua",
+                  desc: "A cada treino, registro seu progresso. Se doer, eu adapto. Se ficar fácil, eu exijo mais.",
+                  bullets: ["Acompanhamento de medidas e gráficos", "Progressão inteligente de carga", "Histórico completo dos seus treinos"]
+                },
               ].map((item, i) => (
                 <div key={i} className="flex gap-5 items-start">
                   <div className="flex-shrink-0 w-14 h-14 rounded-2xl pink-gradient flex items-center justify-center shadow-lg z-10">
                     <span className="font-heading font-bold text-lg text-primary-foreground">{item.step}</span>
                   </div>
-                  <div className="soft-card p-4 flex-1">
+                  <div className="soft-card p-5 flex-1 overflow-hidden">
+                    <div className="h-0.5 pink-gradient w-full -mt-5 mb-4 -mx-5" style={{ width: "calc(100% + 2.5rem)" }} />
                     <h3 className="font-heading text-lg font-bold text-foreground mb-1">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-3">{item.desc}</p>
+                    <ul className="space-y-1.5">
+                      {item.bullets.map((b, j) => (
+                        <li key={j} className="flex items-center gap-2 text-xs text-foreground">
+                          <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               ))}
@@ -315,7 +305,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Resultados */}
+      {/* ─── RESULTADOS (fotos antes/depois) ─── */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="text-center mb-10">
@@ -331,9 +321,9 @@ const LandingPage = () => {
             </p>
           </div>
           <ResultsCarousel />
-          <div className="text-center mt-8 px-4">
+          <div className="text-center mt-8">
             <Button size="lg" onClick={goToOnboarding}
-              className="w-full sm:w-auto pink-gradient text-primary-foreground font-heading font-bold text-sm sm:text-base py-6 px-6 sm:px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
+              className="w-full sm:w-auto pink-gradient text-primary-foreground font-heading font-bold text-sm sm:text-base py-6 px-8 rounded-2xl hover:scale-105 transition-transform shadow-lg">
               QUERO MEU RESULTADO TAMBÉM
               <ArrowRight className="ml-2 w-5 h-5 shrink-0" />
             </Button>
@@ -341,7 +331,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Depoimentos */}
+      {/* ─── DEPOIMENTOS ─── */}
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="text-center mb-10">
@@ -352,9 +342,7 @@ const LandingPage = () => {
             <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground mb-3">
               O que nossas <em className="text-primary not-italic">Leoas dizem.</em>
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Feedbacks reais das alunas no WhatsApp.
-            </p>
+            <p className="text-muted-foreground text-sm">Feedbacks reais das alunas no WhatsApp.</p>
           </div>
 
           <div className="mb-8">
@@ -367,7 +355,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { name: "Camila S.", initial: "C", text: "Em 2 semanas já senti diferença no corpo e na disposição. O método é incrível!", rating: 5 },
+              { name: "Camila S.",   initial: "C", text: "Em 2 semanas já senti diferença no corpo e na disposição. O método é incrível!", rating: 5 },
               { name: "Juliana M.", initial: "J", text: "Nunca consegui manter uma rotina de treino até conhecer a Fábrica de Leoas. Agora treino todo dia!", rating: 5 },
               { name: "Fernanda R.", initial: "F", text: "Tenho problema no joelho e o treino foi todo adaptado pra mim. Sem dor e com resultado!", rating: 5 },
               { name: "Patrícia L.", initial: "P", text: "Os tri-sets são desafiadores mas funcionam demais. Meu corpo mudou em 1 mês!", rating: 5 },
@@ -379,7 +367,6 @@ const LandingPage = () => {
                       <Star key={j} className="w-3.5 h-3.5 fill-primary text-primary" />
                     ))}
                   </div>
-                  {/* Large quote mark */}
                   <div className="text-4xl font-heading text-primary/20 leading-none mb-1 select-none">"</div>
                   <p className="text-sm text-foreground leading-relaxed mb-4">{dep.text}</p>
                 </div>
@@ -392,18 +379,10 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
-
-          <div className="text-center mt-8 px-4">
-            <Button size="lg" onClick={goToOnboarding}
-              className="w-full sm:w-auto pink-gradient text-primary-foreground font-heading font-bold text-sm sm:text-base py-6 px-6 sm:px-10 rounded-2xl hover:scale-105 transition-transform shadow-lg">
-              COMEÇAR MINHA TRANSFORMAÇÃO
-              <ArrowRight className="ml-2 w-5 h-5 shrink-0" />
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* Founder */}
+      {/* ─── FOUNDER ─── */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-2xl">
           <div className="soft-card p-6 sm:p-8 border border-primary/15">
@@ -433,7 +412,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* ─── PRICING ─── */}
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-lg">
           <div className="text-center mb-8">
@@ -448,7 +427,6 @@ const LandingPage = () => {
           </div>
 
           <div className="relative">
-            {/* Popular badge */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
               <div className="pink-gradient text-white text-[11px] font-bold px-4 py-1.5 rounded-full shadow-md tracking-wide whitespace-nowrap">
                 ⭐ MAIS POPULAR
@@ -489,11 +467,16 @@ const LandingPage = () => {
 
               <Button size="lg" onClick={goToOnboarding}
                 className="w-full pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-                GARANTIR MEU ACESSO
+                GARANTIR MEU ACESSO GRÁTIS
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
 
-              <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
+              {/* Scarcity */}
+              <p className="text-center text-xs text-destructive font-semibold mt-3">
+                🔥 Preço de lançamento — pode encerrar a qualquer momento
+              </p>
+
+              <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> 7 dias grátis</span>
                 <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> Acesso imediato</span>
                 <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> Cancele quando quiser</span>
@@ -503,7 +486,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Garantia */}
+      {/* ─── GARANTIA ─── */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 max-w-lg text-center">
           <div className="soft-card p-6 sm:p-8 border border-primary/20 bg-primary/3">
@@ -518,13 +501,19 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ─── FAQ ─── */}
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-center text-foreground mb-3">
-            Tudo que você precisa saber <em className="text-primary not-italic">antes de decidir.</em>
-          </h2>
-          <div className="mt-10 space-y-3">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Zap className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs text-primary font-semibold">DÚVIDAS FREQUENTES</span>
+            </div>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-foreground">
+              Tudo que você precisa saber <em className="text-primary not-italic">antes de decidir.</em>
+            </h2>
+          </div>
+          <div className="space-y-3">
             {faqs.map((faq, i) => (
               <div key={i} className="soft-card overflow-hidden">
                 <button
@@ -551,7 +540,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* ─── FINAL CTA ─── */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-lg text-center">
           <div className="w-12 h-12 rounded-full pink-gradient flex items-center justify-center mx-auto mb-6 shadow-md">
@@ -574,7 +563,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ─── FOOTER ─── */}
       <footer className="py-8 border-t border-border bg-background">
         <div className="container mx-auto px-4 text-center">
           <img src={logoIcon} alt="Fábrica de Leoas" className="h-8 w-auto mx-auto mb-4 opacity-70" />
@@ -589,10 +578,10 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      {/* Sticky CTA flutuante */}
+      {/* ─── STICKY CTA FLUTUANTE ─── */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/95 backdrop-blur-lg border-t border-border shadow-2xl transition-transform duration-300"
-        style={{ transform: showStickyCtа ? "translateY(0)" : "translateY(100%)" }}
+        style={{ transform: showStickyCta ? "translateY(0)" : "translateY(100%)" }}
       >
         <div className="container mx-auto max-w-lg">
           <Button size="lg" onClick={goToOnboarding}
@@ -616,9 +605,7 @@ const ResultsCarousel = () => {
     const container = scrollRef.current;
     if (!container) return;
     const child = container.children[index] as HTMLElement;
-    if (child) {
-      container.scrollTo({ left: child.offsetLeft - 12, behavior: "smooth" });
-    }
+    if (child) container.scrollTo({ left: child.offsetLeft - 12, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
