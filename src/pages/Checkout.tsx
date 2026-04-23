@@ -189,6 +189,12 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
         celebracao: onboardingData.celebracao,
       } as any, { onConflict: "profile_id" } as any);
 
+      // Link quiz_leads (first-click tracking) to this profile/email
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        await linkQuizLead({ profileId: userId, email: authUser?.email || undefined });
+      } catch {}
+
       localStorage.removeItem("onboarding_data");
     } catch (err) {
       console.error("Failed to save onboarding data:", err);
