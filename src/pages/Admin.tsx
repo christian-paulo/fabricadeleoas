@@ -45,7 +45,30 @@ const emptyExercise: Exercise = {
 };
 
 const ITEMS_PER_PAGE = 10;
-const PRICE = 49.90;
+
+// Preços reais dos planos (valor cobrado por ciclo)
+const PLAN_PRICES = {
+  monthly: { total: 39.90, months: 1 },
+  semestral: { total: 119.90, months: 6 },
+  annual: { total: 197.00, months: 12 },
+} as const;
+
+// Detecta o plano a partir do campo subscription_plan (texto livre vindo do Stripe/checkout)
+const detectPlan = (raw?: string | null): keyof typeof PLAN_PRICES => {
+  const s = (raw || "").toLowerCase();
+  if (s.includes("anual") || s.includes("annual") || s.includes("ano")) return "annual";
+  if (s.includes("mensal") || s.includes("monthly") || s.includes("mês") || s.includes("mes")) return "monthly";
+  return "semestral"; // default (plano mais usado)
+};
+
+// MRR contribution = valor total do ciclo / nº meses do ciclo
+const mrrOf = (raw?: string | null) => {
+  const p = PLAN_PRICES[detectPlan(raw)];
+  return p.total / p.months;
+};
+
+// Valor total pago por ciclo (usado para LTV)
+const cycleValueOf = (raw?: string | null) => PLAN_PRICES[detectPlan(raw)].total;
 
 type Section = "overview" | "students" | "exercises" | "quiz" | "feed";
 
@@ -291,7 +314,11 @@ const Admin = () => {
     const active = profiles.filter((p) => getStatus(p) === "ativa");
     const trial = profiles.filter((p) => getStatus(p) === "trial");
     const canceled = profiles.filter((p) => getStatus(p) === "cancelada");
-    const mrr = active.length * PRICE;
+    const mrr = active.reduce((sum, p) => sum + mrrOf(p.subscription_plan), 0);
+    const avgMrrPerUser = active.length > 0 ? mrr / active.length : 0;
+    const avgCycleValue = active.length > 0
+      ? active.reduce((sum, p) => sum + cycleValueOf(p.subscription_plan), 0) / active.length
+      : PLAN_PRICES.semestral.total;
 
     // Conversion: profiles that were in trial and became active
     const totalEverTrial = profiles.filter((p) => p.trial_start_date).length;
@@ -306,7 +333,7 @@ const Admin = () => {
 
     // LTV
     const avgMonths = churnRate > 0 ? (100 / churnRate) : 24;
-    const ltv = PRICE * avgMonths;
+    const ltv = avgMrrPerUser * avgMonths;
 
     return {
       total: profiles.length,
@@ -354,10 +381,11 @@ const Admin = () => {
         const created = p.created_at?.split("T")[0];
         const canceled = p.canceled_at?.split("T")[0];
         return created && created <= dateStr && p.is_subscriber && (!canceled || canceled > dateStr);
-      }).length;
+      });
+      const mrrAtDate = activeAtDate.reduce((sum, p) => sum + mrrOf(p.subscription_plan), 0);
       days.push({
         date: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-        mrr: activeAtDate * PRICE,
+        mrr: Math.round(mrrAtDate * 100) / 100,
       });
     }
     return days;
