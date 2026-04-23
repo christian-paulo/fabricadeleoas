@@ -21,6 +21,7 @@ import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 import printApp from "@/assets/print-app.webp";
 import atual1 from "@/assets/atual1.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
+import logoLeoa from "@/assets/logo-leoa.png";
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
 const benefits = [
@@ -533,6 +534,44 @@ const Checkout = () => {
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const ReservedSlotBanner = () => {
+  const [secondsLeft, setSecondsLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("reserved_slot_deadline");
+    let deadline: number;
+    if (stored) {
+      deadline = parseInt(stored, 10);
+    } else {
+      deadline = Date.now() + 15 * 60 * 1000;
+      sessionStorage.setItem("reserved_slot_deadline", String(deadline));
+    }
+
+    const tick = () => {
+      const diff = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      setSecondsLeft(diff);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <img src={logoLeoa} alt="Fábrica de Leoas" className="h-14 w-auto" />
+      <div className="w-full bg-primary/10 border border-primary/20 rounded-2xl px-5 py-4 text-center">
+        <p className="text-sm md:text-base text-foreground leading-snug">
+          Sua vaga no <span className="font-bold">Acompanhamento do Gilvan</span> será entregue pra próxima candidata em :{" "}
+          <span className="font-bold text-primary tabular-nums">{mm}:{ss}</span>
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const BeforeAfterPreview = () => {
   const beforeBars = [
     { label: "Amor próprio e orgulho do corpo", filled: 1, total: 6, percent: null as string | null },
@@ -852,6 +891,7 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
   return (
     <div className="flex flex-col gap-6">
       {/* Pre-checkout persuasion sections */}
+      <ReservedSlotBanner />
       <BeforeAfterPreview />
       <WeightPrediction pesoAtual={onboardingData.peso_atual} metaPeso={onboardingData.meta_peso} />
       <PersonalizedPlan targetArea={onboardingData.targetArea} workoutDuration={onboardingData.workoutDuration} goal={onboardingData.goal} hasPain={onboardingData.hasPain} painLocation={onboardingData.painLocation} />
