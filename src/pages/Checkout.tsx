@@ -22,7 +22,7 @@ import printApp from "@/assets/print-app.webp";
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
 const benefits = [
-  "Protocolos diários personalizados por IA",
+  "Protocolos diários personalizados pelo Gilvan",
   "Adaptação automática a dores e limitações",
   "Acompanhamento de medidas corporais",
   "142 exercícios do método Gilvan",
