@@ -44,19 +44,25 @@ const mapPaymentMethod = (pm?: string | null): string => {
   return "credit_card";
 };
 
-// Product mapping
+// Product mapping (live prices)
 const PRODUCTS: Record<string, { id: string; name: string; planId: string; planName: string }> = {
-  "price_1TLlHSI4dFrhArZvmSEUhAL9": {
-    id: "prod_UKQ6GwFwJs1fyu",
+  "price_1TPSXJIsQknBjnEnKoQxE06s": {
+    id: "prod_UOF0wA3Z0IfrcU",
     name: "Fábrica de Leoas",
-    planId: "price_1TLlHSI4dFrhArZvmSEUhAL9",
+    planId: "price_1TPSXJIsQknBjnEnKoQxE06s",
     planName: "Plano Semestral",
   },
-  "price_1TEx9fI4dFrhArZvg5kThQaN": {
-    id: "prod_UDNvg49Ys4G6FH",
+  "price_1TPSGiIsQknBjnEncL7IlriJ": {
+    id: "prod_UOEkdbPryEAq4z",
     name: "Fábrica de Leoas",
-    planId: "price_1TEx9fI4dFrhArZvg5kThQaN",
+    planId: "price_1TPSGiIsQknBjnEncL7IlriJ",
     planName: "Plano Mensal",
+  },
+  "price_1TPSXhIsQknBjnEn0WjwG2CS": {
+    id: "prod_UOF1O7d2Nl1y5T",
+    name: "Fábrica de Leoas",
+    planId: "price_1TPSXhIsQknBjnEn0WjwG2CS",
+    planName: "Plano Anual",
   },
 };
 

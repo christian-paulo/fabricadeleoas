@@ -34,8 +34,8 @@ serve(async (req) => {
       }
     }
 
-    let priceId = "price_1TLlHSI4dFrhArZvmSEUhAL9"; // default semestral
-    let trialDays = 3;
+    let priceId = "price_1TPSXJIsQknBjnEnKoQxE06s"; // default semestral (live)
+    let trialDays = 7;
 
     if (!email) {
       try {
@@ -56,8 +56,12 @@ serve(async (req) => {
       }
     }
 
-    // Validate price_id
-    const validPrices = ["price_1TLlHSI4dFrhArZvmSEUhAL9", "price_1TEx9fI4dFrhArZvg5kThQaN"];
+    // Validate price_id (live prices)
+    const validPrices = [
+      "price_1TPSXJIsQknBjnEnKoQxE06s", // Semestral
+      "price_1TPSGiIsQknBjnEncL7IlriJ", // Mensal
+      "price_1TPSXhIsQknBjnEn0WjwG2CS", // Anual
+    ];
     if (!validPrices.includes(priceId)) {
       throw new Error("Invalid price selected");
     }
