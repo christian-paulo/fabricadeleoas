@@ -226,7 +226,7 @@ const Admin = () => {
       (resps || []).forEach((r: any) => { respMap[r.profile_id] = r; });
     }
 
-    const merged = leads.map((l: any) => {
+    const merged = dedupedLeads.map((l: any) => {
       const profile =
         (l.profile_id && profMap[l.profile_id]) ||
         (l.email && profByEmail[l.email.toLowerCase()]) ||
