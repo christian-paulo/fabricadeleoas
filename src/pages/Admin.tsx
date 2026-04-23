@@ -182,7 +182,7 @@ const Admin = () => {
     const seenEmail = new Set<string>();
     const seenProfile = new Set<string>();
     const dedupedAsc: any[] = [];
-    for (const l of sortedAsc) {
+    for (const l of sortedAsc as any[]) {
       const emailKey = l.email ? String(l.email).toLowerCase() : null;
       const profKey = l.profile_id || null;
       if (emailKey && seenEmail.has(emailKey)) continue;
