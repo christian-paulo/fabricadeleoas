@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
+import { linkQuizLead } from "@/lib/quizTracking";
 import testimonial6 from "@/assets/testimonial-6.jpg";
 import dep1 from "@/assets/dep1.webp";
 import dep2 from "@/assets/dep2.webp";
