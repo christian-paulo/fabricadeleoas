@@ -534,6 +534,44 @@ const Checkout = () => {
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const ReservedSlotBanner = () => {
+  const [secondsLeft, setSecondsLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("reserved_slot_deadline");
+    let deadline: number;
+    if (stored) {
+      deadline = parseInt(stored, 10);
+    } else {
+      deadline = Date.now() + 15 * 60 * 1000;
+      sessionStorage.setItem("reserved_slot_deadline", String(deadline));
+    }
+
+    const tick = () => {
+      const diff = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      setSecondsLeft(diff);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <img src={logoLeoa} alt="Fábrica de Leoas" className="h-14 w-auto" />
+      <div className="w-full bg-primary/10 border border-primary/20 rounded-2xl px-5 py-4 text-center">
+        <p className="text-sm md:text-base text-foreground leading-snug">
+          Sua vaga no <span className="font-bold">Acompanhamento do Gilvan</span> será entregue pra próxima candidata em :{" "}
+          <span className="font-bold text-primary tabular-nums">{mm}:{ss}</span>
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const BeforeAfterPreview = () => {
   const beforeBars = [
     { label: "Amor próprio e orgulho do corpo", filled: 1, total: 6, percent: null as string | null },
