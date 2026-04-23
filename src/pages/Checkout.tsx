@@ -28,7 +28,7 @@ import desejadoSaudavel from "@/assets/desejado-saudavel.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
 import desejadoMusculosa from "@/assets/desejado-musculosa.webp";
 import logoLeoa from "@/assets/logo-leoa-pink.png";
-const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
+const stripePromise = loadStripe("pk_live_51TBHtFIsQknBjnEnYrnNfVodiEUtNhsREBaxMSbbfcu1gIxBTLksoaDOvogQWjYH7lq4zNS10d10PjQn5p4rvtBG00av2qM6LK");
 
 const benefits = [
   "Protocolos diários personalizados pelo Gilvan",
