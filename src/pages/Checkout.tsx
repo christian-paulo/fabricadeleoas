@@ -66,7 +66,9 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard`,
+          // Quando o cartão exige 3DS, o Stripe redireciona o navegador para esta URL após o desafio.
+          // Voltamos para /checkout com flag para retomar no passo de criação de conta.
+          return_url: `${window.location.origin}/checkout?payment=success`,
           payment_method_data: {
             billing_details: {
               email,
@@ -334,11 +336,26 @@ const Checkout = () => {
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
 
-  // If already authenticated, go straight to payment
+  // Detecta retorno do desafio 3DS (Stripe redireciona para /checkout?payment=success)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success" && !isAuthenticated) {
+      toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
+      setStep("registration");
+      // Limpa a query para evitar re-disparo
+      window.history.replaceState({}, "", "/checkout");
+    }
+  }, [isAuthenticated]);
+
+  // If already authenticated, go straight to payment (ou dashboard se veio do 3DS)
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
       setEmailConfirmed(true);
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("payment") === "success") {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [isAuthenticated]);
 
