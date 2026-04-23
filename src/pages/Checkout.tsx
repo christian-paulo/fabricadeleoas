@@ -531,6 +531,89 @@ const Checkout = () => {
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const BeforeAfterPreview = () => {
+  const beforeBars = [
+    { label: "Amor próprio e orgulho do corpo", filled: 1, total: 6, percent: null as string | null },
+    { label: "Confiança ao se olhar no espelho", filled: 1, total: 6, percent: "25%", caption: "Baixo" },
+  ];
+  const afterBars = [
+    { label: "Amor próprio e orgulho do corpo", filled: 6, total: 6, percent: null as string | null },
+    { label: "Confiança ao se olhar no espelho", filled: 6, total: 6, percent: "100%", caption: "Elevado" },
+  ];
+
+  const Bars = ({ filled, total, color }: { filled: number; total: number; color: "danger" | "success" }) => (
+    <div className="flex gap-1 mt-1">
+      {Array.from({ length: total }).map((_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 flex-1 rounded-full ${
+            i < filled
+              ? color === "danger"
+                ? "bg-destructive"
+                : "bg-emerald-500"
+              : "bg-muted"
+          }`}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="soft-card p-6">
+      <h3 className="font-heading text-xl text-center text-foreground leading-snug">
+        Agora só depende de <span className="text-primary">você</span>, aplique todas as técnicas do{" "}
+        <span className="text-primary">Gilvan</span> e aproveite sua nova versão!
+      </h3>
+
+      <div className="grid grid-cols-2 gap-4 mt-6">
+        {/* AGORA */}
+        <div>
+          <p className="text-center font-heading text-sm text-destructive mb-2">Agora</p>
+          <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
+            <img src={atual1} alt="Antes do programa" className="w-full h-full object-cover" />
+          </div>
+          <div className="mt-4 space-y-3">
+            {beforeBars.map((b, i) => (
+              <div key={i}>
+                <p className="text-[11px] text-foreground leading-tight">{b.label}</p>
+                {b.caption && (
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">{b.caption}</span>
+                    <span className="text-[10px] font-bold text-destructive">{b.percent}</span>
+                  </div>
+                )}
+                <Bars filled={b.filled} total={b.total} color="danger" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* APÓS */}
+        <div>
+          <p className="text-center font-heading text-sm text-emerald-600 mb-2">Após o programa</p>
+          <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
+            <img src={desejadoDefinida} alt="Depois do programa" className="w-full h-full object-cover" />
+          </div>
+          <div className="mt-4 space-y-3">
+            {afterBars.map((b, i) => (
+              <div key={i}>
+                <p className="text-[11px] text-foreground leading-tight">{b.label}</p>
+                {b.caption && (
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-emerald-600">{b.caption}</span>
+                    <span className="text-[10px] font-bold text-emerald-600">{b.percent}</span>
+                  </div>
+                )}
+                <Bars filled={b.filled} total={b.total} color="success" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso: string }) => {
   const current = parseFloat(pesoAtual) || 85;
   const goal = parseFloat(metaPeso) || 75;
