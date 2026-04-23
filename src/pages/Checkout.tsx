@@ -244,7 +244,7 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
 const PLANS = {
   monthly: {
     id: "monthly",
-    priceId: "price_1TONJUI4dFrhArZvL2BRYDPj",
+    priceId: "price_1TPSGiIsQknBjnEncL7IlriJ",
     label: "MENSAL",
     badge: null,
     priceMain: "R$ 39,90",
@@ -260,7 +260,7 @@ const PLANS = {
   },
   semestral: {
     id: "semestral",
-    priceId: "price_1TLlHSI4dFrhArZvmSEUhAL9",
+    priceId: "price_1TPSXJIsQknBjnEnKoQxE06s",
     label: "SEMESTRAL",
     badge: "MAIS USADO",
     priceMain: "R$ 119,90",
@@ -276,7 +276,7 @@ const PLANS = {
   },
   annual: {
     id: "annual",
-    priceId: "price_1TOOU5I4dFrhArZvcHoOWu2p",
+    priceId: "price_1TPSXhIsQknBjnEn0WjwG2CS",
     label: "ANUAL",
     badge: null,
     priceMain: "R$ 197,00",
