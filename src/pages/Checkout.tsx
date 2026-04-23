@@ -552,7 +552,7 @@ const BeforeAfterPreview = () => {
             i < filled
               ? color === "danger"
                 ? "bg-destructive"
-                : "bg-emerald-500"
+                : "bg-success"
               : "bg-muted"
           }`}
         />
@@ -592,7 +592,7 @@ const BeforeAfterPreview = () => {
 
         {/* APÓS */}
         <div>
-          <p className="text-center font-heading text-sm text-emerald-600 mb-2">Após o programa</p>
+          <p className="text-center font-heading text-sm text-success mb-2">Após o programa</p>
           <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
             <img src={desejadoDefinida} alt="Depois do programa" className="w-full h-full object-cover" />
           </div>
@@ -602,8 +602,8 @@ const BeforeAfterPreview = () => {
                 <p className="text-[11px] text-foreground leading-tight">{b.label}</p>
                 {b.caption && (
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-emerald-600">{b.caption}</span>
-                    <span className="text-[10px] font-bold text-emerald-600">{b.percent}</span>
+                    <span className="text-[10px] text-success">{b.caption}</span>
+                    <span className="text-[10px] font-bold text-success">{b.percent}</span>
                   </div>
                 )}
                 <Bars filled={b.filled} total={b.total} color="success" />
