@@ -568,6 +568,7 @@ const Admin = () => {
                     <KpiCard icon={TrendingUp} label="Conversão Trial→Pago" value={`${kpis.conversionRate.toFixed(1)}%`} color="text-green-400" />
                     <KpiCard icon={TrendingDown} label="Churn Rate (30d)" value={`${kpis.churnRate.toFixed(1)}%`} color="text-destructive" />
                     <KpiCard icon={Target} label="LTV Estimado" value={`R$ ${kpis.ltv.toFixed(0)}`} color="text-accent" />
+                  </div>
                 </div>
 
                 {/* Plan Distribution */}
