@@ -575,7 +575,7 @@ const Treinos = () => {
               </Button>
             </div>
           ) : (
-            <div className="fixed bottom-20 left-0 right-0 z-40 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+            <div className="fixed bottom-24 left-0 right-0 z-40 px-4 max-w-lg mx-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
               <div className="bg-card border border-primary/30 rounded-2xl p-4 shadow-lg flex items-center gap-3">
                 <CheckCircle2 className="text-primary flex-shrink-0" size={32} />
                 <div className="flex-1">
