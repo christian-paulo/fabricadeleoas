@@ -648,7 +648,7 @@ const Admin = () => {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border">
-                        <TableHead className="text-muted-foreground">#</TableHead>
+                        <TableHead className="text-muted-foreground whitespace-nowrap">1º Clique</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
@@ -659,37 +659,40 @@ const Admin = () => {
                         <TableHead className="text-muted-foreground">Local</TableHead>
                         <TableHead className="text-muted-foreground">Dificuldade</TableHead>
                         <TableHead className="text-muted-foreground">Psicológico</TableHead>
-                        <TableHead className="text-muted-foreground">Data</TableHead>
                         <TableHead className="text-muted-foreground">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedQuiz.map((r: any, idx: number) => (
-                        <TableRow key={r.id} className="border-border">
-                          <TableCell className="text-muted-foreground text-sm">{(quizPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
-                          <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.profile?.email || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.corpo_atual || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.meta_peso ? `${r.meta_peso} kg` : "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.local_treino || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.dificuldade || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{(r.psicologico || []).join(", ") || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              const prof = profiles.find((p: any) => p.id === r.profile_id);
-                              if (prof) openDrawer(prof);
-                            }}>
-                              <Eye size={16} className="text-primary" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {paginatedQuiz.map((r: any) => {
+                        const dt = r.first_click_at ? new Date(r.first_click_at) : null;
+                        const dateStr = dt ? dt.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+                        const email = r.profile?.email || r.lead_email || "—";
+                        return (
+                          <TableRow key={r.id} className="border-border">
+                            <TableCell className="text-muted-foreground text-xs whitespace-nowrap">{dateStr}</TableCell>
+                            <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{email}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.corpo_atual || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.meta_peso ? `${r.meta_peso} kg` : "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.local_treino || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.dificuldade || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{(r.psicologico || []).join(", ") || "—"}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                const prof = profiles.find((p: any) => p.id === r.profile?.id);
+                                if (prof) openDrawer(prof);
+                              }}>
+                                <Eye size={16} className="text-primary" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
