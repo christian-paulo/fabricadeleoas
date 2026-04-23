@@ -926,7 +926,31 @@ const Admin = () => {
                   {drawerStudent.whatsapp && <p className="text-sm text-muted-foreground">📱 {drawerStudent.whatsapp}</p>}
                   <p className="text-sm text-muted-foreground">
                     Cadastro: {drawerStudent.created_at ? new Date(drawerStudent.created_at).toLocaleDateString("pt-BR") : "—"}
+                    {daysInApp > 0 && <span className="ml-2 text-primary font-semibold">• {daysInApp} {daysInApp === 1 ? "dia" : "dias"} no app</span>}
                   </p>
+                </div>
+
+                {/* Assinatura & Trial */}
+                <div className="neu-card p-4 space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-heading text-muted-foreground uppercase tracking-widest">💳 Assinatura</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag label="Plano" value={planLabel} />
+                    <Tag label="Assinante" value={drawerStudent.is_subscriber ? "Sim" : "Não"} />
+                    {drawerStudent.canceled_at && (
+                      <Tag label="Cancelada em" value={new Date(drawerStudent.canceled_at).toLocaleDateString("pt-BR")} />
+                    )}
+                  </div>
+                  {trialStart && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Tag label="Trial início" value={trialStart.toLocaleDateString("pt-BR")} />
+                      {trialEnd && <Tag label="Trial fim" value={trialEnd.toLocaleDateString("pt-BR")} />}
+                      {trialDaysLeft !== null && drawerStatus === "trial" && (
+                        <Tag label="Dias restantes" value={Math.max(0, trialDaysLeft)} />
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* UTM / Aquisição */}
