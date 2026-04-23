@@ -33,11 +33,17 @@ serve(async (req) => {
       .from("profiles").select("*").eq("id", user.id).single();
     if (profileError || !profile) throw new Error("Profile not found");
 
-    // Get onboarding responses for dificuldade
+    // Get onboarding responses
     const { data: onboarding } = await supabase
-      .from("onboarding_responses").select("dificuldade").eq("profile_id", user.id).single();
+      .from("onboarding_responses")
+      .select("dificuldade, corpo_desejado, motivacao, idade")
+      .eq("profile_id", user.id)
+      .single();
 
     const dificuldade = onboarding?.dificuldade || "Suar um pouco";
+    const corpoDesejado = onboarding?.corpo_desejado || null;
+    const motivacao = onboarding?.motivacao || null;
+    const idadeAluna = onboarding?.idade || null;
 
     // Get ALL workouts for this user, ordered by creation
     const { data: allWorkouts } = await supabase
@@ -64,12 +70,44 @@ serve(async (req) => {
     const nextWorkoutNumber = workouts.length + 1;
     const isMonthlyPhase = completedCount >= 3;
 
-    // Get ONLY exercises that have a video_url
-    const { data: exercises } = await supabase
+    // Map profile equipment to allowed DB equipment values
+    // Always available at home: bodyweight, floor, wall, sofa, chair, pillow
+    const BASE_EQUIPMENT = [
+      "Peso do Corpo", "peso corporal", "Peso corporal",
+      "Solo", "solo",
+      "Parede",
+      "Sofá", "sófa", "Sofa",
+      "Cadeira",
+      "Almofada",
+      "Joelhos",
+    ];
+
+    const getEquipmentFilter = (eq: string | null): string[] | null => {
+      if (!eq || /sem|corpo|nenhum/i.test(eq)) return BASE_EQUIPMENT;
+      if (/halter|carga|peso/i.test(eq)) {
+        return [...BASE_EQUIPMENT, "Carga", "Carga/Cabo", "Cabo/carga", "Cadeira/Carga", "Mochila"];
+      }
+      if (/cabo|vassoura|elastico|elástico/i.test(eq)) {
+        return [...BASE_EQUIPMENT, "Cabo", "Cabo Vassoura", "Cabo de Vassoura", "Cabo/Carga", "Cabo/carga"];
+      }
+      if (/complet|tudo|todos/i.test(eq)) return null; // null = sem filtro
+      return BASE_EQUIPMENT;
+    };
+
+    const equipmentFilter = getEquipmentFilter(profile.equipment);
+
+    // Get ONLY exercises with video_url, filtered by available equipment
+    let exerciseQuery = supabase
       .from("exercises")
       .select("*")
       .not("video_url", "is", null)
       .neq("video_url", "");
+
+    if (equipmentFilter) {
+      exerciseQuery = exerciseQuery.in("equipment", equipmentFilter);
+    }
+
+    const { data: exercises } = await exerciseQuery;
     if (!exercises || exercises.length === 0) {
       throw new Error("No exercises with video available in the database");
     }
@@ -189,6 +227,8 @@ REGRAS DE MONTAGEM:
 ${isMedicationRisk ? "7. SEGURANÇA MÁXIMA: A aluna usa medicação e se sente mal. EXCLUA exercícios de salto e impacto. Use APENAS exercícios de nível iniciante." : ""}
 ${profile.has_pain ? `8. FILTRO TERAPÊUTICO: A aluna tem dor em: ${profile.pain_location}. Priorize exercícios com foco terapêutico correspondente e EVITE exercícios que agravem essas regiões.` : ""}
 ${profile.goal === "Melhorar Dores" ? "9. OBJETIVO É DORES: Priorize exercícios com therapeutic_focus correspondente." : ""}
+${profile.target_area ? `10. FOCO ESTÉTICO OBRIGATÓRIO: A aluna quer trabalhar "${profile.target_area}". Pelo menos ${Math.ceil(targetExercises * 0.6)} dos ${targetExercises} exercícios DEVEM ter aesthetic_tag correspondente a essa área. Distribua os demais em grupos complementares.` : ""}
+${corpoDesejado ? `11. CORPO DESEJADO: A aluna quer um corpo "${corpoDesejado}". Escolha exercícios que trabalham especificamente esse resultado estético.` : ""}
 
 ${phaseInstructions}
 
@@ -212,9 +252,13 @@ RESPONDA APENAS com um JSON válido no seguinte formato (sem markdown, sem expli
 - Nome: ${profile.full_name}
 - Objetivo: ${profile.goal}
 - Áreas alvo: ${profile.target_area}
+- Corpo desejado: ${corpoDesejado || "Não informado"}
+- Motivação: ${motivacao || "Não informado"}
+- Idade: ${idadeAluna ? idadeAluna + " anos" : "Não informado"}
 - Experiência: ${profile.training_experience}
 - Dias/semana: ${profile.workout_days}
 - Duração: ${effectiveDuration} min
+- Equipamento disponível: ${profile.equipment || "Sem equipamento (apenas peso do corpo)"}
 - Tem dor: ${profile.has_pain ? "Sim - " + profile.pain_location : "Não"}
 - Usa medicação: ${profile.uses_medication ? "Sim - " + profile.medication_feeling : "Não"}
 - Dificuldade desejada: ${dificuldade}
