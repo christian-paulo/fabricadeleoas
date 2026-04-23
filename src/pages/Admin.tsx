@@ -384,7 +384,11 @@ const Admin = () => {
     let list = quizResponses;
     if (quizSearch) {
       const q = quizSearch.toLowerCase();
-      list = list.filter((r: any) => (r.profile?.full_name || "").toLowerCase().includes(q) || (r.profile?.email || "").toLowerCase().includes(q));
+      list = list.filter((r: any) =>
+        (r.profile?.full_name || "").toLowerCase().includes(q) ||
+        (r.profile?.email || "").toLowerCase().includes(q) ||
+        (r.lead_email || "").toLowerCase().includes(q)
+      );
     }
     if (quizGoalFilter !== "all") list = list.filter((r: any) => r.profile?.goal === quizGoalFilter);
     return list;
