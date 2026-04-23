@@ -568,7 +568,51 @@ const Admin = () => {
                     <KpiCard icon={TrendingUp} label="Conversão Trial→Pago" value={`${kpis.conversionRate.toFixed(1)}%`} color="text-green-400" />
                     <KpiCard icon={TrendingDown} label="Churn Rate (30d)" value={`${kpis.churnRate.toFixed(1)}%`} color="text-destructive" />
                     <KpiCard icon={Target} label="LTV Estimado" value={`R$ ${kpis.ltv.toFixed(0)}`} color="text-accent" />
+                </div>
+
+                {/* Plan Distribution */}
+                <div>
+                  <h2 className="text-sm font-heading text-muted-foreground uppercase tracking-widest mb-3">📊 Planos Escolhidos (Ativas)</h2>
+                  <div className="neu-card p-5">
+                    {kpis.active === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhuma assinante ativa ainda.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {planDistribution.map((p) => (
+                          <div key={p.key}>
+                            <div className="flex items-center justify-between mb-1.5 gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: p.color }}
+                                />
+                                <span className="font-heading text-sm text-foreground">{p.label}</span>
+                                <span className="text-xs text-muted-foreground hidden sm:inline">· {p.price}</span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="text-muted-foreground">
+                                  <strong className="text-foreground font-heading text-sm">{p.count}</strong> aluna{p.count === 1 ? "" : "s"}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  MRR: <strong className="text-primary font-heading text-sm">R$ {p.mrr.toFixed(2).replace(".", ",")}</strong>
+                                </span>
+                                <span className="font-heading text-sm text-foreground tabular-nums w-12 text-right">
+                                  {p.pct.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${p.pct}%`, backgroundColor: p.color }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                </div>
                 </div>
 
                 {/* User KPIs */}
