@@ -44,13 +44,25 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || !paymentReady) {
+      toast.error("Aguarde o formulário de pagamento carregar...");
+      return;
+    }
 
     setLoading(true);
     try {
+      // Validate the Payment Element before confirming
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        toast.error(submitError.message || "Verifique os dados do cartão");
+        setLoading(false);
+        return;
+      }
+
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
@@ -80,13 +92,16 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }} />
-      <Button type="submit" disabled={!stripe || loading}
+      <PaymentElement
+        onReady={() => setPaymentReady(true)}
+        options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }}
+      />
+      <Button type="submit" disabled={!stripe || !paymentReady || loading}
         className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
-        {loading ? (
+        {loading || !paymentReady ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            Processando...
+            {loading ? "Processando..." : "Carregando..."}
           </span>
         ) : (
           <span className="flex items-center gap-2">
