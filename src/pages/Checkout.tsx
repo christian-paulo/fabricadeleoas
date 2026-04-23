@@ -10,6 +10,7 @@ import { Check, Shield, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
 import testimonial6 from "@/assets/testimonial-6.jpg";
 import dep1 from "@/assets/dep1.webp";
@@ -529,16 +530,75 @@ const Checkout = () => {
             )}
           </div>
         </div>
-        {/* Depoimentos WhatsApp - última seção da página */}
+        {/* Depoimentos WhatsApp */}
         <div>
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
         </div>
+
+        {/* FAQ - última seção */}
+        <CheckoutFAQ />
       </div>
     </div>
   );
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const CheckoutFAQ = () => {
+  const faqs = [
+    {
+      q: "Tenho limitações físicas, é para mim?",
+      a: "Sim! O protocolo do Gilvan é adaptado para sua rotina, limitações de saúde e até para quem usa medicações como Mounjaro/Ozempic. Adaptamos tudo conforme suas dores e nível.",
+    },
+    {
+      q: "Preciso de equipamentos de academia?",
+      a: "Não. Todos os treinos são feitos em casa, usando apenas o peso do corpo e itens simples como halteres leves ou caneleiras (opcionais). Nada de máquinas.",
+    },
+    {
+      q: "Como recebo o treino?",
+      o: "",
+      a: "Você recebe acesso imediato ao app da Fábrica de Leoas após a confirmação do pagamento. Lá ficam todos os treinos, vídeos demonstrativos e o acompanhamento da sua evolução.",
+    },
+    {
+      q: "É mensalidade? Vou ter que pagar todo mês?",
+      a: "Você escolhe o plano. Temos o Semestral (cobrado a cada 6 meses, com 3 dias de teste grátis) e o Anual (cobrado uma vez por ano). Sem surpresas, sem cobranças escondidas.",
+    },
+    {
+      q: "Quanto tempo dura cada treino?",
+      a: "Os treinos têm duração de 10 a 30 minutos, ajustados ao seu nível e disponibilidade informados no quiz. Perfeito para encaixar na rotina mais corrida.",
+    },
+    {
+      q: "De quanto em quanto tempo o treino muda?",
+      a: "O protocolo é de 4 semanas e se adapta automaticamente conforme você completa as sessões. A cada novo ciclo, novos estímulos para garantir evolução constante.",
+    },
+    {
+      q: "Posso cancelar quando quiser?",
+      a: "Sim! Você pode cancelar a qualquer momento direto no app, sem burocracia, sem multa.",
+    },
+    {
+      q: "Em quanto tempo vou ver resultados?",
+      a: "A maioria das alunas começa a sentir mais energia e disposição já na primeira semana. Resultados visíveis no espelho costumam aparecer entre 3 e 6 semanas, seguindo o plano consistentemente.",
+    },
+  ];
+
+  return (
+    <div className="soft-card p-6">
+      <h3 className="font-heading text-2xl text-center text-foreground mb-6">Perguntas Frequentes</h3>
+      <Accordion type="single" collapsible className="w-full">
+        {faqs.map((f, i) => (
+          <AccordionItem key={i} value={`faq-${i}`} className="border-border/60">
+            <AccordionTrigger className="text-left font-heading text-foreground text-base hover:no-underline">
+              {f.q}
+            </AccordionTrigger>
+            <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+              {f.a}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+};
+
 const ReservedSlotBanner = () => {
   const [secondsLeft, setSecondsLeft] = useState(15 * 60);
 
