@@ -206,7 +206,7 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
         await supabase.from("profiles").upsert({
           id: userId,
           email,
-          full_name: fullName,
+          full_name: (fullName || onboardingData.nome || "").trim() || null,
           whatsapp,
           onboarding_completed: false,
           ...utms,
