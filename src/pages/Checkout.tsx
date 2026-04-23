@@ -535,6 +535,9 @@ const Checkout = () => {
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
         </div>
 
+        {/* CTA de urgência */}
+        <UrgencyCTA onCta={() => document.getElementById("checkout-form-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
+
         {/* FAQ - última seção */}
         <CheckoutFAQ />
       </div>
@@ -543,6 +546,63 @@ const Checkout = () => {
 };
 
 // ─── Pre-Checkout Sections (before Order Summary) ───────────────
+const UrgencyCTA = ({ onCta }: { onCta: () => void }) => {
+  return (
+    <div className="rounded-3xl bg-[#1a1a1a] p-6 sm:p-8 text-center shadow-lg">
+      <h3 className="font-heading font-extrabold text-white text-2xl sm:text-3xl leading-tight tracking-tight">
+        VOCÊ VAI CONTINUAR
+        <br />
+        <span className="text-red-500">PARADA</span>{" "}
+        <span className="text-white">VENDO O</span>{" "}
+        <span className="text-green-400">SUCESSO</span>
+        <br />
+        <span className="text-white">DAS OUTRAS?</span>
+      </h3>
+
+      <div className="mt-6 rounded-2xl bg-[#d8f5d8] px-5 py-4 text-[#1a1a1a]">
+        <p className="font-body text-sm sm:text-base leading-snug">
+          É somente <strong className="font-extrabold">R$0,66 por dia</strong> para você conquistar o corpo de leoa que sempre sonhou!
+        </p>
+      </div>
+
+      <button
+        onClick={onCta}
+        className="mt-5 w-full rounded-2xl bg-[#FFD23F] hover:bg-[#ffcb1f] transition-colors py-4 px-6 font-heading font-bold text-[#1a1a1a] text-lg shadow-md active:scale-[0.99]"
+      >
+        Resgatar meu treino
+      </button>
+
+      <div className="mt-4 flex items-center justify-center gap-2 opacity-90">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg"
+          alt="Visa"
+          className="h-4"
+        />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+          alt="Mastercard"
+          className="h-5"
+        />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg"
+          alt="Amex"
+          className="h-5"
+        />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Elo_logo.svg"
+          alt="Elo"
+          className="h-4"
+        />
+        <img
+          src="https://logospng.org/download/pix/logo-pix-256.png"
+          alt="Pix"
+          className="h-4"
+        />
+      </div>
+    </div>
+  );
+};
+
 const CheckoutFAQ = () => {
   const faqs = [
     {
