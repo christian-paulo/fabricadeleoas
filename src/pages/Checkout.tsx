@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { captureUtms, getStoredUtms, clearStoredUtms } from "@/lib/utm";
+import { linkQuizLead } from "@/lib/quizTracking";
 import testimonial6 from "@/assets/testimonial-6.jpg";
 import dep1 from "@/assets/dep1.webp";
 import dep2 from "@/assets/dep2.webp";
@@ -187,6 +188,12 @@ const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
         psicologico: onboardingData.psicologico,
         celebracao: onboardingData.celebracao,
       } as any, { onConflict: "profile_id" } as any);
+
+      // Link quiz_leads (first-click tracking) to this profile/email
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        await linkQuizLead({ profileId: userId, email: authUser?.email || undefined });
+      } catch {}
 
       localStorage.removeItem("onboarding_data");
     } catch (err) {

@@ -49,6 +49,7 @@ import RulerSlider from "@/components/RulerSlider";
 import { Slider } from "@/components/ui/slider";
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from "@/contexts/OnboardingContext";
 import { toast } from "sonner";
+import { trackQuizFirstClick } from "@/lib/quizTracking";
 
 
 const Onboarding = () => {
@@ -68,6 +69,11 @@ const Onboarding = () => {
   const canProceed = useMemo(() => validateStep(currentStep, data), [currentStep, data]);
 
   const goNext = async () => {
+    // Link email to quiz_leads as soon as user provides it
+    if (currentStep === "email-onboarding" && data.email_onboarding) {
+      const { linkQuizLead } = await import("@/lib/quizTracking");
+      linkQuizLead({ email: data.email_onboarding.trim().toLowerCase() }).catch(() => {});
+    }
     if (currentStep === "analise-ia") {
       navigate("/checkout");
       return;
@@ -1115,29 +1121,36 @@ const AnaliseIAScreen = ({ onNext, saving }: { onNext: () => void; saving: boole
 };
 
 // ─── Boas-vindas Screen ─────────────────────────────────────────
-const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => (
-  <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto overflow-hidden">
-    <div className="flex-1 flex flex-col items-center justify-center">
-      <img
-        src={logoLeoa}
-        alt="Fábrica de Leoas"
-        className="w-32 h-32 mb-8 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] animate-[scale-in_0.8s_ease-out_both]"
-      />
-      <h1 className="text-3xl font-heading text-primary mb-4 text-center animate-[fade-in_0.7s_ease-out_0.4s_both]">
-        Bem-vinda, Leoa!
-      </h1>
-      <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed animate-[fade-in_0.7s_ease-out_0.7s_both]">
-        Responda o quiz de 1 minuto para montar o seu <span className="text-primary font-semibold">Protocolo Personalizado</span> com o Gilvan.
-      </p>
+const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => {
+  const handleStart = () => {
+    // Fire-and-forget: register first quiz click
+    trackQuizFirstClick();
+    onNext();
+  };
+  return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <img
+          src={logoLeoa}
+          alt="Fábrica de Leoas"
+          className="w-32 h-32 mb-8 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] animate-[scale-in_0.8s_ease-out_both]"
+        />
+        <h1 className="text-3xl font-heading text-primary mb-4 text-center animate-[fade-in_0.7s_ease-out_0.4s_both]">
+          Bem-vinda, Leoa!
+        </h1>
+        <p className="text-base text-muted-foreground text-center max-w-xs leading-relaxed animate-[fade-in_0.7s_ease-out_0.7s_both]">
+          Responda o quiz de 1 minuto para montar o seu <span className="text-primary font-semibold">Protocolo Personalizado</span> com o Gilvan.
+        </p>
+      </div>
+      <div className="w-full pb-8 animate-[fade-in_0.6s_ease-out_1.1s_both]">
+        <Button onClick={handleStart}
+          className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide hover-scale">
+          COMEÇAR AGORA
+        </Button>
+      </div>
     </div>
-    <div className="w-full pb-8 animate-[fade-in_0.6s_ease-out_1.1s_both]">
-      <Button onClick={onNext}
-        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide hover-scale">
-        COMEÇAR AGORA
-      </Button>
-    </div>
-  </div>
-);
+  );
+};
 
 // ─── Validation ─────────────────────────────────────────────────
 function validateStep(step: OnboardingStep, data: any): boolean {

@@ -405,6 +405,44 @@ export type Database = {
           },
         ]
       }
+      quiz_leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_click_at: string
+          id: string
+          profile_id: string | null
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_click_at?: string
+          id?: string
+          profile_id?: string | null
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_click_at?: string
+          id?: string
+          profile_id?: string | null
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_leads_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badges: {
         Row: {
           badge_key: string

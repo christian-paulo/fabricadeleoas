@@ -164,15 +164,64 @@ const Admin = () => {
   };
 
   const fetchQuizResponses = async () => {
-    const { data } = await supabase.from("onboarding_responses").select("*");
-    if (data && data.length > 0) {
-      // Enrich with profile name/email
-      const profileIds = data.map((r: any) => r.profile_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds);
-      const profMap: Record<string, any> = {};
-      (profs || []).forEach((p: any) => { profMap[p.id] = p; });
-      setQuizResponses(data.map((r: any) => ({ ...r, profile: profMap[r.profile_id] || {} })));
+    // Source of truth = quiz_leads (every first click on the quiz)
+    const { data: leads } = await supabase
+      .from("quiz_leads" as any)
+      .select("*")
+      .order("first_click_at", { ascending: false });
+    if (!leads || leads.length === 0) { setQuizResponses([]); return; }
+
+    const profileIds = [...new Set(leads.map((l: any) => l.profile_id).filter(Boolean))];
+    const emails = [...new Set(leads.map((l: any) => l.email).filter(Boolean).map((e: string) => e.toLowerCase()))];
+
+    const [profByIdRes, profByEmailRes] = await Promise.all([
+      profileIds.length
+        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds)
+        : Promise.resolve({ data: [] as any[] }),
+      emails.length
+        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("email", emails)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const profMap: Record<string, any> = {};
+    const profByEmail: Record<string, any> = {};
+    (profByIdRes.data || []).forEach((p: any) => { profMap[p.id] = p; });
+    (profByEmailRes.data || []).forEach((p: any) => {
+      profMap[p.id] = p;
+      if (p.email) profByEmail[p.email.toLowerCase()] = p;
+    });
+
+    // Pull onboarding_responses for any matched profiles
+    const allProfileIds = [...new Set([
+      ...profileIds,
+      ...Object.values(profByEmail).map((p: any) => p.id),
+    ])];
+    let respMap: Record<string, any> = {};
+    if (allProfileIds.length) {
+      const { data: resps } = await supabase
+        .from("onboarding_responses")
+        .select("*")
+        .in("profile_id", allProfileIds);
+      (resps || []).forEach((r: any) => { respMap[r.profile_id] = r; });
     }
+
+    const merged = leads.map((l: any) => {
+      const profile =
+        (l.profile_id && profMap[l.profile_id]) ||
+        (l.email && profByEmail[l.email.toLowerCase()]) ||
+        {};
+      const resp = profile.id ? (respMap[profile.id] || {}) : {};
+      return {
+        // synthetic row id for React keys
+        id: l.id,
+        // first click date (replaces row index in UI)
+        first_click_at: l.first_click_at,
+        // lead-known email (may exist before signup)
+        lead_email: l.email,
+        profile,
+        ...resp,
+      };
+    });
+    setQuizResponses(merged);
   };
 
   const fetchExercises = async () => {
@@ -335,7 +384,11 @@ const Admin = () => {
     let list = quizResponses;
     if (quizSearch) {
       const q = quizSearch.toLowerCase();
-      list = list.filter((r: any) => (r.profile?.full_name || "").toLowerCase().includes(q) || (r.profile?.email || "").toLowerCase().includes(q));
+      list = list.filter((r: any) =>
+        (r.profile?.full_name || "").toLowerCase().includes(q) ||
+        (r.profile?.email || "").toLowerCase().includes(q) ||
+        (r.lead_email || "").toLowerCase().includes(q)
+      );
     }
     if (quizGoalFilter !== "all") list = list.filter((r: any) => r.profile?.goal === quizGoalFilter);
     return list;
@@ -573,13 +626,13 @@ const Admin = () => {
                     </SelectContent>
                   </Select>
                   <Button variant="outline" className="border-border text-foreground h-10" onClick={() => {
-                    const headers = ["Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração", "Data"];
+                    const headers = ["1º Clique", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
                     const rows = filteredQuiz.map((r: any) => [
-                      r.profile?.full_name || "", r.profile?.email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
+                      r.first_click_at ? new Date(r.first_click_at).toLocaleString("pt-BR") : "",
+                      r.profile?.full_name || "", r.profile?.email || r.lead_email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
                       r.profile?.goal || "", r.profile?.target_area || "", r.motivacao || "", r.corpo_atual || "", r.corpo_desejado || "",
                       r.biotipo || "", r.profile?.equipment || "", r.local_treino || "", r.dificuldade || "", r.rotina || "",
                       r.flexibilidade || "", (r.psicologico || []).join("; "), r.celebracao || "",
-                      r.created_at ? new Date(r.created_at).toLocaleDateString("pt-BR") : ""
                     ]);
                     const csv = [headers.join(","), ...rows.map((r: any[]) => r.map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\n");
                     const blob = new Blob([csv], { type: "text/csv" });
@@ -595,7 +648,7 @@ const Admin = () => {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border">
-                        <TableHead className="text-muted-foreground">#</TableHead>
+                        <TableHead className="text-muted-foreground whitespace-nowrap">1º Clique</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
@@ -606,37 +659,40 @@ const Admin = () => {
                         <TableHead className="text-muted-foreground">Local</TableHead>
                         <TableHead className="text-muted-foreground">Dificuldade</TableHead>
                         <TableHead className="text-muted-foreground">Psicológico</TableHead>
-                        <TableHead className="text-muted-foreground">Data</TableHead>
                         <TableHead className="text-muted-foreground">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedQuiz.map((r: any, idx: number) => (
-                        <TableRow key={r.id} className="border-border">
-                          <TableCell className="text-muted-foreground text-sm">{(quizPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
-                          <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.profile?.email || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.corpo_atual || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.meta_peso ? `${r.meta_peso} kg` : "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.local_treino || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{r.dificuldade || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{(r.psicologico || []).join(", ") || "—"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{r.created_at ? new Date(r.created_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              const prof = profiles.find((p: any) => p.id === r.profile_id);
-                              if (prof) openDrawer(prof);
-                            }}>
-                              <Eye size={16} className="text-primary" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {paginatedQuiz.map((r: any) => {
+                        const dt = r.first_click_at ? new Date(r.first_click_at) : null;
+                        const dateStr = dt ? dt.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+                        const email = r.profile?.email || r.lead_email || "—";
+                        return (
+                          <TableRow key={r.id} className="border-border">
+                            <TableCell className="text-muted-foreground text-xs whitespace-nowrap">{dateStr}</TableCell>
+                            <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{email}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.profile?.goal || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{r.motivacao || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.corpo_atual || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.meta_peso ? `${r.meta_peso} kg` : "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.local_treino || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{r.dificuldade || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm max-w-[120px] truncate">{(r.psicologico || []).join(", ") || "—"}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                const prof = profiles.find((p: any) => p.id === r.profile?.id);
+                                if (prof) openDrawer(prof);
+                              }}>
+                                <Eye size={16} className="text-primary" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
