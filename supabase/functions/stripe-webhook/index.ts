@@ -127,6 +127,81 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // ── Subscription lifecycle: trial start / activation / cancellation ──────
+    if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId = typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id;
+
+      if (customerId) {
+        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+        const email = customer.email || "";
+
+        if (email) {
+          const priceId = subscription.items?.data?.[0]?.price?.id || "";
+          const productInfo = PRODUCTS[priceId];
+          const planName = productInfo?.planName || "Assinatura";
+
+          const isTrial = subscription.status === "trialing";
+          const isActive = subscription.status === "active";
+          const hasPaymentMethod = !!subscription.default_payment_method;
+
+          // Only record if it's a trial with payment captured or an active sub
+          if ((isTrial && hasPaymentMethod) || isActive) {
+            const trialStartDate = subscription.trial_start
+              ? new Date(subscription.trial_start * 1000).toISOString()
+              : null;
+            const trialEndDate = subscription.trial_end
+              ? new Date(subscription.trial_end * 1000).toISOString()
+              : null;
+
+            await supabaseAdmin
+              .from("profiles")
+              .update({
+                is_subscriber: true,
+                stripe_customer_id: customerId,
+                stripe_subscription_id: subscription.id,
+                trial_start_date: trialStartDate,
+                trial_end_date: trialEndDate,
+                subscription_plan: planName,
+                canceled_at: null,
+              })
+              .eq("email", email);
+
+            logStep("Subscription recorded", { email, status: subscription.status, planName });
+          }
+        }
+      }
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId = typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id;
+
+      if (customerId) {
+        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+        const email = customer.email || "";
+
+        if (email) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              is_subscriber: false,
+              canceled_at: new Date().toISOString(),
+            })
+            .eq("email", email);
+
+          logStep("Subscription cancelled", { email });
+        }
+      }
+    }
+
     // Handle relevant events
     if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
       const invoice = event.data.object as Stripe.Invoice;

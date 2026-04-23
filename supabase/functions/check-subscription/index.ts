@@ -26,6 +26,12 @@ const hasPaidAccess = (subscription: Stripe.Subscription) => {
   return subscription.status === "active" || (subscription.status === "trialing" && !!subscription.default_payment_method);
 };
 
+const PLAN_MAP: Record<string, string> = {
+  "price_1TPSXJIsQknBjnEnKoQxE06s": "Plano Semestral",
+  "price_1TPSGiIsQknBjnEncL7IlriJ": "Plano Mensal",
+  "price_1TPSXhIsQknBjnEn0WjwG2CS": "Plano Anual",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -107,6 +113,8 @@ serve(async (req) => {
     const trialEnd = toIsoString(validSubscription.trial_end);
     const subscriptionEnd = toIsoString(validSubscription.current_period_end);
     const trialStartDate = toIsoString(validSubscription.trial_start);
+    const priceId = validSubscription.items?.data?.[0]?.price?.id || "";
+    const planName = PLAN_MAP[priceId] || "Assinatura";
 
     await supabaseClient
       .from("profiles")
@@ -115,6 +123,9 @@ serve(async (req) => {
         stripe_customer_id: customerId,
         stripe_subscription_id: validSubscription.id,
         trial_start_date: trialStartDate,
+        trial_end_date: trialEnd,
+        subscription_plan: planName,
+        canceled_at: null,
       })
       .eq("id", user.id);
 

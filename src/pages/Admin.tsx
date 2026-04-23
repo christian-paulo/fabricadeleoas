@@ -507,6 +507,8 @@ const Admin = () => {
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">Email</TableHead>
                         <TableHead className="text-muted-foreground">Status</TableHead>
+                        <TableHead className="text-muted-foreground">Plano</TableHead>
+                        <TableHead className="text-muted-foreground">Trial até</TableHead>
                         <TableHead className="text-muted-foreground">Objetivo</TableHead>
                         <TableHead className="text-muted-foreground">Origem</TableHead>
                         <TableHead className="text-muted-foreground">Ações</TableHead>
@@ -523,6 +525,12 @@ const Admin = () => {
                             <TableCell>
                               <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cfg.color}`}>{cfg.label}</span>
                             </TableCell>
+                            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{p.subscription_plan || "—"}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                              {p.trial_end_date
+                                ? new Date(p.trial_end_date).toLocaleDateString("pt-BR")
+                                : "—"}
+                            </TableCell>
                             <TableCell className="text-muted-foreground text-sm">{p.goal || "—"}</TableCell>
                             <TableCell className="text-muted-foreground text-sm">{p.utm_source || "Orgânico"}</TableCell>
                             <TableCell>
@@ -534,7 +542,7 @@ const Admin = () => {
                         );
                       })}
                       {paginatedStudents.length === 0 && (
-                        <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma aluna encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Nenhuma aluna encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
