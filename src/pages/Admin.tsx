@@ -416,6 +416,24 @@ const Admin = () => {
   const weekWorkouts = drawerWorkouts.filter((w) => new Date(w.date) >= weekAgo);
   const weekCompleted = weekWorkouts.filter((w) => w.completed).length;
   const weekGenerated = weekWorkouts.length;
+  const totalCompleted = drawerWorkouts.filter((w) => w.completed).length;
+  const totalGenerated = drawerWorkouts.length;
+  const completedWorkouts = drawerWorkouts.filter((w) => w.completed);
+  const daysInApp = drawerStudent?.created_at
+    ? Math.max(1, Math.floor((Date.now() - new Date(drawerStudent.created_at).getTime()) / 86400000))
+    : 0;
+  const trialStart = drawerStudent?.trial_start_date ? new Date(drawerStudent.trial_start_date) : null;
+  const trialEnd = drawerStudent?.trial_end_date
+    ? new Date(drawerStudent.trial_end_date)
+    : (trialStart ? new Date(trialStart.getTime() + 7 * 86400000) : null);
+  const trialDaysLeft = trialEnd ? Math.ceil((trialEnd.getTime() - Date.now()) / 86400000) : null;
+  const planLabel = (() => {
+    const p = (drawerStudent?.subscription_plan || "").toLowerCase();
+    if (p.includes("semestral") || p.includes("semi")) return "Semestral";
+    if (p.includes("mensal") || p.includes("month")) return "Mensal";
+    if (p.includes("anual") || p.includes("year")) return "Anual";
+    return drawerStudent?.subscription_plan || (drawerStudent?.is_subscriber ? "Ativo" : "—");
+  })();
 
   return (
     <SidebarProvider>
