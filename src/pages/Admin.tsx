@@ -613,7 +613,7 @@ const Admin = () => {
                     )}
                   </div>
                 </div>
-                </div>
+
 
                 {/* User KPIs */}
                 <div>
