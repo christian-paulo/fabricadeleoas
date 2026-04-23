@@ -529,10 +529,13 @@ const Checkout = () => {
             )}
           </div>
         </div>
-        {/* Depoimentos WhatsApp - última seção da página */}
+        {/* Depoimentos WhatsApp */}
         <div>
           <img src={depoimentosWhatsapp} alt="Depoimentos de alunas no WhatsApp" className="w-full rounded-2xl shadow-sm" />
         </div>
+
+        {/* FAQ - última seção */}
+        <CheckoutFAQ />
       </div>
     </div>
   );
