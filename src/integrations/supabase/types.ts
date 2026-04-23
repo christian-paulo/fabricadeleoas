@@ -291,8 +291,10 @@ export type Database = {
           pain_location: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          subscription_plan: string | null
           target_area: string | null
           training_experience: string | null
+          trial_end_date: string | null
           trial_start_date: string | null
           updated_at: string | null
           uses_medication: boolean | null
@@ -320,8 +322,10 @@ export type Database = {
           pain_location?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subscription_plan?: string | null
           target_area?: string | null
           training_experience?: string | null
+          trial_end_date?: string | null
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
@@ -349,8 +353,10 @@ export type Database = {
           pain_location?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          subscription_plan?: string | null
           target_area?: string | null
           training_experience?: string | null
+          trial_end_date?: string | null
           trial_start_date?: string | null
           updated_at?: string | null
           uses_medication?: boolean | null
