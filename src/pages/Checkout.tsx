@@ -44,13 +44,25 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || !paymentReady) {
+      toast.error("Aguarde o formulário de pagamento carregar...");
+      return;
+    }
 
     setLoading(true);
     try {
+      // Validate the Payment Element before confirming
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        toast.error(submitError.message || "Verifique os dados do cartão");
+        setLoading(false);
+        return;
+      }
+
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
