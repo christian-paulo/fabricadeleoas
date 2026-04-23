@@ -631,7 +631,7 @@ const BeforeAfterPreview = ({ corpoAtual, corpoDesejado }: { corpoAtual: string;
         <div>
           <p className="text-center font-heading text-sm text-destructive mb-2">Agora</p>
           <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
-            <img src={atual1} alt="Antes do programa" className="w-full h-full object-cover" />
+            <img src={imgAtual} alt="Antes do programa" className="w-full h-full object-cover" />
           </div>
           <div className="mt-4 space-y-3">
             {beforeBars.map((b, i) => (
@@ -653,7 +653,7 @@ const BeforeAfterPreview = ({ corpoAtual, corpoDesejado }: { corpoAtual: string;
         <div>
           <p className="text-center font-heading text-sm text-success mb-2">Após o programa</p>
           <div className="rounded-2xl overflow-hidden aspect-[3/4] bg-muted">
-            <img src={desejadoDefinida} alt="Depois do programa" className="w-full h-full object-cover" />
+            <img src={imgDesejado} alt="Depois do programa" className="w-full h-full object-cover" />
           </div>
           <div className="mt-4 space-y-3">
             {afterBars.map((b, i) => (
