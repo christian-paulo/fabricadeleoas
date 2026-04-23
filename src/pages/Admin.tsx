@@ -45,7 +45,30 @@ const emptyExercise: Exercise = {
 };
 
 const ITEMS_PER_PAGE = 10;
-const PRICE = 49.90;
+
+// Preços reais dos planos (valor cobrado por ciclo)
+const PLAN_PRICES = {
+  monthly: { total: 39.90, months: 1 },
+  semestral: { total: 119.90, months: 6 },
+  annual: { total: 197.00, months: 12 },
+} as const;
+
+// Detecta o plano a partir do campo subscription_plan (texto livre vindo do Stripe/checkout)
+const detectPlan = (raw?: string | null): keyof typeof PLAN_PRICES => {
+  const s = (raw || "").toLowerCase();
+  if (s.includes("anual") || s.includes("annual") || s.includes("ano")) return "annual";
+  if (s.includes("mensal") || s.includes("monthly") || s.includes("mês") || s.includes("mes")) return "monthly";
+  return "semestral"; // default (plano mais usado)
+};
+
+// MRR contribution = valor total do ciclo / nº meses do ciclo
+const mrrOf = (raw?: string | null) => {
+  const p = PLAN_PRICES[detectPlan(raw)];
+  return p.total / p.months;
+};
+
+// Valor total pago por ciclo (usado para LTV)
+const cycleValueOf = (raw?: string | null) => PLAN_PRICES[detectPlan(raw)].total;
 
 type Section = "overview" | "students" | "exercises" | "quiz" | "feed";
 
