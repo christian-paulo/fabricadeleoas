@@ -122,10 +122,9 @@ const LandingPage = () => {
           {/* Trust row */}
           <div className="flex items-center justify-center gap-3 mt-6">
             <div className="flex -space-x-1.5">
-              {["C","J","F","P","M"].map((l, i) => (
-                <div key={i} className="w-7 h-7 rounded-full pink-gradient border-2 border-background flex items-center justify-center text-[10px] text-white font-bold shadow-sm">
-                  {l}
-                </div>
+              {[dep1, dep2, dep3, dep4, dep5].map((src, i) => (
+                <img key={i} src={src} alt={`Aluna ${i + 1}`}
+                  className="w-8 h-8 rounded-full border-2 border-background object-cover shadow-sm" />
               ))}
             </div>
             <div className="flex flex-col items-start">
