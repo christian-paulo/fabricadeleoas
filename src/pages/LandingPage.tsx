@@ -414,8 +414,8 @@ const LandingPage = () => {
 
       {/* ─── PRICING ─── */}
       <section className="py-16 bg-secondary/30">
-        <div className="container mx-auto px-4 max-w-lg">
-          <div className="text-center mb-8">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
               <Sparkles className="w-3.5 h-3.5 text-primary" />
               <span className="text-xs text-primary font-semibold">OFERTA EXCLUSIVA</span>
@@ -424,64 +424,100 @@ const LandingPage = () => {
               Invista em quem <em className="text-primary not-italic">mais importa.</em>
             </h2>
             <p className="text-muted-foreground text-sm">Acesso completo. Cancele quando quiser.</p>
+            <p className="text-xs text-destructive font-semibold mt-2">🔥 Preço de lançamento — pode encerrar a qualquer momento</p>
           </div>
 
-          <div className="relative">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-              <div className="pink-gradient text-white text-[11px] font-bold px-4 py-1.5 rounded-full shadow-md tracking-wide whitespace-nowrap">
-                ⭐ MAIS POPULAR
-              </div>
-            </div>
-
-            <div className="soft-card p-6 sm:p-8 border-2 border-primary/40 rounded-3xl shadow-[0_8px_40px_hsl(340_82%_52%/0.18)] pt-10">
-              <div className="text-center mb-6">
-                <p className="text-muted-foreground text-xs uppercase tracking-widest mb-2">Assinatura mensal</p>
-                <div className="flex items-baseline justify-center gap-2 mb-1">
-                  <span className="text-muted-foreground text-sm line-through">R$ 97,00</span>
-                  <span className="bg-primary/10 text-primary text-[11px] font-bold px-2 py-0.5 rounded-full">-49%</span>
-                </div>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-heading text-4xl sm:text-5xl font-extrabold text-primary">R$ 49,90</span>
-                  <span className="text-muted-foreground text-sm">/ mês</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">Após o período de teste gratuito</p>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Protocolos diários personalizados por mim",
-                  "142 exercícios com vídeo demonstrativo",
-                  "Adaptação a dores e lesões",
-                  "Acompanhamento de medidas e evolução",
-                  "Treinos para casa e academia",
-                  "Suporte e comunidade de Leoas",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-primary" />
+          {/* 3 planos */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {[
+              {
+                label: "MENSAL",
+                badge: null,
+                price: "R$ 39,90",
+                period: "/mês",
+                perMonth: "R$ 39,90/mês",
+                trial: null,
+                discount: null,
+                highlight: false,
+              },
+              {
+                label: "SEMESTRAL",
+                badge: "⭐ MAIS USADO",
+                price: "R$ 119,90",
+                period: "/semestre",
+                perMonth: "≈ R$ 20/mês",
+                trial: "7 dias grátis",
+                discount: "50% OFF",
+                highlight: true,
+              },
+              {
+                label: "ANUAL",
+                badge: null,
+                price: "R$ 197,00",
+                period: "/ano",
+                perMonth: "≈ R$ 16/mês",
+                trial: "7 dias grátis",
+                discount: "59% OFF",
+                highlight: false,
+              },
+            ].map((plan, i) => (
+              <div key={i} className={`relative soft-card p-5 flex flex-col gap-3 border-2 transition-all ${plan.highlight ? "border-primary shadow-[0_8px_40px_hsl(340_82%_52%/0.2)]" : "border-border/60"} ${plan.badge ? "mt-4 sm:mt-4" : ""}`}>
+                {plan.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                    <div className="pink-gradient text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md">
+                      {plan.badge}
                     </div>
-                    <span className="text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
+                  </div>
+                )}
+                <div className="text-center">
+                  <p className="font-heading text-xs font-bold text-muted-foreground tracking-widest mb-2">{plan.label}</p>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className={`font-heading text-2xl font-extrabold ${plan.highlight ? "text-primary" : "text-foreground"}`}>{plan.price}</span>
+                    <span className="text-muted-foreground text-xs">{plan.period}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{plan.perMonth}</p>
+                </div>
 
-              <Button size="lg" onClick={goToOnboarding}
-                className="w-full pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-                GARANTIR MEU ACESSO GRÁTIS
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+                <div className="flex flex-col items-center gap-1.5">
+                  {plan.discount && (
+                    <span className="bg-primary/10 text-primary text-[11px] font-bold px-2.5 py-0.5 rounded-full">{plan.discount}</span>
+                  )}
+                  {plan.trial ? (
+                    <span className="text-[11px] font-semibold text-green-600 bg-green-500/10 px-2.5 py-0.5 rounded-full">{plan.trial}</span>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground">Sem período de teste</span>
+                  )}
+                </div>
 
-              {/* Scarcity */}
-              <p className="text-center text-xs text-destructive font-semibold mt-3">
-                🔥 Preço de lançamento — pode encerrar a qualquer momento
-              </p>
-
-              <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> 7 dias grátis</span>
-                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> Acesso imediato</span>
-                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-primary" /> Cancele quando quiser</span>
+                <Button size="sm" onClick={goToOnboarding}
+                  className={`w-full rounded-xl font-heading font-bold text-xs py-5 transition-transform hover:scale-105 ${plan.highlight ? "pink-gradient text-primary-foreground shadow-md animate-pulse-pink" : "border border-primary text-primary bg-transparent hover:bg-primary/5"}`}>
+                  {plan.trial ? "COMEÇAR GRÁTIS" : "ASSINAR AGORA"}
+                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                </Button>
               </div>
-            </div>
+            ))}
+          </div>
+
+          {/* Benefícios comuns a todos os planos */}
+          <div className="soft-card p-5 border border-primary/15">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Incluído em todos os planos</p>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                "Protocolos diários personalizados",
+                "142 exercícios com vídeo demonstrativo",
+                "Adaptação a dores e lesões",
+                "Acompanhamento de medidas e evolução",
+                "Treinos para casa e academia",
+                "Suporte e comunidade de Leoas",
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm">
+                  <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 text-primary" />
+                  </div>
+                  <span className="text-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
