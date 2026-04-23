@@ -560,7 +560,7 @@ const UrgencyCTA = ({ onCta }: { onCta: () => void }) => {
 
       <div className="mt-6 rounded-2xl bg-primary/10 border border-primary/20 px-5 py-4 text-foreground">
         <p className="font-body text-sm sm:text-base leading-snug">
-          É somente <strong className="font-extrabold text-primary">R$0,66 por dia</strong> para você conquistar o corpo de leoa 🦁 que sempre sonhou!
+          É somente <strong className="font-extrabold text-primary">R$0,50 por dia</strong> para você conquistar o corpo de leoa 🦁 que sempre sonhou!
         </p>
       </div>
 
