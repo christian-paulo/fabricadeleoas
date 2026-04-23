@@ -20,7 +20,12 @@ import dep5 from "@/assets/dep5.webp";
 import depoimentosWhatsapp from "@/assets/depoimentos-whatsapp.png";
 import printApp from "@/assets/print-app.webp";
 import atual1 from "@/assets/atual1.webp";
+import atual2 from "@/assets/atual2.webp";
+import atual3 from "@/assets/atual3.webp";
+import atual4 from "@/assets/atual4.webp";
+import desejadoSaudavel from "@/assets/desejado-saudavel.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
+import desejadoMusculosa from "@/assets/desejado-musculosa.webp";
 import logoLeoa from "@/assets/logo-leoa-pink.png";
 const stripePromise = loadStripe("pk_test_51TEx7tI4dFrhArZv4EAhW27GaMJSJlxz84IGixOncD3L3D6gf1CT5dAYtcRfpX2CrSF12DV4mTvoQcSiGLoH6VHL00vUrdcK0y");
 
