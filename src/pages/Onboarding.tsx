@@ -69,6 +69,11 @@ const Onboarding = () => {
   const canProceed = useMemo(() => validateStep(currentStep, data), [currentStep, data]);
 
   const goNext = async () => {
+    // Link email to quiz_leads as soon as user provides it
+    if (currentStep === "email-onboarding" && data.email_onboarding) {
+      const { linkQuizLead } = await import("@/lib/quizTracking");
+      linkQuizLead({ email: data.email_onboarding.trim().toLowerCase() }).catch(() => {});
+    }
     if (currentStep === "analise-ia") {
       navigate("/checkout");
       return;
