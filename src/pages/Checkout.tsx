@@ -536,8 +536,12 @@ const WeightPrediction = ({ pesoAtual, metaPeso }: { pesoAtual: string; metaPeso
   const goal = parseFloat(metaPeso) || 75;
   const isGaining = goal > current;
   const mid = Math.round((current + goal) * 10 / 2) / 10;
+
+  // Mesma lógica do onboarding (GraficoPrevisaoScreen): 3-8 semanas conforme diferença
+  const absDiff = Math.abs(goal - current);
+  const weeksNeeded = absDiff <= 5 ? 3 : absDiff <= 8 ? 5 : absDiff <= 12 ? 6 : absDiff <= 18 ? 7 : 8;
   const targetDate = new Date();
-  targetDate.setMonth(targetDate.getMonth() + 2);
+  targetDate.setDate(targetDate.getDate() + weeksNeeded * 7);
   const monthNames = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
   const dateStr = `${monthNames[targetDate.getMonth()]}. ${targetDate.getDate()}`;
 
