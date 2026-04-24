@@ -826,6 +826,7 @@ const Admin = () => {
                     <TableHeader>
                       <TableRow className="border-border">
                         <TableHead className="text-muted-foreground whitespace-nowrap">1º Clique</TableHead>
+                        <TableHead className="text-muted-foreground">Etapa</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
@@ -844,9 +845,22 @@ const Admin = () => {
                         const dt = r.first_click_at ? new Date(r.first_click_at) : null;
                         const dateStr = dt ? dt.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
                         const email = r.profile?.email || r.lead_email || "—";
+                        const stageColor: Record<string, string> = {
+                          lead: "bg-muted text-muted-foreground",
+                          quiz: "bg-amber-500/20 text-amber-400",
+                          account: "bg-blue-500/20 text-blue-400",
+                          trial: "bg-primary/20 text-primary",
+                          active: "bg-green-500/20 text-green-400",
+                          canceled: "bg-destructive/20 text-destructive",
+                        };
                         return (
                           <TableRow key={r.id} className="border-border">
                             <TableCell className="text-muted-foreground text-xs whitespace-nowrap">{dateStr}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${stageColor[r.stage_tone] || "bg-muted text-muted-foreground"}`}>
+                                {r.stage_label || "—"}
+                              </span>
+                            </TableCell>
                             <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
                             <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{email}</TableCell>
                             <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
@@ -869,7 +883,7 @@ const Admin = () => {
                         );
                       })}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
