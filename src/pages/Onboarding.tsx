@@ -1145,7 +1145,7 @@ const BoasVindasScreen = ({ onNext }: { onNext: () => void }) => {
       <div className="w-full pb-8 animate-[fade-in_0.6s_ease-out_1.1s_both]">
         <Button onClick={handleStart}
           className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg uppercase tracking-wide hover-scale">
-          COMEÇAR AGORA
+          INICIAR TESTE GRATUITO
         </Button>
       </div>
     </div>
