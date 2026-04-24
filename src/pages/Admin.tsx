@@ -187,85 +187,133 @@ const Admin = () => {
   };
 
   const fetchQuizResponses = async () => {
-    // Source of truth = quiz_leads (every first click on the quiz)
-    const { data: leads } = await supabase
-      .from("quiz_leads" as any)
-      .select("*")
-      .order("first_click_at", { ascending: false });
-    if (!leads || leads.length === 0) { setQuizResponses([]); return; }
-
-    // Deduplicate leads that belong to the same student (same email or same profile_id),
-    // which can happen when the user starts the quiz in an in-app browser
-    // (Instagram/Facebook) and finishes checkout in an external browser.
-    // Keep the OLDEST record (the real first click).
-    const sortedAsc = [...leads].sort(
-      (a: any, b: any) =>
-        new Date(a.first_click_at).getTime() - new Date(b.first_click_at).getTime()
-    );
-    const seenEmail = new Set<string>();
-    const seenProfile = new Set<string>();
-    const dedupedAsc: any[] = [];
-    for (const l of sortedAsc as any[]) {
-      const emailKey = l.email ? String(l.email).toLowerCase() : null;
-      const profKey = l.profile_id || null;
-      if (emailKey && seenEmail.has(emailKey)) continue;
-      if (profKey && seenProfile.has(profKey)) continue;
-      if (emailKey) seenEmail.add(emailKey);
-      if (profKey) seenProfile.add(profKey);
-      dedupedAsc.push(l);
-    }
-    const dedupedLeads = dedupedAsc.reverse(); // back to newest-first for UI
-
-    const profileIds = [...new Set(dedupedLeads.map((l: any) => l.profile_id).filter(Boolean))];
-    const emails = [...new Set(dedupedLeads.map((l: any) => l.email).filter(Boolean).map((e: string) => e.toLowerCase()))];
-
-    const [profByIdRes, profByEmailRes] = await Promise.all([
-      profileIds.length
-        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("id", profileIds)
-        : Promise.resolve({ data: [] as any[] }),
-      emails.length
-        ? supabase.from("profiles").select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration").in("email", emails)
-        : Promise.resolve({ data: [] as any[] }),
+    // Combine THREE sources so every lead/aluna that interacted with the funnel
+    // appears, regardless of where they dropped off:
+    //  1) quiz_leads          → first click on the quiz (may have no profile yet)
+    //  2) onboarding_responses → completed the quiz (always has profile_id)
+    //  3) profiles            → created account (may have skipped the quiz)
+    const [leadsRes, respsRes, profsRes] = await Promise.all([
+      supabase.from("quiz_leads" as any).select("*"),
+      supabase.from("onboarding_responses").select("*"),
+      supabase
+        .from("profiles")
+        .select("id, full_name, email, goal, target_area, equipment, training_experience, workout_days, workout_duration, onboarding_completed, is_subscriber, subscription_plan, trial_start_date, trial_end_date, canceled_at, created_at"),
     ]);
-    const profMap: Record<string, any> = {};
+
+    const leads = (leadsRes.data as any[]) || [];
+    const resps = (respsRes.data as any[]) || [];
+    const profs = (profsRes.data as any[]) || [];
+
+    const profById: Record<string, any> = {};
     const profByEmail: Record<string, any> = {};
-    (profByIdRes.data || []).forEach((p: any) => { profMap[p.id] = p; });
-    (profByEmailRes.data || []).forEach((p: any) => {
-      profMap[p.id] = p;
+    profs.forEach((p) => {
+      profById[p.id] = p;
       if (p.email) profByEmail[p.email.toLowerCase()] = p;
     });
+    const respByProfile: Record<string, any> = {};
+    resps.forEach((r) => { respByProfile[r.profile_id] = r; });
 
-    // Pull onboarding_responses for any matched profiles
-    const allProfileIds = [...new Set([
-      ...profileIds,
-      ...Object.values(profByEmail).map((p: any) => p.id),
-    ])];
-    let respMap: Record<string, any> = {};
-    if (allProfileIds.length) {
-      const { data: resps } = await supabase
-        .from("onboarding_responses")
-        .select("*")
-        .in("profile_id", allProfileIds);
-      (resps || []).forEach((r: any) => { respMap[r.profile_id] = r; });
-    }
+    // Build a unified entity keyed by profileId OR by email OR by lead session_id
+    type Row = {
+      key: string;
+      first_click_at?: string | null;
+      lead_email?: string | null;
+      profile?: any;
+      resp?: any;
+    };
+    const rowsByKey = new Map<string, Row>();
 
-    const merged = dedupedLeads.map((l: any) => {
+    const upsert = (key: string, patch: Partial<Row>) => {
+      const cur = rowsByKey.get(key) || { key };
+      // keep the OLDEST first_click_at if multiple records contribute
+      if (patch.first_click_at) {
+        if (!cur.first_click_at || new Date(patch.first_click_at) < new Date(cur.first_click_at)) {
+          cur.first_click_at = patch.first_click_at;
+        }
+      }
+      if (patch.lead_email && !cur.lead_email) cur.lead_email = patch.lead_email;
+      if (patch.profile && !cur.profile) cur.profile = patch.profile;
+      if (patch.resp && !cur.resp) cur.resp = patch.resp;
+      rowsByKey.set(key, cur);
+    };
+
+    // Resolve a stable key for any record
+    const keyFor = (profileId?: string | null, email?: string | null, fallback?: string) => {
+      if (profileId) return `p:${profileId}`;
+      if (email) return `e:${email.toLowerCase()}`;
+      return `s:${fallback}`;
+    };
+
+    // 1) quiz_leads
+    leads.forEach((l) => {
       const profile =
-        (l.profile_id && profMap[l.profile_id]) ||
-        (l.email && profByEmail[l.email.toLowerCase()]) ||
-        {};
-      const resp = profile.id ? (respMap[profile.id] || {}) : {};
-      return {
-        // synthetic row id for React keys
-        id: l.id,
-        // first click date (replaces row index in UI)
+        (l.profile_id && profById[l.profile_id]) ||
+        (l.email && profByEmail[String(l.email).toLowerCase()]) ||
+        null;
+      const k = keyFor(profile?.id || l.profile_id, profile?.email || l.email, l.session_id);
+      upsert(k, {
         first_click_at: l.first_click_at,
-        // lead-known email (may exist before signup)
-        lead_email: l.email,
-        profile,
-        ...resp,
+        lead_email: l.email || null,
+        profile: profile || undefined,
+        resp: profile?.id ? respByProfile[profile.id] : undefined,
+      });
+    });
+
+    // 2) onboarding_responses (catches alunas with NO quiz_leads row)
+    resps.forEach((r) => {
+      const profile = profById[r.profile_id];
+      const k = keyFor(r.profile_id, profile?.email);
+      upsert(k, {
+        first_click_at: r.created_at, // fallback timestamp
+        profile: profile || { id: r.profile_id },
+        resp: r,
+      });
+    });
+
+    // 3) profiles (catches signups that skipped the quiz entirely)
+    profs.forEach((p) => {
+      const k = keyFor(p.id, p.email);
+      upsert(k, {
+        first_click_at: p.created_at,
+        profile: p,
+        resp: respByProfile[p.id],
+      });
+    });
+
+    // Determine the funnel stage for each row
+    const stageOf = (row: Row): { key: string; label: string; tone: "lead" | "quiz" | "account" | "trial" | "active" | "canceled" } => {
+      const p = row.profile || {};
+      if (p.canceled_at) return { key: "canceled", label: "Cancelou", tone: "canceled" };
+      if (p.is_subscriber && p.subscription_plan) return { key: "active", label: "Assinante", tone: "active" };
+      if (p.trial_start_date) return { key: "trial", label: "Trial iniciado", tone: "trial" };
+      if (row.resp && Object.keys(row.resp).length > 0) {
+        return { key: "quiz_done", label: "Completou quiz (não pagou)", tone: "quiz" };
+      }
+      if (p.id) return { key: "signup", label: "Criou conta (sem quiz)", tone: "account" };
+      return { key: "lead", label: "Apenas clicou", tone: "lead" };
+    };
+
+    const merged = Array.from(rowsByKey.values()).map((row) => {
+      const stage = stageOf(row);
+      return {
+        id: row.key,
+        first_click_at: row.first_click_at,
+        lead_email: row.lead_email,
+        profile: row.profile || {},
+        stage_key: stage.key,
+        stage_label: stage.label,
+        stage_tone: stage.tone,
+        ...(row.resp || {}),
       };
     });
+
+    // newest first
+    merged.sort((a, b) => {
+      const ta = a.first_click_at ? new Date(a.first_click_at).getTime() : 0;
+      const tb = b.first_click_at ? new Date(b.first_click_at).getTime() : 0;
+      return tb - ta;
+    });
+
     setQuizResponses(merged);
   };
 
@@ -755,9 +803,10 @@ const Admin = () => {
                     </SelectContent>
                   </Select>
                   <Button variant="outline" className="border-border text-foreground h-10" onClick={() => {
-                    const headers = ["1º Clique", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
+                    const headers = ["1º Clique", "Etapa", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
                     const rows = filteredQuiz.map((r: any) => [
                       r.first_click_at ? new Date(r.first_click_at).toLocaleString("pt-BR") : "",
+                      r.stage_label || "",
                       r.profile?.full_name || "", r.profile?.email || r.lead_email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
                       r.profile?.goal || "", r.profile?.target_area || "", r.motivacao || "", r.corpo_atual || "", r.corpo_desejado || "",
                       r.biotipo || "", r.profile?.equipment || "", r.local_treino || "", r.dificuldade || "", r.rotina || "",
@@ -778,6 +827,7 @@ const Admin = () => {
                     <TableHeader>
                       <TableRow className="border-border">
                         <TableHead className="text-muted-foreground whitespace-nowrap">1º Clique</TableHead>
+                        <TableHead className="text-muted-foreground">Etapa</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
@@ -796,9 +846,22 @@ const Admin = () => {
                         const dt = r.first_click_at ? new Date(r.first_click_at) : null;
                         const dateStr = dt ? dt.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
                         const email = r.profile?.email || r.lead_email || "—";
+                        const stageColor: Record<string, string> = {
+                          lead: "bg-muted text-muted-foreground",
+                          quiz: "bg-amber-500/20 text-amber-400",
+                          account: "bg-blue-500/20 text-blue-400",
+                          trial: "bg-primary/20 text-primary",
+                          active: "bg-green-500/20 text-green-400",
+                          canceled: "bg-destructive/20 text-destructive",
+                        };
                         return (
                           <TableRow key={r.id} className="border-border">
                             <TableCell className="text-muted-foreground text-xs whitespace-nowrap">{dateStr}</TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${stageColor[r.stage_tone] || "bg-muted text-muted-foreground"}`}>
+                                {r.stage_label || "—"}
+                              </span>
+                            </TableCell>
                             <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
                             <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{email}</TableCell>
                             <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
@@ -821,7 +884,7 @@ const Admin = () => {
                         );
                       })}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
