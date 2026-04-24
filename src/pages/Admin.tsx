@@ -803,9 +803,10 @@ const Admin = () => {
                     </SelectContent>
                   </Select>
                   <Button variant="outline" className="border-border text-foreground h-10" onClick={() => {
-                    const headers = ["1º Clique", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
+                    const headers = ["1º Clique", "Etapa", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
                     const rows = filteredQuiz.map((r: any) => [
                       r.first_click_at ? new Date(r.first_click_at).toLocaleString("pt-BR") : "",
+                      r.stage_label || "",
                       r.profile?.full_name || "", r.profile?.email || r.lead_email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
                       r.profile?.goal || "", r.profile?.target_area || "", r.motivacao || "", r.corpo_atual || "", r.corpo_desejado || "",
                       r.biotipo || "", r.profile?.equipment || "", r.local_treino || "", r.dificuldade || "", r.rotina || "",
