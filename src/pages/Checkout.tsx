@@ -327,10 +327,9 @@ const Checkout = () => {
         });
         if (fnError) throw fnError;
         if (data?.url) {
-          // Mantém a aluna no paywall e abre o checkout do AbacatePay em nova aba
-          setCheckoutUrl(data.url);
-          window.open(data.url, "_blank", "noopener,noreferrer");
-          setLoading(false);
+          // Redireciona na mesma aba para o checkout do AbacatePay.
+          // Ao concluir, AbacatePay devolve para /checkout?payment=success
+          window.location.href = data.url;
         } else {
           throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
