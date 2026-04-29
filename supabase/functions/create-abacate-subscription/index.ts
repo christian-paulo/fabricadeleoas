@@ -7,11 +7,11 @@ const corsHeaders = {
 };
 
 const PRODUCTS: Record<string, { id: string; label: string }> = {
-  monthly:   { id: "prod_uBNane3ng1bwfYbtnccS5rc3", label: "Mensal" },
-  mensal:    { id: "prod_uBNane3ng1bwfYbtnccS5rc3", label: "Mensal" },
-  semestral: { id: "prod_Bjy3HCZC2GgnEgFZgtg23y51", label: "Semestral" },
-  annual:    { id: "prod_prY5aFWLULfEURBQgDbeu1GR", label: "Anual" },
-  anual:     { id: "prod_prY5aFWLULfEURBQgDbeu1GR", label: "Anual" },
+  monthly:   { id: "prod_aRPjEEFaEcZEspGtskW5fmjy", label: "Mensal" },
+  mensal:    { id: "prod_aRPjEEFaEcZEspGtskW5fmjy", label: "Mensal" },
+  semestral: { id: "prod_HbBF4HUeE2zMCLTk6AB2PqNT", label: "Semestral" },
+  annual:    { id: "prod_tnG5h52RLSyExm54fNaW0Y50", label: "Anual" },
+  anual:     { id: "prod_tnG5h52RLSyExm54fNaW0Y50", label: "Anual" },
 };
 
 serve(async (req) => {
