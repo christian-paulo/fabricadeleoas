@@ -414,6 +414,7 @@ export type Database = {
           profile_id: string | null
           session_id: string
           updated_at: string
+          variant: string | null
         }
         Insert: {
           created_at?: string
@@ -423,6 +424,7 @@ export type Database = {
           profile_id?: string | null
           session_id: string
           updated_at?: string
+          variant?: string | null
         }
         Update: {
           created_at?: string
@@ -432,6 +434,7 @@ export type Database = {
           profile_id?: string | null
           session_id?: string
           updated_at?: string
+          variant?: string | null
         }
         Relationships: [
           {
