@@ -327,9 +327,10 @@ const Checkout = () => {
         });
         if (fnError) throw fnError;
         if (data?.url) {
-          // Redireciona a aluna direto para o checkout do AbacatePay
-          // Ao concluir, AbacatePay devolve para /checkout?payment=success
-          window.location.href = data.url;
+          // Mantém a aluna no paywall e abre o checkout do AbacatePay em nova aba
+          setCheckoutUrl(data.url);
+          window.open(data.url, "_blank", "noopener,noreferrer");
+          setLoading(false);
         } else {
           throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
@@ -471,7 +472,20 @@ const Checkout = () => {
                 {loading && (
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Redirecionando para o pagamento seguro...</p>
+                    <p className="text-sm text-muted-foreground">Preparando seu pagamento seguro...</p>
+                  </div>
+                )}
+                {!loading && checkoutUrl && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Abrimos o pagamento em uma nova aba. Se não abriu, clique abaixo:
+                    </p>
+                    <Button
+                      onClick={() => window.open(checkoutUrl, "_blank", "noopener,noreferrer")}
+                      className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg"
+                    >
+                      Abrir pagamento seguro
+                    </Button>
                   </div>
                 )}
                 {error && !loading && (
