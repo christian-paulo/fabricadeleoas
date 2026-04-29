@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.webp";
-import heroTreino from "@/assets/hero-treino.jpg";
+import heroTreino from "@/assets/gilvan-primeira-sessao.webp";
 import { trackQuizFirstClick } from "@/lib/quizTracking";
 
 type VariantKey = "v1" | "v2" | "v3";
