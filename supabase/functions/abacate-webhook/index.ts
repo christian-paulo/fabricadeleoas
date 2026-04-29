@@ -213,7 +213,7 @@ serve(async (req) => {
       console.warn("[abacate-webhook] no user or email found");
     }
 
-    // Send Purchase event to Meta Conversions API (only on first paid event)
+    // Send Purchase event to Meta Conversions API + Utmify (only on first paid event)
     if (isPaid && !event.includes("renew")) {
       const value = (plan && PLAN_PRICE[plan.toLowerCase()]) || 0;
       const eventId = `abacate_${subscriptionId || externalId || Date.now()}`;
@@ -224,6 +224,73 @@ serve(async (req) => {
         eventId,
         plan,
       });
+
+      // Fetch profile for UTMs and customer info
+      let profileData: any = null;
+      if (userId) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("email, full_name, whatsapp, utm_source, utm_medium, utm_campaign, utm_content")
+          .eq("id", userId)
+          .maybeSingle();
+        profileData = data;
+      } else if (email) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("email, full_name, whatsapp, utm_source, utm_medium, utm_campaign, utm_content")
+          .ilike("email", email)
+          .maybeSingle();
+        profileData = data;
+      }
+
+      const now = new Date();
+      const valueInCents = Math.round(value * 100);
+      const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Assinatura";
+
+      const utmifyPayload = {
+        orderId: subscriptionId || eventId,
+        platform: "AbacatePay",
+        paymentMethod: "pix" as const,
+        status: "paid" as const,
+        createdAt: formatDateUtmify(now),
+        approvedDate: formatDateUtmify(now),
+        refundedAt: null,
+        customer: {
+          name: profileData?.full_name || "Cliente",
+          email: profileData?.email || email || "sem-email@fabricadeleoas.online",
+          phone: profileData?.whatsapp || null,
+          document: null,
+          country: "BR",
+        },
+        products: [
+          {
+            id: plan || "subscription",
+            name: `Fábrica de Leoas - ${planLabel}`,
+            planId: plan || null,
+            planName: planLabel,
+            quantity: 1,
+            priceInCents: valueInCents,
+          },
+        ],
+        trackingParameters: {
+          src: null,
+          sck: null,
+          utm_source: profileData?.utm_source || null,
+          utm_campaign: profileData?.utm_campaign || null,
+          utm_medium: profileData?.utm_medium || null,
+          utm_content: profileData?.utm_content || null,
+          utm_term: null,
+        },
+        commission: {
+          totalPriceInCents: valueInCents,
+          gatewayFeeInCents: 0,
+          userCommissionInCents: valueInCents,
+          currency: "BRL" as const,
+        },
+        isTest: false,
+      };
+
+      await sendToUtmify(utmifyPayload);
     }
 
     return new Response(JSON.stringify({ received: true, userId, email }), {
