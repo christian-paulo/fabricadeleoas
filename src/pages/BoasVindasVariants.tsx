@@ -119,7 +119,7 @@ const BoasVindasVariants = () => {
       <div className="w-full flex items-start gap-2 px-2 pb-8 text-xs text-muted-foreground animate-[fade-in_0.6s_ease-out_0.85s_both]">
         <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
         <span>
-          Você testa por 7 dias — se não gostar, seu dinheiro de volta. Simples assim.
+          7 dias de garantia de satisfação — se não gostar, devolvemos seu dinheiro. Simples assim.
         </span>
       </div>
     </div>

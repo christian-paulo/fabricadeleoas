@@ -38,7 +38,7 @@ const LandingPage = () => {
     "Tri-sets com vídeo demonstrativo",
     "Acompanhamento de evolução",
     "Método exclusivo do Gilvan",
-    "7 dias grátis para testar",
+    "7 dias de garantia de satisfação",
   ];
 
   const faqs = [
@@ -55,8 +55,8 @@ const LandingPage = () => {
       a: "Com certeza. Eu adapto cada protocolo às suas dores e limitações. Se algo incomoda, eu ajusto. Seu corpo é único e seu treino também deve ser."
     },
     {
-      q: "Como funciona o período de teste?",
-      a: "Você tem 7 dias de acesso total e gratuito. Se não amar o método, cancele com 1 clique no app antes da cobrança. Zero burocracia, zero risco."
+      q: "Como funciona a garantia?",
+      a: "Você tem 7 dias de garantia incondicional de satisfação. Se não amar o método, devolvemos 100% do seu dinheiro — basta pedir pelo app. Zero burocracia, zero risco."
     },
     {
       q: "Os treinos são longos?",
@@ -69,7 +69,7 @@ const LandingPage = () => {
 
       {/* Promo Banner */}
       <div className="pink-gradient text-primary-foreground text-center py-2.5 px-4 text-xs sm:text-sm font-medium">
-        🔥 Promoção de lançamento: <strong>7 dias GRÁTIS</strong> · Apenas para as primeiras que decidirem · Encerra sem aviso
+        🔥 Promoção de lançamento: <strong>7 DIAS DE GARANTIA</strong> · Apenas para as primeiras que decidirem · Encerra sem aviso
       </div>
 
       {/* Navbar */}
@@ -82,7 +82,7 @@ const LandingPage = () => {
             </Button>
             <Button size="sm" onClick={goToOnboarding}
               className="pink-gradient text-primary-foreground rounded-full font-semibold text-xs px-4">
-              Começar Grátis
+              Começar Agora
             </Button>
           </div>
         </div>
@@ -115,7 +115,7 @@ const LandingPage = () => {
 
           <Button size="lg" onClick={goToOnboarding}
             className="w-full max-w-sm mx-auto pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-            CRIAR MEU PROTOCOLO GRÁTIS
+            CRIAR MEU PROTOCOLO AGORA
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
 
@@ -156,7 +156,7 @@ const LandingPage = () => {
             {[
               { value: "142", label: "exercícios com vídeo", icon: Dumbbell },
               { value: "4.9★", label: "avaliação das alunas", icon: Star },
-              { value: "7 dias", label: "grátis para testar", icon: Shield },
+              { value: "7 dias", label: "de garantia de satisfação", icon: Shield },
             ].map((stat, i) => (
               <div key={i} className="soft-card p-4 text-center border border-primary/10 bg-primary/5">
                 <div className="flex justify-center mb-2">
@@ -445,7 +445,7 @@ const LandingPage = () => {
                 price: "R$ 119,90",
                 period: "/6 meses",
                 perMonth: "≈ R$ 20/mês",
-                trial: "7 dias grátis",
+                trial: "7 dias de garantia",
                 discount: "50% OFF",
                 highlight: true,
               },
@@ -455,7 +455,7 @@ const LandingPage = () => {
                 price: "R$ 197,00",
                 period: "/ano",
                 perMonth: "≈ R$ 16/mês",
-                trial: "7 dias grátis",
+                trial: "7 dias de garantia",
                 discount: "59% OFF",
                 highlight: false,
               },
@@ -585,15 +585,15 @@ const LandingPage = () => {
             Sua transformação começa <span className="text-primary">agora.</span>
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            7 dias grátis. Sem risco. Sem burocracia.
+            7 dias de garantia. Sem risco. Sem burocracia.
           </p>
           <Button size="lg" onClick={goToOnboarding}
             className="w-full max-w-sm mx-auto pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-            COMEÇAR MEUS 7 DIAS GRÁTIS
+            QUERO MEU PROTOCOLO AGORA
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <p className="text-xs text-muted-foreground mt-4">
-            A partir de R$49,90/mês · 7 dias grátis · Cancele quando quiser
+            A partir de R$49,90/mês · 7 dias de garantia · Cancele quando quiser
           </p>
         </div>
       </section>

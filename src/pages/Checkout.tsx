@@ -238,12 +238,12 @@ const PLANS = {
     priceMain: "R$ 119,90",
     priceSecondary: "/semestre",
     priceWeek: null,
-    trialDays: 7,
+    trialDays: 0,
     orderName: "Plano Semestral",
     orderPrice: "R$ 119,90",
     orderInterval: "Assinatura recorrente a cada 6 meses",
-    trialLabel: "7 dias grátis",
-    trialDiscount: "- R$ 119,90",
+    trialLabel: null,
+    trialDiscount: null,
     discount: "50% OFF",
   },
   annual: {
@@ -254,12 +254,12 @@ const PLANS = {
     priceMain: "R$ 197,00",
     priceSecondary: "/ano",
     priceWeek: null,
-    trialDays: 7,
+    trialDays: 0,
     orderName: "Plano Anual",
     orderPrice: "R$ 197,00",
     orderInterval: "Assinatura recorrente anual",
-    trialLabel: "7 dias grátis",
-    trialDiscount: "- R$ 197,00",
+    trialLabel: null,
+    trialDiscount: null,
     discount: "59% OFF",
   },
 };
@@ -565,7 +565,7 @@ const CheckoutFAQ = () => {
     },
     {
       q: "É mensalidade? Vou ter que pagar todo mês?",
-      a: "Você escolhe o plano. Temos o Semestral (cobrado a cada 6 meses, com 3 dias de teste grátis) e o Anual (cobrado uma vez por ano). Sem surpresas, sem cobranças escondidas.",
+      a: "Você escolhe o plano. Temos o Semestral (cobrado a cada 6 meses) e o Anual (cobrado uma vez por ano). Todos com 7 dias de garantia de satisfação — se não gostar, devolvemos seu dinheiro. Sem surpresas, sem cobranças escondidas.",
     },
     {
       q: "Quanto tempo dura cada treino?",
@@ -1025,24 +1025,18 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
                     <p className="text-[10px] text-muted-foreground">{p.priceSecondary}</p>
                   )}
                 </div>
-                {p.trialDays > 0 ? (
-                  <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded">
-                    {p.trialDays} dias grátis
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-muted-foreground">Sem trial</span>
-                )}
+                <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded">
+                  7 dias de garantia
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* Trial info for selected plan */}
-        {plan.trialDays > 0 && (
-          <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
-            <span>🎁</span> Desfrute de {plan.trialDays} dias de teste gratuito, depois {plan.orderPrice}
-          </p>
-        )}
+        {/* Garantia info */}
+        <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
+          <span>🛡️</span> 7 dias de garantia de satisfação — não gostou, devolvemos seu dinheiro
+        </p>
 
         {/* Order summary */}
         <div className="border border-border rounded-xl p-4 mb-4 bg-background">
@@ -1054,20 +1048,11 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
             </div>
             <p className="font-heading text-base text-foreground">{plan.orderPrice}</p>
           </div>
-          {plan.trialLabel && (
-            <>
-              <div className="border-t border-border my-2" />
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-primary font-medium">{plan.trialLabel}</span>
-                <span className="text-xs text-primary font-medium">{plan.trialDiscount}</span>
-              </div>
-            </>
-          )}
           <div className="border-t border-border my-2" />
           <div className="flex items-center justify-between">
             <span className="font-heading text-sm text-foreground">Total hoje</span>
             <span className="font-heading text-xl text-primary">
-              {plan.trialDays > 0 ? "R$ 0,00" : plan.orderPrice}
+              {plan.orderPrice}
             </span>
           </div>
         </div>
@@ -1085,19 +1070,14 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
           className="w-full mt-3 bg-primary text-primary-foreground font-bold text-sm py-5 rounded-xl uppercase"
           onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
         >
-          {plan.trialDays > 0 ? `TESTE GRATUITO DE ${plan.trialDays} DIAS` : "ASSINAR AGORA"}
+          ASSINAR AGORA
         </Button>
-        {plan.trialDays > 0 && (
-          <p className="text-[11px] text-center text-primary mt-1.5 flex items-center justify-center gap-1">
-            <Check className="w-3 h-3" /> não pague nada agora
-          </p>
-        )}
+        <p className="text-[11px] text-center text-primary mt-1.5 flex items-center justify-center gap-1">
+          <Check className="w-3 h-3" /> 7 dias de garantia incondicional
+        </p>
 
         <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
-          {plan.trialDays > 0
-            ? `Você não será cobrada durante o período de teste. Após ${plan.trialDays} dias, a assinatura de ${plan.orderPrice} será ativada automaticamente. Cancele a qualquer momento com 1 clique.`
-            : `A assinatura de ${plan.orderPrice} será cobrada imediatamente. Cancele a qualquer momento com 1 clique.`
-          }
+          A assinatura de {plan.orderPrice} será cobrada imediatamente. Você tem 7 dias de garantia — se não gostar, é só pedir o reembolso. Cancele a qualquer momento com 1 clique.
         </p>
       </div>
     </div>
