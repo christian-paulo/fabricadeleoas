@@ -97,8 +97,8 @@ const BoasVindasVariants = () => {
       <div className="w-full rounded-2xl overflow-hidden mb-6 shadow-lg animate-[scale-in_0.6s_ease-out_0.45s_both]">
         <img
           src={heroTreino}
-          alt="Treino em casa com o Gilvan"
-          className="w-full h-56 object-cover"
+          alt="Gilvan treinando"
+          className="w-full h-72 object-cover object-top"
         />
       </div>
 
