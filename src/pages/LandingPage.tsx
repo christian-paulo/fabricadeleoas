@@ -82,7 +82,7 @@ const LandingPage = () => {
             </Button>
             <Button size="sm" onClick={goToOnboarding}
               className="pink-gradient text-primary-foreground rounded-full font-semibold text-xs px-4">
-              Começar Grátis
+              Começar Agora
             </Button>
           </div>
         </div>
@@ -585,15 +585,15 @@ const LandingPage = () => {
             Sua transformação começa <span className="text-primary">agora.</span>
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            7 dias grátis. Sem risco. Sem burocracia.
+            7 dias de garantia. Sem risco. Sem burocracia.
           </p>
           <Button size="lg" onClick={goToOnboarding}
             className="w-full max-w-sm mx-auto pink-gradient text-primary-foreground font-heading font-bold text-base py-7 rounded-2xl animate-pulse-pink hover:scale-105 transition-transform shadow-lg">
-            COMEÇAR MEUS 7 DIAS GRÁTIS
+            QUERO MEU PROTOCOLO AGORA
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <p className="text-xs text-muted-foreground mt-4">
-            A partir de R$49,90/mês · 7 dias grátis · Cancele quando quiser
+            A partir de R$49,90/mês · 7 dias de garantia · Cancele quando quiser
           </p>
         </div>
       </section>
