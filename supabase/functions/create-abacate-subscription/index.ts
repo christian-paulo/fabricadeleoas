@@ -59,16 +59,18 @@ serve(async (req) => {
     // Create AbacatePay customer if we don't have one yet
     let customerId = existingCustomerId;
     if (!customerId) {
-      const customerRes = await fetch("https://api.abacatepay.com/v2/customer/create", {
+      const customerRes = await fetch("https://api.abacatepay.com/v2/customers/create", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: fullName || email.split("@")[0],
-          email,
-          cellphone: cellphone || undefined,
+          data: {
+            name: fullName || email.split("@")[0],
+            email,
+            cellphone: cellphone || undefined,
+          },
         }),
       });
       const customerJson = await customerRes.json();
