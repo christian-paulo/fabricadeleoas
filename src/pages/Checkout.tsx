@@ -472,7 +472,20 @@ const Checkout = () => {
                 {loading && (
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Redirecionando para o pagamento seguro...</p>
+                    <p className="text-sm text-muted-foreground">Preparando seu pagamento seguro...</p>
+                  </div>
+                )}
+                {!loading && checkoutUrl && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Abrimos o pagamento em uma nova aba. Se não abriu, clique abaixo:
+                    </p>
+                    <Button
+                      onClick={() => window.open(checkoutUrl, "_blank", "noopener,noreferrer")}
+                      className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg"
+                    >
+                      Abrir pagamento seguro
+                    </Button>
                   </div>
                 )}
                 {error && !loading && (
