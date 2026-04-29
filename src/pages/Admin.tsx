@@ -218,6 +218,7 @@ const Admin = () => {
       key: string;
       first_click_at?: string | null;
       lead_email?: string | null;
+      variant?: string | null;
       profile?: any;
       resp?: any;
     };
@@ -232,6 +233,7 @@ const Admin = () => {
         }
       }
       if (patch.lead_email && !cur.lead_email) cur.lead_email = patch.lead_email;
+      if (patch.variant && !cur.variant) cur.variant = patch.variant;
       if (patch.profile && !cur.profile) cur.profile = patch.profile;
       if (patch.resp && !cur.resp) cur.resp = patch.resp;
       rowsByKey.set(key, cur);
@@ -254,6 +256,7 @@ const Admin = () => {
       upsert(k, {
         first_click_at: l.first_click_at,
         lead_email: l.email || null,
+        variant: l.variant || null,
         profile: profile || undefined,
         resp: profile?.id ? respByProfile[profile.id] : undefined,
       });
@@ -299,6 +302,7 @@ const Admin = () => {
         id: row.key,
         first_click_at: row.first_click_at,
         lead_email: row.lead_email,
+        variant: row.variant || null,
         profile: row.profile || {},
         stage_key: stage.key,
         stage_label: stage.label,
