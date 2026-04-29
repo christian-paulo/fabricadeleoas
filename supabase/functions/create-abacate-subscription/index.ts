@@ -66,11 +66,9 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          data: {
-            name: fullName || email.split("@")[0],
-            email,
-            cellphone: cellphone || undefined,
-          },
+          email,
+          name: fullName || email.split("@")[0],
+          cellphone: cellphone || undefined,
         }),
       });
       const customerJson = await customerRes.json();
