@@ -807,10 +807,11 @@ const Admin = () => {
                     </SelectContent>
                   </Select>
                   <Button variant="outline" className="border-border text-foreground h-10" onClick={() => {
-                    const headers = ["1º Clique", "Etapa", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
+                    const headers = ["1º Clique", "Etapa", "Variação", "Nome", "Email", "Idade", "Altura", "Peso Atual", "Meta Peso", "Objetivo", "Área Alvo", "Motivação", "Corpo Atual", "Corpo Desejado", "Barriga", "Quadril", "Local Treino", "Dificuldade", "Rotina", "Flexibilidade", "Psicológico", "Celebração"];
                     const rows = filteredQuiz.map((r: any) => [
                       r.first_click_at ? new Date(r.first_click_at).toLocaleString("pt-BR") : "",
                       r.stage_label || "",
+                      r.variant || "default",
                       r.profile?.full_name || "", r.profile?.email || r.lead_email || "", r.idade || "", r.altura || "", r.peso_atual || "", r.meta_peso || "",
                       r.profile?.goal || "", r.profile?.target_area || "", r.motivacao || "", r.corpo_atual || "", r.corpo_desejado || "",
                       r.biotipo || "", r.profile?.equipment || "", r.local_treino || "", r.dificuldade || "", r.rotina || "",
@@ -832,6 +833,7 @@ const Admin = () => {
                       <TableRow className="border-border">
                         <TableHead className="text-muted-foreground whitespace-nowrap">1º Clique</TableHead>
                         <TableHead className="text-muted-foreground">Etapa</TableHead>
+                        <TableHead className="text-muted-foreground">Variação</TableHead>
                         <TableHead className="text-muted-foreground">Nome</TableHead>
                         <TableHead className="text-muted-foreground">E-mail</TableHead>
                         <TableHead className="text-muted-foreground">Idade</TableHead>
@@ -866,6 +868,11 @@ const Admin = () => {
                                 {r.stage_label || "—"}
                               </span>
                             </TableCell>
+                            <TableCell>
+                              <span className="px-2 py-0.5 rounded-md text-xs font-mono bg-secondary text-foreground/80 whitespace-nowrap">
+                                {r.variant ? r.variant.toUpperCase() : "DEFAULT"}
+                              </span>
+                            </TableCell>
                             <TableCell className="text-foreground font-medium whitespace-nowrap">{r.profile?.full_name || "—"}</TableCell>
                             <TableCell className="text-muted-foreground text-sm whitespace-nowrap">{email}</TableCell>
                             <TableCell className="text-muted-foreground text-sm">{r.idade || "—"}</TableCell>
@@ -888,7 +895,7 @@ const Admin = () => {
                         );
                       })}
                       {paginatedQuiz.length === 0 && (
-                        <TableRow><TableCell colSpan={13} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={14} className="text-center text-muted-foreground py-8">Nenhuma resposta encontrada</TableCell></TableRow>
                       )}
                     </TableBody>
                   </Table>
