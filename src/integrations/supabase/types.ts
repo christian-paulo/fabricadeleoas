@@ -200,6 +200,45 @@ export type Database = {
           },
         ]
       }
+      pending_subscriptions: {
+        Row: {
+          abacate_customer_id: string | null
+          abacate_subscription_id: string | null
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          plan: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          plan: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_likes: {
         Row: {
           created_at: string

@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/contexts/OnboardingContext";
@@ -29,7 +27,6 @@ import desejadoSaudavel from "@/assets/desejado-saudavel.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
 import desejadoMusculosa from "@/assets/desejado-musculosa.webp";
 import logoLeoa from "@/assets/logo-leoa-pink.png";
-const stripePromise = loadStripe("pk_live_51TBHtFIsQknBjnEnYrnNfVodiEUtNhsREBaxMSbbfcu1gIxBTLksoaDOvogQWjYH7lq4zNS10d10PjQn5p4rvtBG00av2qM6LK");
 
 const benefits = [
   "Protocolos diários personalizados pelo Gilvan",
@@ -41,85 +38,6 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
-const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => void; email: string }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-  const [paymentReady, setPaymentReady] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements || !paymentReady) {
-      toast.error("Aguarde o formulário de pagamento carregar...");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Validate the Payment Element before confirming
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        toast.error(submitError.message || "Verifique os dados do cartão");
-        setLoading(false);
-        return;
-      }
-
-      const { error } = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          // Quando o cartão exige 3DS, o Stripe redireciona o navegador para esta URL após o desafio.
-          // Voltamos para /checkout com flag para retomar no passo de criação de conta.
-          return_url: `${window.location.origin}/checkout?payment=success`,
-          payment_method_data: {
-            billing_details: {
-              email,
-            },
-          },
-        },
-        redirect: "if_required",
-      });
-
-      if (error) {
-        toast.error(error.message || "Erro ao processar pagamento");
-        return;
-      }
-
-      toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
-      onPaymentSuccess();
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement
-        onReady={() => setPaymentReady(true)}
-        options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }}
-      />
-      <Button type="submit" disabled={!stripe || !paymentReady || loading}
-        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
-        {loading || !paymentReady ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            {loading ? "Processando..." : "Carregando..."}
-          </span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Confirmar Assinatura
-          </span>
-        )}
-      </Button>
-      <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-        <Shield className="w-3 h-3" />
-        Pagamento seguro e criptografado
-      </p>
-    </form>
-  );
-};
 
 // ─── Registration Form (shown AFTER payment) ──
 const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
@@ -352,7 +270,7 @@ const Checkout = () => {
   const { user, loading: authLoading, checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
   const navigate = useNavigate();
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
@@ -363,69 +281,54 @@ const Checkout = () => {
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
 
-  // Detecta retorno do desafio 3DS (Stripe redireciona para /checkout?payment=success)
+  // Detecta retorno do checkout AbacatePay (?payment=success)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "success" && !isAuthenticated) {
       toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
       setStep("registration");
-      // Limpa a query para evitar re-disparo
       window.history.replaceState({}, "", "/checkout");
     }
   }, [isAuthenticated]);
 
-  // If already authenticated, go straight to payment (ou dashboard se veio do 3DS)
+  // If already authenticated, go straight to payment (ou dashboard se veio do callback)
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
       setEmailConfirmed(true);
       const params = new URLSearchParams(window.location.search);
-      if (params.get("payment") === "success") {
+      if (params.get("payment") === "success" || params.get("abacate") === "success") {
         navigate("/dashboard", { replace: true });
       }
     }
   }, [isAuthenticated]);
 
-  // Reset client secret when plan changes
+  // Reset checkout url when plan changes
   const handlePlanChange = (newPlan: PlanKey) => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
-    setClientSecret(null);
+    setCheckoutUrl(null);
   };
 
-  // Load checkout when we have an email and are on payment step
+  // Create AbacatePay subscription checkout when email is confirmed
   useEffect(() => {
     if (step !== "payment") return;
-    if (!emailConfirmed || !checkoutEmail || clientSecret) return;
+    if (!emailConfirmed || !checkoutEmail || checkoutUrl) return;
     setLoading(true);
-    const createIntent = async () => {
+    setError(null);
+    const createCheckout = async () => {
       try {
-        const body: any = { price_id: plan.priceId, trial_days: plan.trialDays };
-        
-        if (isAuthenticated) {
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
-          if (fnError) throw fnError;
-          if (data.already_subscribed) {
-            await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
-            toast.info("Você já possui uma assinatura ativa!");
-            navigate("/dashboard");
-            return;
-          }
-          if (data.client_secret) setClientSecret(data.client_secret);
-          else throw new Error("Não foi possível iniciar o checkout");
+        const { data, error: fnError } = await supabase.functions.invoke("create-abacate-subscription", {
+          body: {
+            plan: selectedPlan,
+            email: checkoutEmail,
+          },
+        });
+        if (fnError) throw fnError;
+        if (data?.url) {
+          setCheckoutUrl(data.url);
         } else {
-          body.email = checkoutEmail;
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
-          if (fnError) throw fnError;
-          if (data.already_subscribed) {
-            // Pagamento já realizado para este email — pular para criação de conta
-            toast.success("Pagamento já confirmado! Crie sua conta para continuar. 🦁");
-            setStep("registration");
-            setLoading(false);
-            return;
-          }
-          if (data.client_secret) setClientSecret(data.client_secret);
-          else throw new Error("Não foi possível iniciar o checkout");
+          throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
         console.error("Checkout error:", err);
@@ -434,7 +337,7 @@ const Checkout = () => {
         setLoading(false);
       }
     };
-    createIntent();
+    createCheckout();
   }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
 
   const handlePaymentSuccess = async () => {
@@ -558,45 +461,31 @@ const Checkout = () => {
             {/* Payment form after email confirmed */}
             {emailConfirmed && (
               <>
-                <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
+                <h2 className="font-heading text-xl text-foreground mb-4">Método de Pagamento</h2>
+                <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  Pagamento seguro via AbacatePay — Cartão ou PIX
+                </p>
                 {loading && (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 )}
-                {clientSecret && (
-                  <Elements stripe={stripePromise}
-                    options={{
-                      clientSecret,
-                      appearance: {
-                        theme: "stripe",
-                        variables: {
-                          colorPrimary: "#FF69B4",
-                          colorBackground: "#FFFFF4",
-                          colorText: "#4A4A4A",
-                          colorDanger: "#ef4444",
-                          fontFamily: "system-ui, sans-serif",
-                          borderRadius: "16px",
-                          spacingUnit: "4px",
-                        },
-                        rules: {
-                          ".Input": {
-                            backgroundColor: "#FFFFF4",
-                            border: "1px solid hsl(340 20% 90%)",
-                          },
-                          ".Input:focus": {
-                            borderColor: "#FF69B4",
-                            boxShadow: "0 0 0 1px #FF69B4",
-                          },
-                          ".Label": {
-                            color: "#808080",
-                          },
-                        },
-                      },
-                      locale: "pt-BR",
-                    }}>
-                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
-                  </Elements>
+                {error && !loading && (
+                  <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
+                    {error}
+                  </div>
+                )}
+                {checkoutUrl && !loading && (
+                  <div className="rounded-2xl overflow-hidden border border-border bg-background">
+                    <iframe
+                      src={checkoutUrl}
+                      title="Checkout AbacatePay"
+                      className="w-full"
+                      style={{ height: "720px", border: "none" }}
+                      allow="payment *"
+                    />
+                  </div>
                 )}
               </>
             )}
