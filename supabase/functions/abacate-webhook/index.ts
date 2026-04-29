@@ -12,9 +12,9 @@ const META_PIXEL_ID = "1453509346269854";
 const PLAN_PRICE: Record<string, number> = {
   monthly: 39.9,
   mensal: 39.9,
-  semestral: 197.0,
-  annual: 297.0,
-  anual: 297.0,
+  semestral: 119.9,
+  annual: 197.9,
+  anual: 197.9,
 };
 
 async function sha256(input: string): Promise<string> {
