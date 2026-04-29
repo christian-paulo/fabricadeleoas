@@ -74,6 +74,31 @@ async function sendMetaPurchase(opts: {
   }
 }
 
+// Format date to Utmify format: "YYYY-MM-DD HH:MM:SS" in UTC
+function formatDateUtmify(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+async function sendToUtmify(payload: Record<string, unknown>): Promise<void> {
+  const apiToken = Deno.env.get("UTMIFY_API_TOKEN");
+  if (!apiToken) {
+    console.warn("[utmify] UTMIFY_API_TOKEN not set, skipping");
+    return;
+  }
+  try {
+    const resp = await fetch("https://api.utmify.com.br/api-credentials/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-token": apiToken },
+      body: JSON.stringify(payload),
+    });
+    const text = await resp.text();
+    console.log("[utmify] response", resp.status, text);
+  } catch (e) {
+    console.error("[utmify] error", e);
+  }
+}
+
 /**
  * AbacatePay webhook handler.
  *
