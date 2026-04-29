@@ -10,8 +10,8 @@ const META_PIXEL_ID = "1453509346269854";
 
 // Plan -> price (BRL)
 const PLAN_PRICE: Record<string, number> = {
-  monthly: 47.0,
-  mensal: 47.0,
+  monthly: 39.9,
+  mensal: 39.9,
   semestral: 197.0,
   annual: 297.0,
   anual: 297.0,
