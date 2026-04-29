@@ -22,6 +22,7 @@ import TreinoClassicoDetalhe from "./pages/TreinoClassicoDetalhe";
 import AdminLogin from "./pages/AdminLogin";
 import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
+import BoasVindasVariants from "./pages/BoasVindasVariants";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
+              <Route path="/boas-vindas/:variant" element={<BoasVindasVariants />} />
               <Route path="/onboarding/:step" element={<Onboarding />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/admin/login" element={<AdminLogin />} />
