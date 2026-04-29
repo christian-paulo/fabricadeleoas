@@ -327,14 +327,15 @@ const Checkout = () => {
         });
         if (fnError) throw fnError;
         if (data?.url) {
-          setCheckoutUrl(data.url);
+          // Redireciona a aluna direto para o checkout do AbacatePay
+          // Ao concluir, AbacatePay devolve para /checkout?payment=success
+          window.location.href = data.url;
         } else {
           throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
-      } finally {
         setLoading(false);
       }
     };
@@ -468,24 +469,14 @@ const Checkout = () => {
                   Pagamento seguro via AbacatePay — Cartão ou PIX
                 </p>
                 {loading && (
-                  <div className="flex items-center justify-center py-8">
+                  <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground">Redirecionando para o pagamento seguro...</p>
                   </div>
                 )}
                 {error && !loading && (
                   <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
                     {error}
-                  </div>
-                )}
-                {checkoutUrl && !loading && (
-                  <div className="rounded-2xl overflow-hidden border border-border bg-background">
-                    <iframe
-                      src={checkoutUrl}
-                      title="Checkout AbacatePay"
-                      className="w-full"
-                      style={{ height: "720px", border: "none" }}
-                      allow="payment *"
-                    />
                   </div>
                 )}
               </>
