@@ -322,6 +322,7 @@ const Checkout = () => {
           body: {
             plan: selectedPlan,
             email: checkoutEmail,
+            full_name: onboardingData.nome || undefined,
           },
         });
         if (fnError) throw fnError;
