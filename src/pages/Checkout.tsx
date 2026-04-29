@@ -543,45 +543,31 @@ const Checkout = () => {
             {/* Payment form after email confirmed */}
             {emailConfirmed && (
               <>
-                <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
+                <h2 className="font-heading text-xl text-foreground mb-4">Método de Pagamento</h2>
+                <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  Pagamento seguro via AbacatePay — Cartão ou PIX
+                </p>
                 {loading && (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 )}
-                {clientSecret && (
-                  <Elements stripe={stripePromise}
-                    options={{
-                      clientSecret,
-                      appearance: {
-                        theme: "stripe",
-                        variables: {
-                          colorPrimary: "#FF69B4",
-                          colorBackground: "#FFFFF4",
-                          colorText: "#4A4A4A",
-                          colorDanger: "#ef4444",
-                          fontFamily: "system-ui, sans-serif",
-                          borderRadius: "16px",
-                          spacingUnit: "4px",
-                        },
-                        rules: {
-                          ".Input": {
-                            backgroundColor: "#FFFFF4",
-                            border: "1px solid hsl(340 20% 90%)",
-                          },
-                          ".Input:focus": {
-                            borderColor: "#FF69B4",
-                            boxShadow: "0 0 0 1px #FF69B4",
-                          },
-                          ".Label": {
-                            color: "#808080",
-                          },
-                        },
-                      },
-                      locale: "pt-BR",
-                    }}>
-                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
-                  </Elements>
+                {error && !loading && (
+                  <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
+                    {error}
+                  </div>
+                )}
+                {checkoutUrl && !loading && (
+                  <div className="rounded-2xl overflow-hidden border border-border bg-background">
+                    <iframe
+                      src={checkoutUrl}
+                      title="Checkout AbacatePay"
+                      className="w-full"
+                      style={{ height: "720px", border: "none" }}
+                      allow="payment *"
+                    />
+                  </div>
                 )}
               </>
             )}
