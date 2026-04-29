@@ -327,14 +327,15 @@ const Checkout = () => {
         });
         if (fnError) throw fnError;
         if (data?.url) {
-          setCheckoutUrl(data.url);
+          // Redireciona a aluna direto para o checkout do AbacatePay
+          // Ao concluir, AbacatePay devolve para /checkout?payment=success
+          window.location.href = data.url;
         } else {
           throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
-      } finally {
         setLoading(false);
       }
     };
