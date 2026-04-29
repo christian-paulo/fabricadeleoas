@@ -3,13 +3,18 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-abacatepay-signature",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 /**
- * AbacatePay sends events. We rely on the URL secret query param for validation
- * (recommended pattern in their docs). HMAC verification can be added if Abacate
- * provides a signature header.
+ * AbacatePay webhook handler.
+ *
+ * The webhook URL is configured in AbacatePay panel with `?webhookSecret=...`
+ * which we verify against ABACATEPAY_WEBHOOK_SECRET if set.
+ *
+ * Flow:
+ *  - If event identifies a known userId (via metadata or externalId or stored sub_id) → update profiles.
+ *  - Otherwise, persist on pending_subscriptions (matched later by email when account is created).
  */
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -32,25 +37,30 @@ serve(async (req) => {
     const payload = await req.json();
     console.log("[abacate-webhook] event", JSON.stringify(payload));
 
-    const event = payload.event || payload.type;
+    const event = String(payload.event || payload.type || "").toLowerCase();
     const data = payload.data || payload;
 
-    // Try to extract identifiers
-    const externalId: string | undefined = data?.externalId || data?.billing?.externalId;
-    const subscriptionId: string | undefined = data?.id || data?.billing?.id;
+    const externalId: string | undefined = data?.externalId || data?.billing?.externalId || data?.subscription?.externalId;
+    const subscriptionId: string | undefined = data?.id || data?.subscription?.id || data?.billing?.id;
     const customerId: string | undefined = data?.customerId || data?.customer?.id;
-    const status: string | undefined = data?.status || data?.billing?.status;
-    const metadata = data?.metadata || data?.billing?.metadata || {};
+    const status: string = String(data?.status || data?.billing?.status || "").toUpperCase();
+    const metadata = data?.metadata || data?.subscription?.metadata || data?.billing?.metadata || {};
 
-    // Resolve user
     let userId: string | undefined = metadata?.user_id;
     let plan: string | undefined = metadata?.plan;
+    let email: string | undefined = metadata?.email || data?.customer?.email;
 
-    if (!userId && externalId && externalId.includes("__")) {
-      const [u, p] = externalId.split("__");
-      userId = u;
-      plan = plan || p;
+    if (externalId) {
+      // Format: user:<id>__<plan> OR email:<email>__<plan>
+      const m = externalId.match(/^(user|email):(.+?)__(.+)$/);
+      if (m) {
+        if (m[1] === "user" && !userId) userId = m[2];
+        if (m[1] === "email" && !email) email = m[2];
+        if (!plan) plan = m[3];
+      }
     }
+
+    // Try to find user by stored subscriptionId
     if (!userId && subscriptionId) {
       const { data: prof } = await supabase
         .from("profiles")
@@ -63,47 +73,54 @@ serve(async (req) => {
       }
     }
 
-    if (!userId) {
-      console.warn("[abacate-webhook] no user found for event");
-      return new Response(JSON.stringify({ received: true, matched: false }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+    // Try to find user by email
+    if (!userId && email) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("id")
+        .ilike("email", email)
+        .maybeSingle();
+      if (prof) userId = prof.id;
     }
 
-    const updates: Record<string, unknown> = {};
-    if (subscriptionId) updates.abacate_subscription_id = subscriptionId;
-    if (customerId) updates.abacate_customer_id = customerId;
-    if (plan) updates.subscription_plan = plan;
-    updates.payment_provider = "abacate";
+    const isPaid = event.includes("paid") || event.includes("activated") || status === "PAID" || status === "ACTIVE";
+    const isCancelled = event.includes("cancel") || status === "CANCELLED";
+    const isExpiredOrRefunded = event.includes("expired") || event.includes("refund") || status === "EXPIRED" || status === "REFUNDED";
 
-    const evt = String(event || "").toLowerCase();
-    const stat = String(status || "").toUpperCase();
+    if (userId) {
+      const updates: Record<string, unknown> = { payment_provider: "abacate" };
+      if (subscriptionId) updates.abacate_subscription_id = subscriptionId;
+      if (customerId) updates.abacate_customer_id = customerId;
+      if (plan) updates.subscription_plan = plan;
+      if (isPaid) { updates.is_subscriber = true; updates.canceled_at = null; }
+      if (isCancelled) { updates.is_subscriber = false; updates.canceled_at = new Date().toISOString(); }
+      if (isExpiredOrRefunded) updates.is_subscriber = false;
 
-    if (
-      evt.includes("paid") || evt.includes("billing.paid") ||
-      evt.includes("subscription.activated") || stat === "PAID"
-    ) {
-      updates.is_subscriber = true;
-      updates.canceled_at = null;
+      const { error: upErr } = await supabase.from("profiles").update(updates).eq("id", userId);
+      if (upErr) console.error("[abacate-webhook] profile update error", upErr);
+    } else if (email) {
+      // Pre-account flow: update pending_subscriptions
+      const upsertData: Record<string, unknown> = {
+        email,
+        plan: plan || "unknown",
+        abacate_subscription_id: subscriptionId,
+        abacate_customer_id: customerId,
+        status: isPaid ? "paid" : isCancelled ? "cancelled" : isExpiredOrRefunded ? "expired" : "pending",
+        paid_at: isPaid ? new Date().toISOString() : null,
+        metadata,
+      };
+      // Conflict on subscription_id if available, otherwise just insert
+      if (subscriptionId) {
+        await supabase.from("pending_subscriptions")
+          .upsert(upsertData, { onConflict: "abacate_subscription_id" });
+      } else {
+        await supabase.from("pending_subscriptions").insert(upsertData);
+      }
+    } else {
+      console.warn("[abacate-webhook] no user or email found");
     }
 
-    if (
-      evt.includes("cancel") || evt.includes("subscription.cancelled") ||
-      stat === "CANCELLED"
-    ) {
-      updates.is_subscriber = false;
-      updates.canceled_at = new Date().toISOString();
-    }
-
-    if (evt.includes("expired") || stat === "EXPIRED" || evt.includes("refund") || stat === "REFUNDED") {
-      updates.is_subscriber = false;
-    }
-
-    const { error: upErr } = await supabase.from("profiles").update(updates).eq("id", userId);
-    if (upErr) console.error("[abacate-webhook] profile update error", upErr);
-
-    return new Response(JSON.stringify({ received: true, userId, updates }), {
+    return new Response(JSON.stringify({ received: true, userId, email }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
