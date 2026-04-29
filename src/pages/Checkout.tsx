@@ -352,7 +352,7 @@ const Checkout = () => {
   const { user, loading: authLoading, checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
   const navigate = useNavigate();
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
@@ -363,69 +363,54 @@ const Checkout = () => {
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
 
-  // Detecta retorno do desafio 3DS (Stripe redireciona para /checkout?payment=success)
+  // Detecta retorno do checkout AbacatePay (?payment=success)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "success" && !isAuthenticated) {
       toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
       setStep("registration");
-      // Limpa a query para evitar re-disparo
       window.history.replaceState({}, "", "/checkout");
     }
   }, [isAuthenticated]);
 
-  // If already authenticated, go straight to payment (ou dashboard se veio do 3DS)
+  // If already authenticated, go straight to payment (ou dashboard se veio do callback)
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
       setEmailConfirmed(true);
       const params = new URLSearchParams(window.location.search);
-      if (params.get("payment") === "success") {
+      if (params.get("payment") === "success" || params.get("abacate") === "success") {
         navigate("/dashboard", { replace: true });
       }
     }
   }, [isAuthenticated]);
 
-  // Reset client secret when plan changes
+  // Reset checkout url when plan changes
   const handlePlanChange = (newPlan: PlanKey) => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
-    setClientSecret(null);
+    setCheckoutUrl(null);
   };
 
-  // Load checkout when we have an email and are on payment step
+  // Create AbacatePay subscription checkout when email is confirmed
   useEffect(() => {
     if (step !== "payment") return;
-    if (!emailConfirmed || !checkoutEmail || clientSecret) return;
+    if (!emailConfirmed || !checkoutEmail || checkoutUrl) return;
     setLoading(true);
-    const createIntent = async () => {
+    setError(null);
+    const createCheckout = async () => {
       try {
-        const body: any = { price_id: plan.priceId, trial_days: plan.trialDays };
-        
-        if (isAuthenticated) {
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
-          if (fnError) throw fnError;
-          if (data.already_subscribed) {
-            await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
-            toast.info("Você já possui uma assinatura ativa!");
-            navigate("/dashboard");
-            return;
-          }
-          if (data.client_secret) setClientSecret(data.client_secret);
-          else throw new Error("Não foi possível iniciar o checkout");
+        const { data, error: fnError } = await supabase.functions.invoke("create-abacate-subscription", {
+          body: {
+            plan: selectedPlan,
+            email: checkoutEmail,
+          },
+        });
+        if (fnError) throw fnError;
+        if (data?.url) {
+          setCheckoutUrl(data.url);
         } else {
-          body.email = checkoutEmail;
-          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
-          if (fnError) throw fnError;
-          if (data.already_subscribed) {
-            // Pagamento já realizado para este email — pular para criação de conta
-            toast.success("Pagamento já confirmado! Crie sua conta para continuar. 🦁");
-            setStep("registration");
-            setLoading(false);
-            return;
-          }
-          if (data.client_secret) setClientSecret(data.client_secret);
-          else throw new Error("Não foi possível iniciar o checkout");
+          throw new Error(data?.error || "Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
         console.error("Checkout error:", err);
@@ -434,7 +419,7 @@ const Checkout = () => {
         setLoading(false);
       }
     };
-    createIntent();
+    createCheckout();
   }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
 
   const handlePaymentSuccess = async () => {
