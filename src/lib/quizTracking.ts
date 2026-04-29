@@ -36,14 +36,15 @@ export const getQuizSessionId = (): string => {
   return id;
 };
 
-/** Records the first click on the quiz (called when user clicks "Começar Agora"). Idempotent. */
-export const trackQuizFirstClick = async (): Promise<void> => {
+/** Records the first click on the quiz (called when user clicks "Começar Agora"). Idempotent.
+ *  `variant` identifies which welcome screen the lead saw (e.g. "default", "v1", "v2", "v3"). */
+export const trackQuizFirstClick = async (variant: string = "default"): Promise<void> => {
   if (safeGet(TRACKED_KEY) === "1") return;
   const sessionId = getQuizSessionId();
   try {
     const { error } = await supabase
       .from("quiz_leads" as any)
-      .insert({ session_id: sessionId });
+      .insert({ session_id: sessionId, variant });
     if (error && !String(error.message || "").toLowerCase().includes("duplicate")) {
       console.warn("quiz_leads insert:", error);
     }
