@@ -6,6 +6,74 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const META_PIXEL_ID = "1453509346269854";
+
+// Plan -> price (BRL)
+const PLAN_PRICE: Record<string, number> = {
+  monthly: 47.0,
+  mensal: 47.0,
+  semestral: 197.0,
+  annual: 297.0,
+  anual: 297.0,
+};
+
+async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input.trim().toLowerCase());
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function sendMetaPurchase(opts: {
+  email?: string;
+  value: number;
+  currency?: string;
+  eventId: string;
+  plan?: string;
+}) {
+  const token = Deno.env.get("META_PIXEL_ACCESS_TOKEN");
+  if (!token) {
+    console.warn("[meta-capi] missing META_PIXEL_ACCESS_TOKEN");
+    return;
+  }
+  try {
+    const userData: Record<string, unknown> = {};
+    if (opts.email) userData.em = [await sha256(opts.email)];
+
+    const body = {
+      data: [
+        {
+          event_name: "Purchase",
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: opts.eventId,
+          action_source: "website",
+          user_data: userData,
+          custom_data: {
+            currency: opts.currency || "BRL",
+            value: opts.value,
+            content_name: opts.plan || "subscription",
+            content_type: "product",
+          },
+        },
+      ],
+    };
+
+    const resp = await fetch(
+      `https://graph.facebook.com/v19.0/${META_PIXEL_ID}/events?access_token=${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+    const text = await resp.text();
+    console.log("[meta-capi] purchase response", resp.status, text);
+  } catch (e) {
+    console.error("[meta-capi] error", e);
+  }
+}
+
 /**
  * AbacatePay webhook handler.
  *
@@ -118,6 +186,19 @@ serve(async (req) => {
       }
     } else {
       console.warn("[abacate-webhook] no user or email found");
+    }
+
+    // Send Purchase event to Meta Conversions API (only on first paid event)
+    if (isPaid && !event.includes("renew")) {
+      const value = (plan && PLAN_PRICE[plan.toLowerCase()]) || 0;
+      const eventId = `abacate_${subscriptionId || externalId || Date.now()}`;
+      await sendMetaPurchase({
+        email,
+        value,
+        currency: "BRL",
+        eventId,
+        plan,
+      });
     }
 
     return new Response(JSON.stringify({ received: true, userId, email }), {
