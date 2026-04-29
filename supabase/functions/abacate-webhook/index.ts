@@ -188,6 +188,19 @@ serve(async (req) => {
       console.warn("[abacate-webhook] no user or email found");
     }
 
+    // Send Purchase event to Meta Conversions API (only on first paid event)
+    if (isPaid && !event.includes("renew")) {
+      const value = (plan && PLAN_PRICE[plan.toLowerCase()]) || 0;
+      const eventId = `abacate_${subscriptionId || externalId || Date.now()}`;
+      await sendMetaPurchase({
+        email,
+        value,
+        currency: "BRL",
+        eventId,
+        plan,
+      });
+    }
+
     return new Response(JSON.stringify({ received: true, userId, email }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
