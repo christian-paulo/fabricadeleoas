@@ -87,7 +87,7 @@ serve(async (req) => {
 
     const subPayload: Record<string, unknown> = {
       items: [{ id: product.id, quantity: 1 }],
-      methods: ["CARD", "PIX"],
+      methods: ["CARD"],
       externalId,
       completionUrl: userId
         ? `${origin}/dashboard?abacate=success&plan=${plan}`
