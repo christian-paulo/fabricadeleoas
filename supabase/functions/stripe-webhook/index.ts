@@ -46,6 +46,12 @@ const mapPaymentMethod = (pm?: string | null): string => {
 
 // Product mapping (live prices)
 const PRODUCTS: Record<string, { id: string; name: string; planId: string; planName: string }> = {
+  "price_1TRjkrIsQknBjnEnLFTuLQtu": {
+    id: "prod_UOF0wA3Z0IfrcU",
+    name: "Fábrica de Leoas",
+    planId: "price_1TRjkrIsQknBjnEnLFTuLQtu",
+    planName: "Plano Semestral",
+  },
   "price_1TPSXJIsQknBjnEnKoQxE06s": {
     id: "prod_UOF0wA3Z0IfrcU",
     name: "Fábrica de Leoas",

@@ -34,8 +34,8 @@ serve(async (req) => {
       }
     }
 
-    let priceId = "price_1TPSXJIsQknBjnEnKoQxE06s"; // default semestral (live)
-    let trialDays = 7;
+    let priceId = "price_1TRjkrIsQknBjnEnLFTuLQtu"; // default semestral (live, sem trial)
+    let trialDays = 0;
 
     if (!email) {
       try {
@@ -58,7 +58,8 @@ serve(async (req) => {
 
     // Validate price_id (live prices)
     const validPrices = [
-      "price_1TPSXJIsQknBjnEnKoQxE06s", // Semestral
+      "price_1TRjkrIsQknBjnEnLFTuLQtu", // Semestral (novo, sem trial)
+      "price_1TPSXJIsQknBjnEnKoQxE06s", // Semestral (legado, mantido para compat)
       "price_1TPSGiIsQknBjnEncL7IlriJ", // Mensal
       "price_1TPSXhIsQknBjnEn0WjwG2CS", // Anual
     ];
@@ -131,14 +132,18 @@ serve(async (req) => {
       payment_settings: {
         save_default_payment_method: "on_subscription",
       },
-      expand: ["pending_setup_intent"],
+      expand: ["pending_setup_intent", "latest_invoice.payment_intent"],
     };
 
     if (trialDays > 0) {
+      // Mantido para compat: nunca usado por padrão (cobrança imediata)
       subscriptionParams.trial_period_days = trialDays;
       subscriptionParams.trial_settings = {
         end_behavior: { missing_payment_method: "cancel" },
       };
+    } else {
+      // Força explicitamente sem trial, sobrescrevendo qualquer trial do preço
+      subscriptionParams.trial_period_days = 0;
     }
 
     const subscription = await stripe.subscriptions.create(subscriptionParams);

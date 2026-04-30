@@ -27,6 +27,7 @@ const hasPaidAccess = (subscription: Stripe.Subscription) => {
 };
 
 const PLAN_MAP: Record<string, string> = {
+  "price_1TRjkrIsQknBjnEnLFTuLQtu": "Plano Semestral",
   "price_1TPSXJIsQknBjnEnKoQxE06s": "Plano Semestral",
   "price_1TPSGiIsQknBjnEncL7IlriJ": "Plano Mensal",
   "price_1TPSXhIsQknBjnEn0WjwG2CS": "Plano Anual",
