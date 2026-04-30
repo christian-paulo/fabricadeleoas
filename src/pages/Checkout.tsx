@@ -275,8 +275,14 @@ const Checkout = () => {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
-  const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
+  // Email começa NÃO confirmado mesmo se já houver email do onboarding —
+  // queremos que a aluna veja o paywall completo e clique no plano antes de
+  // ser redirecionada para o gateway de pagamento.
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>("semestral");
+  // Indica que a aluna clicou explicitamente em "Assinar" e que devemos
+  // iniciar o redirect para o checkout do AbacatePay.
+  const [checkoutRequested, setCheckoutRequested] = useState(false);
 
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
@@ -291,7 +297,8 @@ const Checkout = () => {
     }
   }, [isAuthenticated]);
 
-  // If already authenticated, go straight to payment (ou dashboard se veio do callback)
+  // If already authenticated, prefill email (mas só confirma para usuários logados,
+  // que não precisam ver o paywall novamente).
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
@@ -310,10 +317,28 @@ const Checkout = () => {
     setCheckoutUrl(null);
   };
 
-  // Create AbacatePay subscription checkout when email is confirmed
+  // Inicia o redirect ao checkout SOMENTE quando a aluna clica num CTA de assinar.
+  const startCheckout = () => {
+    setError(null);
+    if (!checkoutEmail) {
+      // Sem e-mail (lead direto): mostra o formulário inline de e-mail.
+      setEmailConfirmed(false);
+      document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setEmailConfirmed(true);
+    setCheckoutRequested(true);
+    document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  // Cria o checkout AbacatePay APENAS quando:
+  //   - a aluna logada chega na página (fluxo de re-assinatura), OU
+  //   - a aluna anônima clicou explicitamente em um CTA de assinar (checkoutRequested).
+  // Isso garante que leads vejam o paywall completo antes de qualquer redirect.
   useEffect(() => {
     if (step !== "payment") return;
     if (!emailConfirmed || !checkoutEmail || checkoutUrl) return;
+    if (!isAuthenticated && !checkoutRequested) return;
     setLoading(true);
     setError(null);
     const createCheckout = async () => {
@@ -337,10 +362,11 @@ const Checkout = () => {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
         setLoading(false);
+        setCheckoutRequested(false);
       }
     };
     createCheckout();
-  }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
+  }, [emailConfirmed, checkoutEmail, selectedPlan, step, isAuthenticated, checkoutRequested]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
@@ -436,32 +462,49 @@ const Checkout = () => {
           <OrderSummary selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
           {/* Payment Form */}
           <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
-            {/* Email input for guest users */}
-            {!isAuthenticated && !emailConfirmed && (
-              <div className="mb-6">
-                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+            {/* Caso 1: aluna ainda não clicou em assinar — mostra resumo + CTA */}
+            {!checkoutRequested && !isAuthenticated && (
+              <div>
+                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá! 🦁</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Informe seu e-mail para iniciar o pagamento
+                  Confirme seu e-mail e finalize sua assinatura com pagamento seguro.
                 </p>
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  if (checkoutEmail) setEmailConfirmed(true);
-                }} className="space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!checkoutEmail) return;
+                    setEmailConfirmed(true);
+                    setCheckoutRequested(true);
+                  }}
+                  className="space-y-4"
+                >
                   <div>
                     <Label className="text-xs text-muted-foreground">E-mail</Label>
-                    <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
-                      placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                    <Input
+                      type="email"
+                      value={checkoutEmail}
+                      onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="bg-background border-border text-foreground h-12 mt-1 rounded-xl"
+                      required
+                    />
                   </div>
-                  <Button type="submit"
-                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-                    Continuar para o Pagamento
+                  <Button
+                    type="submit"
+                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg"
+                  >
+                    Ir para o pagamento seguro
                   </Button>
+                  <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
+                    <Shield className="w-3 h-3 text-primary" />
+                    Pagamento seguro via AbacatePay — Cartão ou PIX
+                  </p>
                 </form>
               </div>
             )}
 
-            {/* Payment form after email confirmed */}
-            {emailConfirmed && (
+            {/* Caso 2: redirect em andamento (após clique) */}
+            {(checkoutRequested || isAuthenticated) && emailConfirmed && (
               <>
                 <h2 className="font-heading text-xl text-foreground mb-4">Método de Pagamento</h2>
                 <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
@@ -489,7 +532,7 @@ const Checkout = () => {
         </div>
 
         {/* CTA de urgência */}
-        <UrgencyCTA onCta={() => document.getElementById("checkout-form-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
+        <UrgencyCTA onCta={startCheckout} />
 
         {/* FAQ - última seção */}
         <CheckoutFAQ />
