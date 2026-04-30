@@ -331,10 +331,14 @@ const Checkout = () => {
     document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  // Create AbacatePay subscription checkout when email is confirmed
+  // Cria o checkout AbacatePay APENAS quando:
+  //   - a aluna logada chega na página (fluxo de re-assinatura), OU
+  //   - a aluna anônima clicou explicitamente em um CTA de assinar (checkoutRequested).
+  // Isso garante que leads vejam o paywall completo antes de qualquer redirect.
   useEffect(() => {
     if (step !== "payment") return;
     if (!emailConfirmed || !checkoutEmail || checkoutUrl) return;
+    if (!isAuthenticated && !checkoutRequested) return;
     setLoading(true);
     setError(null);
     const createCheckout = async () => {
@@ -358,10 +362,11 @@ const Checkout = () => {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
         setLoading(false);
+        setCheckoutRequested(false);
       }
     };
     createCheckout();
-  }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
+  }, [emailConfirmed, checkoutEmail, selectedPlan, step, isAuthenticated, checkoutRequested]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
