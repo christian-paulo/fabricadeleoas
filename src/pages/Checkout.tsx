@@ -41,7 +41,7 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
-const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => void; email: string }) => {
+const CheckoutForm = ({ onPaymentSuccess, email, setupIntentId }: { onPaymentSuccess: () => void; email: string; setupIntentId: string | null }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -64,11 +64,9 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
         return;
       }
 
-      const { error } = await stripe.confirmSetup({
+      const { error, setupIntent } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          // Quando o cartão exige 3DS, o Stripe redireciona o navegador para esta URL após o desafio.
-          // Voltamos para /checkout com flag para retomar no passo de criação de conta.
           return_url: `${window.location.origin}/checkout?payment=success`,
           payment_method_data: {
             billing_details: {
@@ -81,6 +79,22 @@ const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => voi
 
       if (error) {
         toast.error(error.message || "Erro ao processar pagamento");
+        return;
+      }
+
+      // Cartão validado → criar a subscription (cobrança imediata)
+      const idToFinalize = setupIntent?.id || setupIntentId;
+      if (!idToFinalize) {
+        toast.error("Erro: SetupIntent não disponível");
+        return;
+      }
+
+      const { data: finalizeData, error: finalizeError } = await supabase.functions.invoke(
+        "finalize-subscription",
+        { body: { setup_intent_id: idToFinalize } }
+      );
+      if (finalizeError || finalizeData?.error) {
+        toast.error(finalizeData?.error || finalizeError?.message || "Erro ao ativar assinatura");
         return;
       }
 
