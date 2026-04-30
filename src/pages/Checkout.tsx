@@ -275,8 +275,14 @@ const Checkout = () => {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
-  const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
+  // Email começa NÃO confirmado mesmo se já houver email do onboarding —
+  // queremos que a aluna veja o paywall completo e clique no plano antes de
+  // ser redirecionada para o gateway de pagamento.
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>("semestral");
+  // Indica que a aluna clicou explicitamente em "Assinar" e que devemos
+  // iniciar o redirect para o checkout do AbacatePay.
+  const [checkoutRequested, setCheckoutRequested] = useState(false);
 
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
