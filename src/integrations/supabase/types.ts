@@ -200,6 +200,45 @@ export type Database = {
           },
         ]
       }
+      pending_subscriptions: {
+        Row: {
+          abacate_customer_id: string | null
+          abacate_subscription_id: string | null
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          plan: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          plan: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_likes: {
         Row: {
           created_at: string
@@ -276,6 +315,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          abacate_customer_id: string | null
+          abacate_subscription_id: string | null
           canceled_at: string | null
           created_at: string | null
           email: string | null
@@ -289,6 +330,7 @@ export type Database = {
           notify_likes: boolean
           onboarding_completed: boolean | null
           pain_location: string | null
+          payment_provider: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_plan: string | null
@@ -307,6 +349,8 @@ export type Database = {
           workout_duration: number | null
         }
         Insert: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
           canceled_at?: string | null
           created_at?: string | null
           email?: string | null
@@ -320,6 +364,7 @@ export type Database = {
           notify_likes?: boolean
           onboarding_completed?: boolean | null
           pain_location?: string | null
+          payment_provider?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_plan?: string | null
@@ -338,6 +383,8 @@ export type Database = {
           workout_duration?: number | null
         }
         Update: {
+          abacate_customer_id?: string | null
+          abacate_subscription_id?: string | null
           canceled_at?: string | null
           created_at?: string | null
           email?: string | null
@@ -351,6 +398,7 @@ export type Database = {
           notify_likes?: boolean
           onboarding_completed?: boolean | null
           pain_location?: string | null
+          payment_provider?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_plan?: string | null
