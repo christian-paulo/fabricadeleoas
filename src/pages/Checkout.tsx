@@ -367,6 +367,7 @@ const Checkout = () => {
   const { data: onboardingData } = useOnboarding();
   const navigate = useNavigate();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [setupIntentId, setSetupIntentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
@@ -405,6 +406,7 @@ const Checkout = () => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
     setClientSecret(null);
+    setSetupIntentId(null);
   };
 
   // Load checkout when we have an email and are on payment step
