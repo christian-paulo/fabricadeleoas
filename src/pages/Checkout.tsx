@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/contexts/OnboardingContext";
@@ -27,6 +29,7 @@ import desejadoSaudavel from "@/assets/desejado-saudavel.webp";
 import desejadoDefinida from "@/assets/desejado-definida.webp";
 import desejadoMusculosa from "@/assets/desejado-musculosa.webp";
 import logoLeoa from "@/assets/logo-leoa-pink.png";
+const stripePromise = loadStripe("pk_live_51TBHtFIsQknBjnEnYrnNfVodiEUtNhsREBaxMSbbfcu1gIxBTLksoaDOvogQWjYH7lq4zNS10d10PjQn5p4rvtBG00av2qM6LK");
 
 const benefits = [
   "Protocolos diários personalizados pelo Gilvan",
@@ -38,6 +41,85 @@ const benefits = [
   "Cancele quando quiser",
 ];
 
+const CheckoutForm = ({ onPaymentSuccess, email }: { onPaymentSuccess: () => void; email: string }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements || !paymentReady) {
+      toast.error("Aguarde o formulário de pagamento carregar...");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Validate the Payment Element before confirming
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        toast.error(submitError.message || "Verifique os dados do cartão");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await stripe.confirmSetup({
+        elements,
+        confirmParams: {
+          // Quando o cartão exige 3DS, o Stripe redireciona o navegador para esta URL após o desafio.
+          // Voltamos para /checkout com flag para retomar no passo de criação de conta.
+          return_url: `${window.location.origin}/checkout?payment=success`,
+          payment_method_data: {
+            billing_details: {
+              email,
+            },
+          },
+        },
+        redirect: "if_required",
+      });
+
+      if (error) {
+        toast.error(error.message || "Erro ao processar pagamento");
+        return;
+      }
+
+      toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
+      onPaymentSuccess();
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement
+        onReady={() => setPaymentReady(true)}
+        options={{ layout: "tabs", defaultValues: { billingDetails: { email } }, fields: { billingDetails: { email: "never" } }, terms: { card: "never" } }}
+      />
+      <Button type="submit" disabled={!stripe || !paymentReady || loading}
+        className="w-full pink-gradient text-primary-foreground font-heading h-14 rounded-2xl text-lg shadow-lg">
+        {loading || !paymentReady ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            {loading ? "Processando..." : "Carregando..."}
+          </span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            Confirmar Assinatura
+          </span>
+        )}
+      </Button>
+      <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+        <Shield className="w-3 h-3" />
+        Pagamento seguro e criptografado
+      </p>
+    </form>
+  );
+};
 
 // ─── Registration Form (shown AFTER payment) ──
 const RegistrationForm = ({ checkoutEmail }: { checkoutEmail: string }) => {
@@ -238,12 +320,12 @@ const PLANS = {
     priceMain: "R$ 119,90",
     priceSecondary: "/semestre",
     priceWeek: null,
-    trialDays: 0,
+    trialDays: 7,
     orderName: "Plano Semestral",
     orderPrice: "R$ 119,90",
     orderInterval: "Assinatura recorrente a cada 6 meses",
-    trialLabel: null,
-    trialDiscount: null,
+    trialLabel: "7 dias grátis",
+    trialDiscount: "- R$ 119,90",
     discount: "50% OFF",
   },
   annual: {
@@ -254,12 +336,12 @@ const PLANS = {
     priceMain: "R$ 197,00",
     priceSecondary: "/ano",
     priceWeek: null,
-    trialDays: 0,
+    trialDays: 7,
     orderName: "Plano Anual",
     orderPrice: "R$ 197,00",
     orderInterval: "Assinatura recorrente anual",
-    trialLabel: null,
-    trialDiscount: null,
+    trialLabel: "7 dias grátis",
+    trialDiscount: "- R$ 197,00",
     discount: "59% OFF",
   },
 };
@@ -270,103 +352,90 @@ const Checkout = () => {
   const { user, loading: authLoading, checkSubscription, refreshProfile } = useAuth();
   const { data: onboardingData } = useOnboarding();
   const navigate = useNavigate();
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"email" | "payment" | "registration">("payment");
   const [checkoutEmail, setCheckoutEmail] = useState(onboardingData.email_onboarding || "");
-  // Email começa NÃO confirmado mesmo se já houver email do onboarding —
-  // queremos que a aluna veja o paywall completo e clique no plano antes de
-  // ser redirecionada para o gateway de pagamento.
-  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [emailConfirmed, setEmailConfirmed] = useState(!!onboardingData.email_onboarding);
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>("semestral");
-  // Indica que a aluna clicou explicitamente em "Assinar" e que devemos
-  // iniciar o redirect para o checkout do AbacatePay.
-  const [checkoutRequested, setCheckoutRequested] = useState(false);
 
   const isAuthenticated = !!user;
   const plan = PLANS[selectedPlan];
 
-  // Detecta retorno do checkout AbacatePay (?payment=success)
+  // Detecta retorno do desafio 3DS (Stripe redireciona para /checkout?payment=success)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "success" && !isAuthenticated) {
       toast.success("Pagamento confirmado! Agora crie sua conta. 🦁");
       setStep("registration");
+      // Limpa a query para evitar re-disparo
       window.history.replaceState({}, "", "/checkout");
     }
   }, [isAuthenticated]);
 
-  // If already authenticated, prefill email (mas só confirma para usuários logados,
-  // que não precisam ver o paywall novamente).
+  // If already authenticated, go straight to payment (ou dashboard se veio do 3DS)
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
       setEmailConfirmed(true);
       const params = new URLSearchParams(window.location.search);
-      if (params.get("payment") === "success" || params.get("abacate") === "success") {
+      if (params.get("payment") === "success") {
         navigate("/dashboard", { replace: true });
       }
     }
   }, [isAuthenticated]);
 
-  // Reset checkout url when plan changes
+  // Reset client secret when plan changes
   const handlePlanChange = (newPlan: PlanKey) => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
-    setCheckoutUrl(null);
+    setClientSecret(null);
   };
 
-  // Inicia o redirect ao checkout SOMENTE quando a aluna clica num CTA de assinar.
-  const startCheckout = () => {
-    setError(null);
-    if (!checkoutEmail) {
-      // Sem e-mail (lead direto): mostra o formulário inline de e-mail.
-      setEmailConfirmed(false);
-      document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    setEmailConfirmed(true);
-    setCheckoutRequested(true);
-    document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
-
-  // Cria o checkout AbacatePay APENAS quando:
-  //   - a aluna logada chega na página (fluxo de re-assinatura), OU
-  //   - a aluna anônima clicou explicitamente em um CTA de assinar (checkoutRequested).
-  // Isso garante que leads vejam o paywall completo antes de qualquer redirect.
+  // Load checkout when we have an email and are on payment step
   useEffect(() => {
     if (step !== "payment") return;
-    if (!emailConfirmed || !checkoutEmail || checkoutUrl) return;
-    if (!isAuthenticated && !checkoutRequested) return;
+    if (!emailConfirmed || !checkoutEmail || clientSecret) return;
     setLoading(true);
-    setError(null);
-    const createCheckout = async () => {
+    const createIntent = async () => {
       try {
-        const { data, error: fnError } = await supabase.functions.invoke("create-abacate-subscription", {
-          body: {
-            plan: selectedPlan,
-            email: checkoutEmail,
-            full_name: onboardingData.nome || undefined,
-          },
-        });
-        if (fnError) throw fnError;
-        if (data?.url) {
-          // Redireciona na mesma aba para o checkout do AbacatePay.
-          // Ao concluir, AbacatePay devolve para /checkout?payment=success
-          window.location.href = data.url;
+        const body: any = { price_id: plan.priceId, trial_days: plan.trialDays };
+        
+        if (isAuthenticated) {
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
+          if (fnError) throw fnError;
+          if (data.already_subscribed) {
+            await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user!.id);
+            toast.info("Você já possui uma assinatura ativa!");
+            navigate("/dashboard");
+            return;
+          }
+          if (data.client_secret) setClientSecret(data.client_secret);
+          else throw new Error("Não foi possível iniciar o checkout");
         } else {
-          throw new Error(data?.error || "Não foi possível iniciar o checkout");
+          body.email = checkoutEmail;
+          const { data, error: fnError } = await supabase.functions.invoke("create-subscription-intent", { body });
+          if (fnError) throw fnError;
+          if (data.already_subscribed) {
+            // Pagamento já realizado para este email — pular para criação de conta
+            toast.success("Pagamento já confirmado! Crie sua conta para continuar. 🦁");
+            setStep("registration");
+            setLoading(false);
+            return;
+          }
+          if (data.client_secret) setClientSecret(data.client_secret);
+          else throw new Error("Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
         console.error("Checkout error:", err);
         setError(err.message || "Erro ao carregar checkout");
+      } finally {
         setLoading(false);
-        setCheckoutRequested(false);
       }
     };
-    createCheckout();
-  }, [emailConfirmed, checkoutEmail, selectedPlan, step, isAuthenticated, checkoutRequested]);
+    createIntent();
+  }, [emailConfirmed, checkoutEmail, selectedPlan, step]);
 
   const handlePaymentSuccess = async () => {
     if (isAuthenticated) {
@@ -462,65 +531,72 @@ const Checkout = () => {
           <OrderSummary selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
           {/* Payment Form */}
           <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
-            {/* Caso 1: aluna ainda não clicou em assinar — mostra resumo + CTA */}
-            {!checkoutRequested && !isAuthenticated && (
-              <div>
-                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá! 🦁</h2>
+            {/* Email input for guest users */}
+            {!isAuthenticated && !emailConfirmed && (
+              <div className="mb-6">
+                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Confirme seu e-mail e finalize sua assinatura com pagamento seguro.
+                  Informe seu e-mail para iniciar o pagamento
                 </p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!checkoutEmail) return;
-                    setEmailConfirmed(true);
-                    setCheckoutRequested(true);
-                  }}
-                  className="space-y-4"
-                >
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (checkoutEmail) setEmailConfirmed(true);
+                }} className="space-y-4">
                   <div>
                     <Label className="text-xs text-muted-foreground">E-mail</Label>
-                    <Input
-                      type="email"
-                      value={checkoutEmail}
-                      onChange={(e) => setCheckoutEmail(e.target.value)}
-                      placeholder="seu@email.com"
-                      className="bg-background border-border text-foreground h-12 mt-1 rounded-xl"
-                      required
-                    />
+                    <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
                   </div>
-                  <Button
-                    type="submit"
-                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg"
-                  >
-                    Ir para o pagamento seguro
+                  <Button type="submit"
+                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
+                    Continuar para o Pagamento
                   </Button>
-                  <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
-                    <Shield className="w-3 h-3 text-primary" />
-                    Pagamento seguro via AbacatePay — Cartão ou PIX
-                  </p>
                 </form>
               </div>
             )}
 
-            {/* Caso 2: redirect em andamento (após clique) */}
-            {(checkoutRequested || isAuthenticated) && emailConfirmed && (
+            {/* Payment form after email confirmed */}
+            {emailConfirmed && (
               <>
-                <h2 className="font-heading text-xl text-foreground mb-4">Método de Pagamento</h2>
-                <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-primary" />
-                  Pagamento seguro via AbacatePay — Cartão ou PIX
-                </p>
+                <h2 className="font-heading text-xl text-foreground mb-6">Método de Pagamento</h2>
                 {loading && (
-                  <div className="flex flex-col items-center justify-center py-10 gap-3">
+                  <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Redirecionando para o pagamento seguro...</p>
                   </div>
                 )}
-                {error && !loading && (
-                  <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">
-                    {error}
-                  </div>
+                {clientSecret && (
+                  <Elements stripe={stripePromise}
+                    options={{
+                      clientSecret,
+                      appearance: {
+                        theme: "stripe",
+                        variables: {
+                          colorPrimary: "#FF69B4",
+                          colorBackground: "#FFFFF4",
+                          colorText: "#4A4A4A",
+                          colorDanger: "#ef4444",
+                          fontFamily: "system-ui, sans-serif",
+                          borderRadius: "16px",
+                          spacingUnit: "4px",
+                        },
+                        rules: {
+                          ".Input": {
+                            backgroundColor: "#FFFFF4",
+                            border: "1px solid hsl(340 20% 90%)",
+                          },
+                          ".Input:focus": {
+                            borderColor: "#FF69B4",
+                            boxShadow: "0 0 0 1px #FF69B4",
+                          },
+                          ".Label": {
+                            color: "#808080",
+                          },
+                        },
+                      },
+                      locale: "pt-BR",
+                    }}>
+                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
+                  </Elements>
                 )}
               </>
             )}
@@ -532,7 +608,7 @@ const Checkout = () => {
         </div>
 
         {/* CTA de urgência */}
-        <UrgencyCTA onCta={startCheckout} />
+        <UrgencyCTA onCta={() => document.getElementById("checkout-form-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
 
         {/* FAQ - última seção */}
         <CheckoutFAQ />
@@ -599,7 +675,7 @@ const CheckoutFAQ = () => {
     },
     {
       q: "É mensalidade? Vou ter que pagar todo mês?",
-      a: "Você escolhe o plano. Temos o Semestral (cobrado a cada 6 meses) e o Anual (cobrado uma vez por ano). Todos com 7 dias de garantia de satisfação — se não gostar, devolvemos seu dinheiro. Sem surpresas, sem cobranças escondidas.",
+      a: "Você escolhe o plano. Temos o Semestral (cobrado a cada 6 meses, com 3 dias de teste grátis) e o Anual (cobrado uma vez por ano). Sem surpresas, sem cobranças escondidas.",
     },
     {
       q: "Quanto tempo dura cada treino?",
@@ -1059,18 +1135,24 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
                     <p className="text-[10px] text-muted-foreground">{p.priceSecondary}</p>
                   )}
                 </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded">
-                  7 dias de garantia
-                </span>
+                {p.trialDays > 0 ? (
+                  <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded">
+                    {p.trialDays} dias grátis
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Sem trial</span>
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Garantia info */}
-        <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
-          <span>🛡️</span> 7 dias de garantia de satisfação — não gostou, devolvemos seu dinheiro
-        </p>
+        {/* Trial info for selected plan */}
+        {plan.trialDays > 0 && (
+          <p className="text-[11px] text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
+            <span>🎁</span> Desfrute de {plan.trialDays} dias de teste gratuito, depois {plan.orderPrice}
+          </p>
+        )}
 
         {/* Order summary */}
         <div className="border border-border rounded-xl p-4 mb-4 bg-background">
@@ -1082,11 +1164,20 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
             </div>
             <p className="font-heading text-base text-foreground">{plan.orderPrice}</p>
           </div>
+          {plan.trialLabel && (
+            <>
+              <div className="border-t border-border my-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-primary font-medium">{plan.trialLabel}</span>
+                <span className="text-xs text-primary font-medium">{plan.trialDiscount}</span>
+              </div>
+            </>
+          )}
           <div className="border-t border-border my-2" />
           <div className="flex items-center justify-between">
             <span className="font-heading text-sm text-foreground">Total hoje</span>
             <span className="font-heading text-xl text-primary">
-              {plan.orderPrice}
+              {plan.trialDays > 0 ? "R$ 0,00" : plan.orderPrice}
             </span>
           </div>
         </div>
@@ -1104,14 +1195,19 @@ const OrderSummary = ({ selectedPlan, onPlanChange }: { selectedPlan: PlanKey; o
           className="w-full mt-3 bg-primary text-primary-foreground font-bold text-sm py-5 rounded-xl uppercase"
           onClick={() => document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth" })}
         >
-          ASSINAR AGORA
+          {plan.trialDays > 0 ? `TESTE GRATUITO DE ${plan.trialDays} DIAS` : "ASSINAR AGORA"}
         </Button>
-        <p className="text-[11px] text-center text-primary mt-1.5 flex items-center justify-center gap-1">
-          <Check className="w-3 h-3" /> 7 dias de garantia incondicional
-        </p>
+        {plan.trialDays > 0 && (
+          <p className="text-[11px] text-center text-primary mt-1.5 flex items-center justify-center gap-1">
+            <Check className="w-3 h-3" /> não pague nada agora
+          </p>
+        )}
 
         <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
-          A assinatura de {plan.orderPrice} será cobrada imediatamente. Você tem 7 dias de garantia — se não gostar, é só pedir o reembolso. Cancele a qualquer momento com 1 clique.
+          {plan.trialDays > 0
+            ? `Você não será cobrada durante o período de teste. Após ${plan.trialDays} dias, a assinatura de ${plan.orderPrice} será ativada automaticamente. Cancele a qualquer momento com 1 clique.`
+            : `A assinatura de ${plan.orderPrice} será cobrada imediatamente. Cancele a qualquer momento com 1 clique.`
+          }
         </p>
       </div>
     </div>

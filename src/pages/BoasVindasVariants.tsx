@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import logoLeoa from "@/assets/logo-leoa.webp";
-import heroTreino from "@/assets/gilvan-primeira-sessao.webp";
+import heroTreino from "@/assets/hero-treino.jpg";
 import { trackQuizFirstClick } from "@/lib/quizTracking";
 
 type VariantKey = "v1" | "v2" | "v3";
@@ -97,8 +97,8 @@ const BoasVindasVariants = () => {
       <div className="w-full rounded-2xl overflow-hidden mb-6 shadow-lg animate-[scale-in_0.6s_ease-out_0.45s_both]">
         <img
           src={heroTreino}
-          alt="Gilvan treinando"
-          className="w-full h-72 object-cover object-top"
+          alt="Treino em casa com o Gilvan"
+          className="w-full h-56 object-cover"
         />
       </div>
 
@@ -119,7 +119,7 @@ const BoasVindasVariants = () => {
       <div className="w-full flex items-start gap-2 px-2 pb-8 text-xs text-muted-foreground animate-[fade-in_0.6s_ease-out_0.85s_both]">
         <ShieldCheck size={18} className="text-primary shrink-0 mt-0.5" />
         <span>
-          7 dias de garantia de satisfação — se não gostar, devolvemos seu dinheiro. Simples assim.
+          Você testa por 7 dias — se não gostar, seu dinheiro de volta. Simples assim.
         </span>
       </div>
     </div>
