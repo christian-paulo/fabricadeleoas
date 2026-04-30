@@ -428,6 +428,7 @@ const Checkout = () => {
             return;
           }
           if (data.client_secret) setClientSecret(data.client_secret);
+          if (data.setup_intent_id) setSetupIntentId(data.setup_intent_id);
           else throw new Error("Não foi possível iniciar o checkout");
         } else {
           body.email = checkoutEmail;
@@ -441,6 +442,7 @@ const Checkout = () => {
             return;
           }
           if (data.client_secret) setClientSecret(data.client_secret);
+          if (data.setup_intent_id) setSetupIntentId(data.setup_intent_id);
           else throw new Error("Não foi possível iniciar o checkout");
         }
       } catch (err: any) {
@@ -611,7 +613,7 @@ const Checkout = () => {
                       },
                       locale: "pt-BR",
                     }}>
-                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} />
+                    <CheckoutForm onPaymentSuccess={handlePaymentSuccess} email={checkoutEmail} setupIntentId={setupIntentId} />
                   </Elements>
                 )}
               </>
