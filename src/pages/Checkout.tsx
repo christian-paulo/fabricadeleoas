@@ -297,7 +297,8 @@ const Checkout = () => {
     }
   }, [isAuthenticated]);
 
-  // If already authenticated, go straight to payment (ou dashboard se veio do callback)
+  // If already authenticated, prefill email (mas só confirma para usuários logados,
+  // que não precisam ver o paywall novamente).
   useEffect(() => {
     if (isAuthenticated && user?.email) {
       setCheckoutEmail(user.email);
@@ -314,6 +315,20 @@ const Checkout = () => {
     if (newPlan === selectedPlan) return;
     setSelectedPlan(newPlan);
     setCheckoutUrl(null);
+  };
+
+  // Inicia o redirect ao checkout SOMENTE quando a aluna clica num CTA de assinar.
+  const startCheckout = () => {
+    setError(null);
+    if (!checkoutEmail) {
+      // Sem e-mail (lead direto): mostra o formulário inline de e-mail.
+      setEmailConfirmed(false);
+      document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setEmailConfirmed(true);
+    setCheckoutRequested(true);
+    document.getElementById("checkout-payment")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   // Create AbacatePay subscription checkout when email is confirmed
