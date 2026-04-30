@@ -314,7 +314,7 @@ const PLANS = {
   },
   semestral: {
     id: "semestral",
-    priceId: "price_1TPSXJIsQknBjnEnKoQxE06s",
+    priceId: "price_1TRjkrIsQknBjnEnLFTuLQtu",
     label: "SEMESTRAL",
     badge: "MAIS USADO",
     priceMain: "R$ 119,90",
