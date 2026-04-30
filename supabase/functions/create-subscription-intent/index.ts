@@ -84,11 +84,11 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
+    // Verificar se já tem assinatura paga ativa (evita cobrar duas vezes)
     const existingSubscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "all",
       limit: 10,
-      expand: ["data.pending_setup_intent"],
     });
 
     const paidSubscription = existingSubscriptions.data.find(hasPaidAccess);
@@ -99,63 +99,27 @@ serve(async (req) => {
       });
     }
 
-    const reusablePendingSubscription = existingSubscriptions.data.find((subscription) => {
-      const pendingSetupIntent =
-        subscription.pending_setup_intent && typeof subscription.pending_setup_intent !== "string"
-          ? subscription.pending_setup_intent
-          : null;
-
-      return ["trialing", "incomplete", "past_due", "unpaid"].includes(subscription.status)
-        && !subscription.default_payment_method
-        && !!pendingSetupIntent?.client_secret;
+    // Cria um SetupIntent standalone para coletar o cartão.
+    // A subscription será criada pelo webhook setup_intent.succeeded
+    // (cobrança imediata, sem trial).
+    const setupIntent = await stripe.setupIntents.create({
+      customer: customerId,
+      payment_method_types: ["card"],
+      usage: "off_session",
+      metadata: {
+        price_id: priceId,
+        ...(userId ? { supabase_user_id: userId } : {}),
+        flow: "fabrica_de_leoas_subscription",
+      },
     });
 
-    if (reusablePendingSubscription) {
-      const pendingSetupIntent = reusablePendingSubscription.pending_setup_intent as Stripe.SetupIntent;
-
-      return new Response(
-        JSON.stringify({
-          subscription_id: reusablePendingSubscription.id,
-          client_secret: pendingSetupIntent.client_secret,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        }
-      );
-    }
-
-    const subscriptionParams: any = {
-      customer: customerId,
-      items: [{ price: priceId }],
-      payment_behavior: "default_incomplete",
-      payment_settings: {
-        save_default_payment_method: "on_subscription",
-      },
-      expand: ["pending_setup_intent", "latest_invoice.payment_intent"],
-    };
-
-    if (trialDays > 0) {
-      // Mantido para compat: nunca usado por padrão (cobrança imediata)
-      subscriptionParams.trial_period_days = trialDays;
-      subscriptionParams.trial_settings = {
-        end_behavior: { missing_payment_method: "cancel" },
-      };
-    } else {
-      // Força explicitamente sem trial, sobrescrevendo qualquer trial do preço
-      subscriptionParams.trial_period_days = 0;
-    }
-
-    const subscription = await stripe.subscriptions.create(subscriptionParams);
-
-    const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null;
-    if (!setupIntent?.client_secret) {
+    if (!setupIntent.client_secret) {
       throw new Error("Não foi possível iniciar a coleta do cartão");
     }
 
     return new Response(
       JSON.stringify({
-        subscription_id: subscription.id,
+        setup_intent_id: setupIntent.id,
         client_secret: setupIntent.client_secret,
       }),
       {
