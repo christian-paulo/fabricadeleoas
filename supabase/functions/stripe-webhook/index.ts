@@ -133,7 +133,60 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // ── Subscription lifecycle: trial start / activation / cancellation ──────
+    // ── SetupIntent succeeded → criar a subscription com cobrança imediata ──
+    if (event.type === "setup_intent.succeeded") {
+      const setupIntent = event.data.object as Stripe.SetupIntent;
+      const flow = setupIntent.metadata?.flow;
+      const priceId = setupIntent.metadata?.price_id;
+
+      if (flow === "fabrica_de_leoas_subscription" && priceId) {
+        const customerId = typeof setupIntent.customer === "string"
+          ? setupIntent.customer
+          : setupIntent.customer?.id;
+        const paymentMethodId = typeof setupIntent.payment_method === "string"
+          ? setupIntent.payment_method
+          : setupIntent.payment_method?.id;
+
+        if (customerId && paymentMethodId) {
+          // Evita criar subscription duplicada se já existir uma ativa/em cobrança
+          const existing = await stripe.subscriptions.list({
+            customer: customerId,
+            status: "all",
+            limit: 10,
+          });
+          const alreadyHas = existing.data.find((s) =>
+            ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(s.status)
+          );
+
+          if (!alreadyHas) {
+            // Define este cartão como default do customer
+            await stripe.customers.update(customerId, {
+              invoice_settings: { default_payment_method: paymentMethodId },
+            });
+
+            // Cria subscription cobrando imediatamente
+            await stripe.subscriptions.create({
+              customer: customerId,
+              items: [{ price: priceId }],
+              default_payment_method: paymentMethodId,
+              trial_period_days: 0,
+              payment_behavior: "error_if_incomplete",
+              metadata: setupIntent.metadata as Record<string, string>,
+            });
+            logStep("Subscription created from setup_intent", { customerId, priceId });
+          } else {
+            logStep("Subscription already exists, skipping create", { customerId, status: alreadyHas.status });
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+
     if (
       event.type === "customer.subscription.created" ||
       event.type === "customer.subscription.updated"
