@@ -462,32 +462,49 @@ const Checkout = () => {
           <OrderSummary selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
           {/* Payment Form */}
           <div id="checkout-payment" className="soft-card p-6 md:p-8 order-1 md:order-2">
-            {/* Email input for guest users */}
-            {!isAuthenticated && !emailConfirmed && (
-              <div className="mb-6">
-                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá!</h2>
+            {/* Caso 1: aluna ainda não clicou em assinar — mostra resumo + CTA */}
+            {!checkoutRequested && !isAuthenticated && (
+              <div>
+                <h2 className="font-heading text-xl text-foreground mb-2">Quase lá! 🦁</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Informe seu e-mail para iniciar o pagamento
+                  Confirme seu e-mail e finalize sua assinatura com pagamento seguro.
                 </p>
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  if (checkoutEmail) setEmailConfirmed(true);
-                }} className="space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!checkoutEmail) return;
+                    setEmailConfirmed(true);
+                    setCheckoutRequested(true);
+                  }}
+                  className="space-y-4"
+                >
                   <div>
                     <Label className="text-xs text-muted-foreground">E-mail</Label>
-                    <Input type="email" value={checkoutEmail} onChange={(e) => setCheckoutEmail(e.target.value)}
-                      placeholder="seu@email.com" className="bg-background border-border text-foreground h-12 mt-1 rounded-xl" required />
+                    <Input
+                      type="email"
+                      value={checkoutEmail}
+                      onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="bg-background border-border text-foreground h-12 mt-1 rounded-xl"
+                      required
+                    />
                   </div>
-                  <Button type="submit"
-                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg">
-                    Continuar para o Pagamento
+                  <Button
+                    type="submit"
+                    className="w-full pink-gradient text-primary-foreground font-heading h-12 rounded-2xl shadow-lg"
+                  >
+                    Ir para o pagamento seguro
                   </Button>
+                  <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
+                    <Shield className="w-3 h-3 text-primary" />
+                    Pagamento seguro via AbacatePay — Cartão ou PIX
+                  </p>
                 </form>
               </div>
             )}
 
-            {/* Payment form after email confirmed */}
-            {emailConfirmed && (
+            {/* Caso 2: redirect em andamento (após clique) */}
+            {(checkoutRequested || isAuthenticated) && emailConfirmed && (
               <>
                 <h2 className="font-heading text-xl text-foreground mb-4">Método de Pagamento</h2>
                 <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
@@ -515,7 +532,7 @@ const Checkout = () => {
         </div>
 
         {/* CTA de urgência */}
-        <UrgencyCTA onCta={() => document.getElementById("checkout-form-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })} />
+        <UrgencyCTA onCta={startCheckout} />
 
         {/* FAQ - última seção */}
         <CheckoutFAQ />
