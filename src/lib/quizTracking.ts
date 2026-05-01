@@ -65,6 +65,44 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase();
  *     (matches the lead created on the original browser).
  *  3. If still no match, insert a new lead row so we don't lose the data.
  */
+/**
+ * Saves the quiz progress (responses + last_step + name) to quiz_leads in real-time.
+ * Called on each step of the onboarding so we capture data even if the lead never finishes.
+ * Idempotent: updates the existing lead row by session_id.
+ */
+export const saveQuizProgress = async (params: {
+  step?: string;
+  name?: string;
+  email?: string;
+  responses?: Record<string, any>;
+}): Promise<void> => {
+  const sessionId = getQuizSessionId();
+  const update: Record<string, any> = { updated_at: new Date().toISOString() };
+  if (params.step) update.last_step = params.step;
+  if (params.name && params.name.trim()) update.name = params.name.trim();
+  if (params.email && params.email.trim()) update.email = normalizeEmail(params.email);
+  if (params.responses) update.responses = params.responses;
+
+  try {
+    // Try update first
+    const { data, error } = await supabase
+      .from("quiz_leads" as any)
+      .update(update)
+      .eq("session_id", sessionId)
+      .select("id");
+    if (!error && data && data.length > 0) return;
+
+    // No row yet (e.g. user landed directly on a quiz step) — insert one
+    await supabase.from("quiz_leads" as any).insert({
+      session_id: sessionId,
+      variant: "default",
+      ...update,
+    });
+  } catch (e) {
+    console.warn("saveQuizProgress failed", e);
+  }
+};
+
 export const linkQuizLead = async (params: { email?: string; profileId?: string }) => {
   const email = params.email ? normalizeEmail(params.email) : undefined;
   if (email) safeSet(EMAIL_KEY, email);

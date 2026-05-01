@@ -49,7 +49,7 @@ import RulerSlider from "@/components/RulerSlider";
 import { Slider } from "@/components/ui/slider";
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from "@/contexts/OnboardingContext";
 import { toast } from "sonner";
-import { trackQuizFirstClick } from "@/lib/quizTracking";
+import { trackQuizFirstClick, saveQuizProgress } from "@/lib/quizTracking";
 
 
 const Onboarding = () => {
@@ -65,6 +65,17 @@ const Onboarding = () => {
   useEffect(() => {
     if (currentIndex === -1) navigate("/onboarding/boas-vindas", { replace: true });
   }, [currentIndex, navigate]);
+
+  // Persist progress to quiz_leads on every step change so leads who abandon are still captured
+  useEffect(() => {
+    if (currentIndex < 0 || currentStep === "boas-vindas") return;
+    saveQuizProgress({
+      step: currentStep,
+      name: data.nome || undefined,
+      email: data.email_onboarding || undefined,
+      responses: data,
+    }).catch(() => {});
+  }, [currentStep]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canProceed = useMemo(() => validateStep(currentStep, data), [currentStep, data]);
 
