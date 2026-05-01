@@ -218,6 +218,9 @@ const Admin = () => {
       key: string;
       first_click_at?: string | null;
       lead_email?: string | null;
+      lead_name?: string | null;
+      lead_responses?: Record<string, any> | null;
+      last_step?: string | null;
       variant?: string | null;
       profile?: any;
       resp?: any;
@@ -233,6 +236,9 @@ const Admin = () => {
         }
       }
       if (patch.lead_email && !cur.lead_email) cur.lead_email = patch.lead_email;
+      if (patch.lead_name && !cur.lead_name) cur.lead_name = patch.lead_name;
+      if (patch.lead_responses && !cur.lead_responses) cur.lead_responses = patch.lead_responses;
+      if (patch.last_step && !cur.last_step) cur.last_step = patch.last_step;
       if (patch.variant && !cur.variant) cur.variant = patch.variant;
       if (patch.profile && !cur.profile) cur.profile = patch.profile;
       if (patch.resp && !cur.resp) cur.resp = patch.resp;
@@ -256,6 +262,9 @@ const Admin = () => {
       upsert(k, {
         first_click_at: l.first_click_at,
         lead_email: l.email || null,
+        lead_name: l.name || null,
+        lead_responses: l.responses || null,
+        last_step: l.last_step || null,
         variant: l.variant || null,
         profile: profile || undefined,
         resp: profile?.id ? respByProfile[profile.id] : undefined,
@@ -293,21 +302,63 @@ const Admin = () => {
         return { key: "quiz_done", label: "Completou quiz (não pagou)", tone: "quiz" };
       }
       if (p.id) return { key: "signup", label: "Criou conta (sem quiz)", tone: "account" };
+      // Lead que avançou no quiz mas não criou conta
+      const lr = row.lead_responses || {};
+      const hasAnyAnswer = Object.values(lr).some((v) => {
+        if (v == null || v === "" || v === false) return false;
+        if (Array.isArray(v) && v.length === 0) return false;
+        return true;
+      });
+      if (row.last_step && row.last_step !== "boas-vindas" && hasAnyAnswer) {
+        return { key: "in_progress", label: `Em andamento (${row.last_step})`, tone: "quiz" };
+      }
       return { key: "lead", label: "Apenas clicou", tone: "lead" };
     };
 
     const merged = Array.from(rowsByKey.values()).map((row) => {
       const stage = stageOf(row);
+      // Merge order: onboarding_responses (most authoritative) > quiz_leads.responses snapshot
+      const lr = row.lead_responses || {};
+      const profile = row.profile || {};
+      // Mirror lead snapshot fields into top-level so existing columns (idade, motivacao, etc.) work
+      const flatLead: Record<string, any> = {
+        idade: lr.idade,
+        altura: lr.altura,
+        peso_atual: lr.peso_atual,
+        meta_peso: lr.meta_peso,
+        motivacao: Array.isArray(lr.motivacao) ? lr.motivacao.join(", ") : lr.motivacao,
+        corpo_atual: lr.corpo_atual,
+        corpo_desejado: lr.corpo_desejado,
+        biotipo: lr.tipo_barriga,
+        local_treino: lr.local_treino,
+        dificuldade: lr.dificuldade,
+        rotina: lr.rotina,
+        flexibilidade: lr.flexibilidade,
+        psicologico: lr.psicologico,
+        celebracao: lr.celebracao,
+      };
+      // Synthesize a profile fallback so columns reading r.profile.full_name / .goal still display
+      const profileMerged = {
+        ...profile,
+        full_name: profile.full_name || row.lead_name || (lr.nome as string) || null,
+        email: profile.email || row.lead_email || (lr.email_onboarding as string) || null,
+        goal: profile.goal || lr.goal || null,
+        target_area: profile.target_area || (Array.isArray(lr.targetArea) ? lr.targetArea.join(", ") : lr.targetArea) || null,
+        equipment: profile.equipment || lr.equipment || null,
+      };
       return {
         id: row.key,
         first_click_at: row.first_click_at,
         lead_email: row.lead_email,
+        lead_name: row.lead_name,
+        last_step: row.last_step,
         variant: row.variant || null,
-        profile: row.profile || {},
+        profile: profileMerged,
         stage_key: stage.key,
         stage_label: stage.label,
         stage_tone: stage.tone,
-        ...(row.resp || {}),
+        ...flatLead,
+        ...(row.resp || {}), // onboarding_responses overrides snapshot when present
       };
     });
 
