@@ -459,7 +459,10 @@ export type Database = {
           email: string | null
           first_click_at: string
           id: string
+          last_step: string | null
+          name: string | null
           profile_id: string | null
+          responses: Json | null
           session_id: string
           updated_at: string
           variant: string | null
@@ -469,7 +472,10 @@ export type Database = {
           email?: string | null
           first_click_at?: string
           id?: string
+          last_step?: string | null
+          name?: string | null
           profile_id?: string | null
+          responses?: Json | null
           session_id: string
           updated_at?: string
           variant?: string | null
@@ -479,7 +485,10 @@ export type Database = {
           email?: string | null
           first_click_at?: string
           id?: string
+          last_step?: string | null
+          name?: string | null
           profile_id?: string | null
+          responses?: Json | null
           session_id?: string
           updated_at?: string
           variant?: string | null
